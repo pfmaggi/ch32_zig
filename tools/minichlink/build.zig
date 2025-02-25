@@ -8,12 +8,18 @@ pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const minichlink = try buildMinichlink(b, target, optimize);
+    const minichlink = try buildMinichlink(b, .exe, target, optimize);
     b.installArtifact(minichlink);
+
+    const minichlink_lib = try buildMinichlink(b, .lib, target, optimize);
+    const install_minichlink_lib = b.addInstallArtifact(minichlink_lib, .{});
+    const build_lib = b.step("lib", "Build the minichlink as library");
+    build_lib.dependOn(&install_minichlink_lib.step);
 }
 
 fn buildMinichlink(
     b: *std.Build,
+    kind: std.Build.Step.Compile.Kind,
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
 ) !*std.Build.Step.Compile {
@@ -21,7 +27,7 @@ fn buildMinichlink(
     const libusb = createLibusb(b, libusb_dep, target, optimize);
 
     const minichlink_dep = b.dependency("ch32v003fun", .{});
-    const minichlink = try createMinichlink(b, minichlink_dep, target, optimize);
+    const minichlink = try createMinichlink(b, minichlink_dep, kind, target, optimize);
     minichlink.linkLibrary(libusb);
 
     return minichlink;
@@ -30,6 +36,7 @@ fn buildMinichlink(
 fn createMinichlink(
     b: *std.Build,
     dep: *std.Build.Dependency,
+    kind: std.Build.Step.Compile.Kind,
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
 ) !*std.Build.Step.Compile {
@@ -37,12 +44,19 @@ fn createMinichlink(
     const exe = std.Build.Step.Compile.create(b, .{
         .name = "minichlink",
         .version = .{ .major = 1, .minor = 0, .patch = 0, .pre = "rc.2" },
-        .kind = .exe,
+        .kind = kind,
+        .linkage = .dynamic,
         .root_module = b.createModule(.{
             .target = target,
             .optimize = optimize,
         }),
     });
+
+    if (kind == .lib) {
+        // exe.root_module.addCMacro("MINICHLINK_AS_LIBRARY", "1");
+        exe.installHeader(root_path.path(b, "minichlink.h"), "minichlink.h");
+    }
+
     exe.linkLibC();
     exe.addIncludePath(root_path);
     exe.addCSourceFiles(.{
