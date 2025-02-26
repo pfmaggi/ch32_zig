@@ -1,12 +1,15 @@
 const std = @import("std");
 const builtin = @import("builtin");
 
-// zig build --release=safe
+// zig build --release=fast
 // MacOS: install XCode
 // Linux: apt install libudev-dev
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
-    const optimize = b.standardOptimizeOption(.{});
+
+    // Minichlink only works with ReleaseFast optimization mode.
+    const optimize = std.builtin.OptimizeMode.ReleaseFast;
+    // const optimize = b.standardOptimizeOption(.{});
 
     const minichlink = try buildMinichlink(b, .exe, target, optimize);
     b.installArtifact(minichlink);

@@ -25,10 +25,9 @@
   };
 
   outputs =
-    inputs@{
-      nixpkgs,
-      flake-utils,
-      ...
+    inputs@{ nixpkgs
+    , flake-utils
+    , ...
     }:
     let
       zlsBinName = "zigscient";
@@ -74,7 +73,7 @@
                 ''
                 + ''
                   mkdir -p .cache
-                  zig build --cache-dir $(pwd)/.zig-cache --global-cache-dir $(pwd)/.cache -Dcpu=baseline -Doptimize=ReleaseSafe --prefix $out
+                  zig build --cache-dir $(pwd)/.zig-cache --global-cache-dir $(pwd)/.cache -Dcpu=baseline --prefix $out
                 '';
             };
           }
@@ -116,6 +115,8 @@
               ''
                 export FLAKE_ROOT=$(nix flake metadata | grep 'Resolved URL' | awk '{print $3}' | awk -F'://' '{print $2}')
                 export HISTFILE="$FLAKE_ROOT/.nix_bash_history"
+                sed -i 's/^: [0-9]\{10\}:[0-9];//' $HISTFILE
+                sed -i '/^#/d' $HISTFILE
               ''
               + pkgs.lib.optionalAttrs pkgs.stdenv.isDarwin ''
                 export NIX_CFLAGS_COMPILE="-iframework $SDKROOT/System/Library/Frameworks -isystem $SDKROOT/usr/include $NIX_CFLAGS_COMPILE"
