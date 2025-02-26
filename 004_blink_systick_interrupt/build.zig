@@ -1,7 +1,11 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
-    const optimize = b.standardOptimizeOption(.{});
+    const optimize = b.option(
+        std.builtin.OptimizeMode,
+        "optimize",
+        "Prioritize performance, safety, or binary size",
+    ) orelse .ReleaseSmall;
 
     const name = "ch32v003_blink";
     const linkerScript = std.Build.LazyPath{ .cwd_relative = "src/ch32v003.ld" };

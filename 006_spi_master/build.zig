@@ -1,17 +1,16 @@
 const std = @import("std");
 
 pub fn build(b: *std.Build) void {
-    const optimize = b.standardOptimizeOption(.{});
-    const optimize003 = switch (optimize) {
-        // ch32v003 don't have enough flash memory for debug builds.
-        .Debug => .ReleaseSmall,
-        else => optimize,
-    };
+    const optimize = b.option(
+        std.builtin.OptimizeMode,
+        "optimize",
+        "Prioritize performance, safety, or binary size",
+    ) orelse .ReleaseSmall;
 
     const firmware = addFirmware(b, .{
         .name = "ch32v003_blink",
         .mcu = ch32v003,
-        .optimize = optimize003,
+        .optimize = optimize,
         .strip = false,
     });
     installFirmware(b, firmware, FirmwareFormat.elf);
@@ -20,7 +19,7 @@ pub fn build(b: *std.Build) void {
     const firmwareStrip = addFirmware(b, .{
         .name = "ch32v003_blink",
         .mcu = ch32v003,
-        .optimize = optimize003,
+        .optimize = optimize,
         .strip = true,
     });
     installFirmware(b, firmwareStrip, FirmwareFormat.@"asm");
