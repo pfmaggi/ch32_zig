@@ -6,7 +6,7 @@ compiled using `zig build` as well.
 
 ## Getting Started
 
-> [!NOTE]
+> \[!NOTE\]
 > If you are using `nix`, you can simply run `nix develop` in the root of the project, and it will automatically install
 > `zig`, `zigscient`, and `minichlink` in your environment.
 > And you can skip to the [Build and upload the example](#build-and-upload-the-example) section.
@@ -66,7 +66,7 @@ size zig-out/firmware/ch32v003_blink.elf
 # Sections info (clang)
 objdump -h zig-out/firmware/ch32v003_blink.elf 
 bloaty zig-out/firmware/ch32v003_blink.elf
-````
+```
 
 ### Dump memory
 
@@ -82,4 +82,3 @@ screen /dev/tty.usbmodem* 115200
 
 `Ctrl + A`, `Ctrl + \` - Exit screen and terminate all programs in this screen. \
 `Ctrl + D`, `D` or `Ctrl + A`, `Ctrl + D` - "minimize" screen and `screen -r` to restore it.
-

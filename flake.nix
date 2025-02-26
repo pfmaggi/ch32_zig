@@ -4,6 +4,10 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    treefmt = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
 
     # For upgrade use `nix flake update zig zigscient-src`
     zig = {
@@ -22,7 +26,6 @@
 
   outputs =
     inputs@{
-      self,
       nixpkgs,
       flake-utils,
       ...
@@ -31,7 +34,7 @@
       zlsBinName = "zigscient";
       overlays = [
         (
-          final: prev: with prev; rec {
+          _final: prev: with prev; rec {
             zig = inputs.zig.packages.${system}.master;
             zls = stdenvNoCC.mkDerivation {
               name = "zigscient";
@@ -82,8 +85,10 @@
       system:
       let
         pkgs = import nixpkgs { inherit overlays system; };
-        zig = pkgs.zig;
-        zls = pkgs.zls;
+        # Eval the treefmt modules from ./treefmt.nix
+        treefmtEval = inputs.treefmt.lib.evalModule pkgs ./treefmt.nix;
+        inherit (pkgs) zig;
+        inherit (pkgs) zls;
 
         buildInputs =
           with pkgs;
@@ -137,8 +142,8 @@
           };
         };
 
-        # run: `nix fmt .`
-        formatter = pkgs.nixfmt-rfc-style;
+        # run: `nix fmt`
+        formatter = treefmtEval.config.build.wrapper;
       }
     );
 }

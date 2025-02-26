@@ -127,7 +127,7 @@ pub fn main() void {
 
     var timestamp: u32 = 0;
     while (true) {
-        if ( STK_CNTL.* - timestamp > 10000) {
+        if (STK_CNTL.* - timestamp > 10000) {
             timestamp = STK_CNTL.*;
         }
 

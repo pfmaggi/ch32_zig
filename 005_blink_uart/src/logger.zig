@@ -30,6 +30,6 @@ pub fn logFn(
         const seconds = millis / std.time.ms_per_s;
         const milliseconds = millis % std.time.ms_per_s;
 
-        w.print(prefix ++ format ++ "\r\n", .{ seconds, milliseconds } ++ args) catch {        };
+        w.print(prefix ++ format ++ "\r\n", .{ seconds, milliseconds } ++ args) catch {};
     }
 }

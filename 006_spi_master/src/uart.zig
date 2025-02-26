@@ -84,7 +84,7 @@ pub const UART = enum(u32) {
         return .{ .context = self };
     }
 
-    fn simpleDeadline(count :u32) ?DeadlineFn {
+    fn simpleDeadline(count: u32) ?DeadlineFn {
         return struct {
             var counter = count;
             pub fn deadline() bool {
