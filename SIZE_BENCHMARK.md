@@ -32,9 +32,15 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|
+| 836 | 948 | 1008 | Failed |
+
+## 006_blink_uart_logger
+
+| ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
+|--------|--------|--------|--------|
 | 5624 | 8516 | 15544 | Failed |
 
-## 006_spi_master
+## 007_spi_master
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|

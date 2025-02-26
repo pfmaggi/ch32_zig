@@ -18,6 +18,7 @@ const builtin = @import("builtin");
 const start = @import("start.zig");
 const irq = @import("interrups.zig");
 const uart = @import("uart.zig");
+const logger = @import("logger.zig");
 
 pub const interrups: irq.Interrups = .{
     .SysTick = sysTickHandler,
@@ -27,6 +28,14 @@ comptime {
     _ = start;
     _ = irq;
 }
+
+pub const std_options = std.Options{
+    .log_level = .debug,
+    // .logFn = start.nopLogFn,
+    .logFn = logger.logFn,
+};
+
+pub const panic = start.panic;
 
 // Configure the RCC to use the HSI clock and PLL to get 48MHz.
 fn rcc_init_hsi_pll() void {
@@ -108,6 +117,8 @@ pub fn main() !void {
     });
 
     _ = try uart.USART1.writeBlocking("UART initialized\n", null);
+    logger.set(uart.USART1);
+    std.log.info("Logger initialized", .{});
 
     while (true) {
         // Wait for interrupt.
