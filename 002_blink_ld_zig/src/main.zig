@@ -39,11 +39,11 @@ export fn _start() linksection(".init") callconv(.Naked) noreturn {
 }
 
 // Get the address of the .bss and .data sections from the linker script.
-extern var __bss_start: u8;
-extern var __bss_end: u8;
-extern var __data_start: u8;
-extern var __data_end: u8;
-extern const __data_load_start: u8;
+extern var __bss_start: u32;
+extern const __bss_end: u32;
+extern var __data_start: u32;
+extern const __data_end: u32;
+extern const __data_load_start: u32;
 
 export fn resetHandler() callconv(.C) noreturn {
     // Set global pointer.
@@ -59,18 +59,23 @@ export fn resetHandler() callconv(.C) noreturn {
         \\la sp, __end_of_stack
     );
 
-    // Clear .bss section.
-    const bss_start: [*]u8 = @ptrCast(&__bss_start);
-    const bss_end: [*]u8 = @ptrCast(&__bss_end);
-    const bss_len = @intFromPtr(bss_end) - @intFromPtr(bss_start);
-    @memset(bss_start[0..bss_len], 0);
+    // Using a simple loop instead of @memset and @memcpy
+    // allows the program size to be closer to the assembly version.
 
-    // Copy .data from flash to RAM.
-    const data_start: [*]u8 = @ptrCast(&__data_start);
-    const data_end: [*]u8 = @ptrCast(&__data_end);
+    // Clear .bss section.
+    const bss_start: [*]align(4) u32 = @ptrCast(&__bss_start);
+    const bss_end: [*]align(4) const u32 = @ptrCast(&__bss_end);
+    const bss_len = @intFromPtr(bss_end) - @intFromPtr(bss_start);
+    // Divide by 4 because we are working with u32(4 bytes).
+    for (0..bss_len / 4) |i| bss_start[i] = 0;
+
+    // Copy .data from Flash to RAM.
+    const data_start: [*]align(4) u32 = @ptrCast(&__data_start);
+    const data_end: [*]align(4) const u32 = @ptrCast(&__data_end);
     const data_len = @intFromPtr(data_end) - @intFromPtr(data_start);
-    const data_src: [*]const u8 = @ptrCast(&__data_load_start);
-    @memcpy(data_start[0..data_len], data_src[0..data_len]);
+    const data_src: [*]align(4) const u32 = @ptrCast(&__data_load_start);
+    // Divide by 4 because we are working with u32(4 bytes).
+    for (0..data_len / 4) |i| data_start[i] = data_src[i];
 
     main();
 
