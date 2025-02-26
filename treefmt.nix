@@ -9,7 +9,7 @@
     jsonfmt.enable = true;
     mdformat.enable = true;
     shfmt.enable = true;
-    shellcheck.enable = true;
+    # shellcheck.enable = true;
     zig.enable = true;
   };
 

@@ -25,9 +25,10 @@
   };
 
   outputs =
-    inputs@{ nixpkgs
-    , flake-utils
-    , ...
+    inputs@{
+      nixpkgs,
+      flake-utils,
+      ...
     }:
     let
       zlsBinName = "zigscient";

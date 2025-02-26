@@ -37,6 +37,10 @@ minichlink -w zig-out/firmware/ch32v003_blink.bin flash -b
 
 ## Useful Notes
 
+### Size benchmark
+
+See [SIZE_BENCHMARK.md](SIZE_BENCHMARK.md)
+
 ### Flashing
 
 ```shell
