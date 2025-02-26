@@ -71,6 +71,9 @@ bloaty zig-out/firmware/ch32v003_blink.elf
 ### Dump memory
 
 ```shell
+# To stdout as hex
+minichlink -r + 0x20000000 128
+# To file
 minichlink -r memory.bin 0x20000000 2048
 ```
 
