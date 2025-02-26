@@ -6,6 +6,7 @@ set -euo pipefail
 modes=("ReleaseSmall" "ReleaseFast" "ReleaseSafe" "Debug")
 
 echo "# Size benchmark" >SIZE_BENCHMARK.md
+echo "" >>SIZE_BENCHMARK.md
 echo "This document contains the size in bytes of the firmware for each optimize mode." >>SIZE_BENCHMARK.md
 echo "" >>SIZE_BENCHMARK.md
 echo '`Failed` means that the firmware is too large to fit in the flash memory.' >>SIZE_BENCHMARK.md
@@ -31,13 +32,13 @@ for dir in */; do
   dir=${dir//\//}
 
   echo "## ${dir}" >>SIZE_BENCHMARK.md
+  echo "" >>SIZE_BENCHMARK.md
+
   for mode in "${modes[@]}"; do
     printf "| %s " "$mode" >>SIZE_BENCHMARK.md
   done
   printf "|\n" >>SIZE_BENCHMARK.md
 
-  # | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
-  # |--------|--------|
   for mode in "${modes[@]}"; do
     printf "|--------" >>SIZE_BENCHMARK.md
   done
