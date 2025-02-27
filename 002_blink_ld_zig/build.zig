@@ -27,10 +27,7 @@ pub fn build(b: *std.Build) void {
         .name = name,
         .root_source_file = b.path("src/main.zig"),
         .target = ch32v003_target,
-        .optimize = switch (optimize) {
-            .Debug => .ReleaseSafe, // ch32v003 don't have enough flash memory for debug builds.
-            else => optimize,
-        },
+        .optimize = optimize,
         .strip = true,
         .single_threaded = true,
         .linkage = .static,

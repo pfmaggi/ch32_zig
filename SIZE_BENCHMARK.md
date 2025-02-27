@@ -8,25 +8,25 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|
-| 56 | 62 | 62 | 62 |
+| 56 | 62 | 62 | 5258 |
 
 ## 002_blink_ld_zig
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|
-| 188 | 624 | 660 | 660 |
+| 188 | 624 | 660 | 573 |
 
 ## 003_blink_ld_asm
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|
-| 184 | 188 | 200 | 200 |
+| 184 | 188 | 200 | 397 |
 
 ## 004_blink_systick_interrupt
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|
-| 268 | 286 | 290 | 290 |
+| 268 | 286 | 290 | 407 |
 
 ## 005_blink_uart
 
