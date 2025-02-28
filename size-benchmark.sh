@@ -31,6 +31,10 @@ for dir in */; do
 
   dir=${dir//\//}
 
+  if [ "$dir" == "template" ]; then
+    continue
+  fi
+
   echo "## ${dir}" >>SIZE_BENCHMARK.md
   echo "" >>SIZE_BENCHMARK.md
 
