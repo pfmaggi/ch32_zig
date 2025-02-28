@@ -10,11 +10,12 @@ pub fn build(b: *std.Build) void {
     const name = "template";
     const targets: []const Target = &.{
         .{ .chip = .{ .model = .CH32V003F4P6 } },
-        .{ .chip = .{ .model = .CH32V305RBT6 } },
-        .{ .chip = .{ .series = .CH32V003 } },
         .{ .chip = .{ .series = .CH32V30x } },
     };
 
+    //      ┌──────────────────────────────────────────────────────────┐
+    //      │                          Build                           │
+    //      └──────────────────────────────────────────────────────────┘
     for (targets) |target| {
         const options = FirmwareOptions{
             .name = b.fmt("{s}_{s}", .{ name, target.chip.string() }),
@@ -24,15 +25,36 @@ pub fn build(b: *std.Build) void {
         buildAndInstallFirmware(b, options);
     }
 
-    // Tests
-
-    const unit_tests = b.addTest(.{
-        .root_source_file = b.path("src/tests.zig"),
-    });
-
-    const unit_tests_run = b.addRunArtifact(unit_tests);
+    //      ┌──────────────────────────────────────────────────────────┐
+    //      │                           Test                           │
+    //      └──────────────────────────────────────────────────────────┘
     const test_step = b.step("test", "Run platform-independent tests");
-    test_step.dependOn(&unit_tests_run.step);
+    for (targets) |target| {
+        const unit_tests = b.addTest(.{
+            .name = b.fmt("{s}_{s}_test", .{ name, target.chip.string() }),
+            .root_source_file = b.path("src/main.zig"),
+        });
+        const config_options = buildConfigOptions(b, unit_tests.name, target.chip);
+        unit_tests.root_module.addImport("config", config_options.createModule());
+
+        const unit_tests_run = b.addRunArtifact(unit_tests);
+        test_step.dependOn(&unit_tests_run.step);
+    }
+
+    //      ┌──────────────────────────────────────────────────────────┐
+    //      │                          Check                           │
+    //      └──────────────────────────────────────────────────────────┘
+    // ZLS magic: https://zigtools.org/zls/guides/build-on-save/
+    const check_step = b.step("check", "Check if compiles");
+    for (targets) |target| {
+        const options = FirmwareOptions{
+            .name = b.fmt("{s}_{s}_check", .{ name, target.chip.string() }),
+            .target = target,
+            .optimize = optimize,
+        };
+        const fw = addFirmware(b, options);
+        check_step.dependOn(&fw.step);
+    }
 }
 
 const ChipSeries = enum {
@@ -178,10 +200,10 @@ fn buildAndInstallFirmware(
     _ = installFirmware(b, firmware_no_strip, FirmwareFormat.elf);
 }
 
-fn addFirmware(b: *std.Build, options: FirmwareOptions) *std.Build.Step.Compile {
+fn buildConfigOptions(b: *std.Build, name: []const u8, chip: Chip) *std.Build.Step.Options {
     const config_options = b.addOptions();
-    config_options.addOption([]const u8, "name", options.name);
-    switch (options.target.chip) {
+    config_options.addOption([]const u8, "name", name);
+    switch (chip) {
         .model => |v| {
             config_options.addOption(ChipModel, "chip_model", v);
             config_options.addOption(ChipSeries, "chip_series", v.series());
@@ -191,6 +213,12 @@ fn addFirmware(b: *std.Build, options: FirmwareOptions) *std.Build.Step.Compile 
             config_options.addOption(ChipSeries, "chip_series", v);
         },
     }
+
+    return config_options;
+}
+
+fn addFirmware(b: *std.Build, options: FirmwareOptions) *std.Build.Step.Compile {
+    const config_options = buildConfigOptions(b, options.name, options.target.chip);
 
     const fw = b.createModule(.{
         .root_source_file = options.root_source_file orelse b.path("src/main.zig"),
