@@ -33,6 +33,7 @@ pub fn build(b: *std.Build) void {
         const unit_tests = b.addTest(.{
             .name = b.fmt("{s}_{s}_test", .{ name, target.chip.string() }),
             .root_source_file = b.path("src/main.zig"),
+            .test_runner = .{ .path = b.path("test_runner.zig"), .mode = .simple },
         });
         const config_options = buildConfigOptions(b, unit_tests.name, target.chip);
         unit_tests.root_module.addImport("config", config_options.createModule());
