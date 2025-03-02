@@ -17,11 +17,23 @@ pub const interrups: core.Interrups = .{};
 
 pub fn main() !void {
     hal.gpio.Port.C.enable();
+    hal.uart.USART1.setup(hal.uart.Config{
+        .cpu_frequency = 8_000_000,
+        .baud_rate = 115_200,
+    });
 
     const led = hal.gpio.Pin.init(.C, 0);
     led.as_output(.{ .speed = .max_50mhz, .mode = .push_pull });
 
+    _ = try hal.uart.USART1.writeBlocking("Hello, World!\r\n", null);
+
+    var count: u32 = 0;
+    var buffer: [10]u8 = undefined;
     while (true) {
+        _ = try hal.uart.USART1.writeBlocking(intToStr(&buffer, count), null);
+        _ = try hal.uart.USART1.writeBlocking("\r\n", null);
+        count += 1;
+
         // led.toggle();
         const on = led.read();
         led.write(!on);
@@ -34,6 +46,22 @@ pub fn main() !void {
     }
 
     unreachable;
+}
+
+fn intToStr(buf: []u8, value: u32) []u8 {
+    var i: u32 = buf.len;
+    var v: u32 = value;
+    if (v == 0) {
+        buf[0] = '0';
+        return buf[0..1];
+    }
+
+    while (v > 0) : (v /= 10) {
+        i -= 1;
+        buf[i] = @as(u8, @truncate(v % 10)) + '0';
+    }
+
+    return buf[i..];
 }
 
 test {
