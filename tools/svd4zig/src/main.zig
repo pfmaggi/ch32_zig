@@ -420,7 +420,7 @@ fn getChunk(line: []const u8) ?XmlChunk {
         .derivedFrom = null,
     };
 
-    const trimmed = mem.trim(u8, line, " \n");
+    const trimmed = mem.trim(u8, line, " \n\t");
     var toker = mem.tokenizeAny(u8, trimmed, "<>"); //" =\n<>\"");
 
     if (toker.next()) |maybe_tag| {
