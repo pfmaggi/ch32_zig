@@ -25,10 +25,9 @@
   };
 
   outputs =
-    inputs@{
-      nixpkgs,
-      flake-utils,
-      ...
+    inputs@{ nixpkgs
+    , flake-utils
+    , ...
     }:
     let
       zlsBinName = "zigscient";
@@ -105,6 +104,10 @@
           ++ lib.optionals stdenv.isDarwin [
             apple-sdk_14
           ];
+
+        baseShellHook = ''
+          export FLAKE_ROOT="$(nix flake metadata | grep 'Resolved URL' | awk '{print $3}' | awk -F'://' '{print $2}')"
+        '';
       in
       {
         # run: `nix develop`
@@ -113,8 +116,8 @@
             inherit buildInputs;
 
             shellHook =
-              ''
-                export FLAKE_ROOT=$(nix flake metadata | grep 'Resolved URL' | awk '{print $3}' | awk -F'://' '{print $2}')
+              baseShellHook
+              + ''
                 export HISTFILE="$FLAKE_ROOT/.nix_bash_history"
                 sed -i 's/^: [0-9]\{10\}:[0-9];//' $HISTFILE
                 sed -i '/^#/d' $HISTFILE
@@ -131,11 +134,14 @@
             inherit buildInputs;
 
             shellHook = pkgs.lib.concatLines [
+              baseShellHook
               ''
-                if [[ -f .idea/zigbrains.xml ]]; then
-                  xmlstarlet ed -L -u '//project/component[@name="ZLSSettings"]/option[@name="zlsPath"]/@value' -v '${zls}/bin/${zlsBinName}' .idea/zigbrains.xml
-                  xmlstarlet ed -L -u '//project/component[@name="ZigProjectSettings"]/option[@name="toolchainPath"]/@value' -v '${zig}/bin' .idea/zigbrains.xml
-                  xmlstarlet ed -L -u '//project/component[@name="ZigProjectSettings"]/option[@name="explicitPathToStd"]/@value' -v '${zig}/lib/std' .idea/zigbrains.xml
+                if [[ -f "$FLAKE_ROOT/.idea/zigbrains.xml" ]]; then
+                    xmlstarlet ed -L -u '//project/component[@name="ZLSSettings"]/option[@name="zlsPath"]/@value' -v '${zls}/bin/${zlsBinName}' "$FLAKE_ROOT/.idea/zigbrains.xml"
+                    xmlstarlet ed -L -u '//project/component[@name="ZigProjectSettings"]/option[@name="toolchainPath"]/@value' -v '${zig}/bin' "$FLAKE_ROOT/.idea/zigbrains.xml"
+                    xmlstarlet ed -L -u '//project/component[@name="ZigProjectSettings"]/option[@name="explicitPathToStd"]/@value' -v '${zig}/lib/std' "$FLAKE_ROOT/.idea/zigbrains.xml"
+                  else
+                    echo "No IDEA project found"
                 fi
 
                 exit 0
