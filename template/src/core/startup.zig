@@ -28,18 +28,31 @@ fn _start() callconv(.C) noreturn {
         \\la sp, __end_of_stack
     );
 
-    // Clear .bss section.
+    // Clear whole RAM. Good for debugging.
     asm volatile (
         \\    li a0, 0
-        \\    la a1, __bss_start
-        \\    la a2, __bss_end
-        \\    beq a1, a2, clear_bss_done
-        \\clear_bss_loop:
+        \\    la a1, __start_of_ram
+        \\    la a2, __end_of_stack
+        \\    beq a1, a2, clear_ram_done
+        \\clear_ram_loop:
         \\    sw a0, 0(a1)
         \\    addi a1, a1, 4
-        \\    blt a1, a2, clear_bss_loop
-        \\clear_bss_done:
+        \\    blt a1, a2, clear_ram_loop
+        \\clear_ram_done:
     );
+
+    // // Clear .bss section.
+    // asm volatile (
+    //     \\    li a0, 0
+    //     \\    la a1, __bss_start
+    //     \\    la a2, __bss_end
+    //     \\    beq a1, a2, clear_bss_done
+    //     \\clear_bss_loop:
+    //     \\    sw a0, 0(a1)
+    //     \\    addi a1, a1, 4
+    //     \\    blt a1, a2, clear_bss_loop
+    //     \\clear_bss_done:
+    // );
 
     // Copy .data from flash to RAM.
     asm volatile (

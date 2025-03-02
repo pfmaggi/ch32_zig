@@ -39,6 +39,7 @@ SECTIONS
   } > RAM
 
   __data_load_start = LOADADDR(.data);
+  __start_of_ram = ORIGIN(RAM);
   __end_of_stack = ORIGIN(RAM) + LENGTH(RAM);
   PROVIDE(__global_pointer$ = __data_start + 0x800);
 }
