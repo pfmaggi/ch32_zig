@@ -13,3 +13,9 @@ comptime {
 }
 
 pub const Interrups = interrups.Interrups;
+
+test {
+    _ = startup;
+    _ = interrups;
+    _ = panic;
+}

@@ -91,10 +91,8 @@ inline fn callMain() noreturn {
 
     if (return_type == .error_union) {
         root.main() catch |err| {
-            const prefix = "main() returned error";
-
-            var buf: [64]u8 = undefined;
-            const msg = std.fmt.bufPrint(&buf, prefix ++ " {s}", .{@errorName(err)}) catch prefix;
+            var buf: [32]u8 = undefined;
+            const msg = concat(&buf, "main(): ", @errorName(err));
             @panic(msg);
         };
     } else {
@@ -102,4 +100,45 @@ inline fn callMain() noreturn {
     }
 
     panic.hang();
+}
+
+fn concat(buf: []u8, a: []const u8, b: []const u8) []u8 {
+    var i: usize = 0;
+    while (i < a.len and i < buf.len) : (i += 1) {
+        buf[i] = a[i];
+    }
+
+    var j: usize = 0;
+    while (j < b.len and i + j < buf.len) : (j += 1) {
+        buf[i + j] = b[j];
+    }
+
+    return buf[0 .. i + j];
+}
+
+test "concat" {
+    const a = "Hello, ";
+    const b = "World!";
+    var buf: [20]u8 = undefined;
+    const result = concat(&buf, a, b);
+    const expected = "Hello, World!";
+    try std.testing.expectEqualStrings(expected, result);
+}
+
+test "concat small buffer" {
+    const a = "Hello, ";
+    const b = "World!";
+    var buf: [8]u8 = undefined;
+    const result = concat(&buf, a, b);
+    const expected = "Hello, W";
+    try std.testing.expectEqualStrings(expected, result);
+}
+
+test "concat very small buffer" {
+    const a = "Hello, ";
+    const b = "World!";
+    var buf: [4]u8 = undefined;
+    const result = concat(&buf, a, b);
+    const expected = "Hell";
+    try std.testing.expectEqualStrings(expected, result);
 }
