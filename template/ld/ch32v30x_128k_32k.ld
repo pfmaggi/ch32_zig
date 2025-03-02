@@ -16,9 +16,9 @@ SECTIONS
      *(.text*)
   } > FLASH
 
-  .rodata_str :
+  .rodata :
   {
-     *(.rodata.str*)
+     *(.rodata*)
   } > FLASH
 
   .data :
@@ -26,7 +26,6 @@ SECTIONS
      __data_start = .;
      *(.sdata*)
      *(.data*)
-     *(.rodata*)
      __data_end = .;
   } > RAM AT> FLASH
 
