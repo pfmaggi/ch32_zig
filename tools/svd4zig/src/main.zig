@@ -43,7 +43,7 @@ const register_def =
     \\            // modify MMIO registers that only allow word-sized stores.
     \\            // https://github.com/ziglang/zig/issues/8981#issuecomment-854911077
     \\            const aligned: Write align(4) = value;
-    \\            const v: *volatile Write = @ptrCast(&aligned);
+    \\            const v: *volatile u32 = @constCast(@ptrCast(&aligned));
     \\            self.raw_ptr.* = v.*;
     \\        }
     \\
