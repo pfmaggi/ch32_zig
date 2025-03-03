@@ -9,48 +9,21 @@ const svd = @import("svd.zig");
 var line_buffer: [1024 * 1024]u8 = undefined;
 
 const register_def =
-    \\pub fn Register(comptime R: type) type {
-    \\    return RegisterRW(R, R);
-    \\}
-    \\
-    \\pub fn RegisterRW(comptime Read: type, comptime Write: type) type {
-    \\    return struct {
-    \\        raw_ptr: *volatile u32,
+    \\pub fn RegisterRW(comptime Register: type) type {
+    \\    return extern struct {
+    \\        raw: u32,
     \\
     \\        const Self = @This();
     \\
-    \\        pub fn init(address: usize) Self {
-    \\            return Self{ .raw_ptr = @ptrFromInt(address) };
+    \\        pub inline fn read(self: *volatile Self) Register {
+    \\            return @bitCast(self.raw);
     \\        }
     \\
-    \\        pub fn initRange(address: usize, comptime dim_increment: usize, comptime num_registers: usize) [num_registers]Self {
-    \\            var registers: [num_registers]Self = undefined;
-    \\            var i: usize = 0;
-    \\            while (i < num_registers) : (i += 1) {
-    \\                registers[i] = Self.init(address + (i * dim_increment));
-    \\            }
-    \\            return registers;
+    \\        pub inline fn write(self: *volatile Self, value: Register) void {
+    \\            self.write_raw(@bitCast(value));
     \\        }
     \\
-    \\        pub fn read(self: Self) Read {
-    \\            return @bitCast(self.raw_ptr.*);
-    \\        }
-    \\
-    \\        pub fn write(self: Self, value: Write) void {
-    \\            // Forcing the alignment is a workaround for stores through
-    \\            // volatile pointers generating multiple loads and stores.
-    \\            // This is necessary for LLVM to generate code that can successfully
-    \\            // modify MMIO registers that only allow word-sized stores.
-    \\            // https://github.com/ziglang/zig/issues/8981#issuecomment-854911077
-    \\            const aligned: Write align(4) = value;
-    \\            const v: *volatile u32 = @constCast(@ptrCast(&aligned));
-    \\            self.raw_ptr.* = v.*;
-    \\        }
-    \\
-    \\        pub fn modify(self: Self, new_value: anytype) void {
-    \\            if (Read != Write) {
-    \\                @compileError("Can't modify because read and write types for this register aren't the same.");
-    \\            }
+    \\        pub inline fn modify(self: *volatile Self, new_value: anytype) void {
     \\            var old_value = self.read();
     \\            const info = @typeInfo(@TypeOf(new_value));
     \\            inline for (info.Struct.fields) |field| {
@@ -59,24 +32,51 @@ const register_def =
     \\            self.write(old_value);
     \\        }
     \\
-    \\        pub fn read_raw(self: Self) u32 {
-    \\            return self.raw_ptr.*;
+    \\        pub inline fn write_raw(self: *volatile Self, value: u32) void {
+    \\            self.raw = value;
     \\        }
     \\
-    \\        pub fn write_raw(self: Self, value: u32) void {
-    \\            self.raw_ptr.* = value;
-    \\        }
-    \\
-    \\        pub fn default_read_value(_: Self) Read {
-    \\            return Read{};
-    \\        }
-    \\
-    \\        pub fn default_write_value(_: Self) Write {
-    \\            return Write{};
+    \\        pub inline fn default(_: *volatile Self) Register {
+    \\            return Register{};
     \\        }
     \\    };
     \\}
     \\
+    \\pub fn RegisterRO(comptime Register: type) type {
+    \\    return extern struct {
+    \\        raw: u32,
+    \\
+    \\        const Self = @This();
+    \\
+    \\        pub inline fn read(self: *volatile Self) Register {
+    \\            return @bitCast(self.raw);
+    \\        }
+    \\
+    \\        pub inline fn default(_: *volatile Self) Register {
+    \\            return Register{};
+    \\        }
+    \\    };
+    \\}
+    \\
+    \\pub fn RegisterWO(comptime Register: type) type {
+    \\    return extern struct {
+    \\        raw: u32,
+    \\
+    \\        const Self = @This();
+    \\
+    \\        pub inline fn write(self: *volatile Self, value: Register) void {
+    \\            self.write_raw(@bitCast(value));
+    \\        }
+    \\
+    \\        pub inline fn write_raw(self: *volatile Self, value: u32) void {
+    \\            self.raw = value;
+    \\        }
+    \\
+    \\        pub inline fn default(_: *volatile Self) Register {
+    \\            return Register{};
+    \\        }
+    \\    };
+    \\}
 ;
 
 pub fn main() anyerror!void {
