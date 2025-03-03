@@ -163,6 +163,20 @@ const Chip = union(enum) {
             .series => |v| v.string(),
         };
     }
+
+    fn as_series(chip: Chip) ChipSeries {
+        return switch (chip) {
+            .model => |v| v.series(),
+            .series => |v| v,
+        };
+    }
+
+    fn as_model(chip: Chip) ChipModel {
+        return switch (chip) {
+            .model => |v| v,
+            .series => |v| v.minimalModel(),
+        };
+    }
 };
 
 const Target = struct {
@@ -204,17 +218,8 @@ fn buildAndInstallFirmware(
 fn buildConfigOptions(b: *std.Build, name: []const u8, chip: Chip) *std.Build.Step.Options {
     const config_options = b.addOptions();
     config_options.addOption([]const u8, "name", name);
-    switch (chip) {
-        .model => |v| {
-            config_options.addOption(ChipModel, "chip_model", v);
-            config_options.addOption(ChipSeries, "chip_series", v.series());
-        },
-        .series => |v| {
-            config_options.addOption(ChipModel, "chip_model", v.minimalModel());
-            config_options.addOption(ChipSeries, "chip_series", v);
-        },
-    }
-
+    config_options.addOption(ChipModel, "chip_model", chip.as_model());
+    config_options.addOption(ChipSeries, "chip_series", chip.as_series());
     return config_options;
 }
 
