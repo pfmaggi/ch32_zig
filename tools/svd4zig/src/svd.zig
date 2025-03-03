@@ -650,7 +650,7 @@ test "Field print" {
     field.bit_width = 1;
 
     try buf_stream.print("{}\n", .{field});
-    try std.testing.expect(std.mem.eql(u8, fieldDesiredPrint, output_buffer.items));
+    try std.testing.expectEqualStrings(fieldDesiredPrint, output_buffer.items);
 }
 
 test "Register Print" {
@@ -658,23 +658,22 @@ test "Register Print" {
     const registerDesiredPrint =
         \\
         \\/// RND
-        \\const RND_val = packed struct {
-        \\/// unused [0:1]
-        \\_unused0: u2 = 1,
-        \\/// RNGEN [2:2]
-        \\/// RNGEN comment
-        \\RNGEN: u1 = 1,
-        \\/// unused [3:9]
-        \\_unused3: u5 = 0,
-        \\_unused8: u2 = 0,
-        \\/// SEED [10:12]
-        \\/// SEED comment
-        \\SEED: u3 = 0,
-        \\/// padding [13:31]
-        \\_padding: u19 = 0,
-        \\};
         \\/// RND comment
-        \\pub const RND = Register(RND_val).init(base_address + 0x100);
+        \\RND: RegisterRW(packed struct {
+        \\    /// unused [0:1]
+        \\    _unused0: u2 = 1,
+        \\    /// RNGEN [2:2]
+        \\    /// RNGEN comment
+        \\    RNGEN: u1 = 1,
+        \\    /// unused [3:9]
+        \\    _unused3: u5 = 0,
+        \\    _unused8: u2 = 0,
+        \\    /// SEED [10:12]
+        \\    /// SEED comment
+        \\    SEED: u3 = 0,
+        \\    /// padding [13:31]
+        \\    _padding: u19 = 0,
+        \\}),
         \\
     ;
 
@@ -711,7 +710,7 @@ test "Register Print" {
     try register.fields.append(field2);
 
     try buf_stream.print("{}\n", .{register});
-    try std.testing.expectEqualSlices(u8, registerDesiredPrint, output_buffer.items);
+    try std.testing.expectEqualStrings(registerDesiredPrint, output_buffer.items);
 }
 
 test "Peripheral Print" {
@@ -719,27 +718,28 @@ test "Peripheral Print" {
     const peripheralDesiredPrint =
         \\
         \\/// PERIPH comment
-        \\pub const PERIPH = struct {
+        \\pub const PERIPH = extern struct {
+        \\    pub fn from(base: u32) *volatile types.PERIPH {
+        \\        return @ptrFromInt(base);
+        \\    }
         \\
-        \\const base_address = 0x24000;
-        \\/// RND
-        \\const RND_val = packed struct {
-        \\/// unused [0:1]
-        \\_unused0: u2 = 1,
-        \\/// RNGEN [2:2]
-        \\/// RNGEN comment
-        \\RNGEN: u1 = 1,
-        \\/// unused [3:9]
-        \\_unused3: u5 = 0,
-        \\_unused8: u2 = 0,
-        \\/// SEED [10:12]
-        \\/// SEED comment
-        \\SEED: u3 = 0,
-        \\/// padding [13:31]
-        \\_padding: u19 = 0,
-        \\};
-        \\/// RND comment
-        \\pub const RND = Register(RND_val).init(base_address + 0x100);
+        \\    /// RND
+        \\    /// RND comment
+        \\    const RND: RegisterRW(packed struct {
+        \\        /// unused [0:1]
+        \\        _unused0: u2 = 1,
+        \\        /// RNGEN [2:2]
+        \\        /// RNGEN comment
+        \\        RNGEN: u1 = 1,
+        \\        /// unused [3:9]
+        \\        _unused3: u5 = 0,
+        \\        _unused8: u2 = 0,
+        \\        /// SEED [10:12]
+        \\        /// SEED comment
+        \\        SEED: u3 = 0,
+        \\        /// padding [13:31]
+        \\        _padding: u19 = 0,
+        \\    }),
         \\};
         \\
     ;
@@ -785,7 +785,7 @@ test "Peripheral Print" {
     try peripheral.registers.append(register);
 
     try buf_stream.print("{}\n", .{peripheral});
-    try std.testing.expectEqualSlices(u8, peripheralDesiredPrint, output_buffer.items);
+    try std.testing.expectEqualStrings(peripheralDesiredPrint, output_buffer.items);
 }
 fn bitWidthToMask(width: u32) u32 {
     const max_supported_bits = 32;
