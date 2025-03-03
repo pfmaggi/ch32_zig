@@ -569,7 +569,7 @@ pub const Field = struct {
 
     pub fn fieldResetValue(bit_start: u32, bit_width: u32, reg_reset_value: u32) u32 {
         const shifted_reset_value = reg_reset_value >> @as(u5, @intCast(bit_start));
-        const reset_value_mask = @as(u32, @intCast(@as(u33, 1) << @as(u6, @intCast(bit_width)) - 1));
+        const reset_value_mask = @as(u32, @intCast((@as(u33, 1) << @as(u6, @intCast(bit_width))) - 1));
 
         return shifted_reset_value & reset_value_mask;
     }
@@ -633,7 +633,7 @@ test "Field print" {
     field.bit_width = 1;
 
     try buf_stream.print("{}\n", .{field});
-    std.testing.expect(std.mem.eql(u8, output_buffer.items, fieldDesiredPrint));
+    try std.testing.expect(std.mem.eql(u8, fieldDesiredPrint, output_buffer.items));
 }
 
 test "Register Print" {
@@ -696,7 +696,7 @@ test "Register Print" {
     try register.fields.append(field2);
 
     try buf_stream.print("{}\n", .{register});
-    std.testing.expectEqualSlices(u8, output_buffer.items, registerDesiredPrint);
+    try std.testing.expectEqualSlices(u8, registerDesiredPrint, output_buffer.items);
 }
 
 test "Peripheral Print" {
@@ -772,7 +772,7 @@ test "Peripheral Print" {
     try peripheral.registers.append(register);
 
     try buf_stream.print("{}\n", .{peripheral});
-    std.testing.expectEqualSlices(u8, peripheralDesiredPrint, output_buffer.items);
+    try std.testing.expectEqualSlices(u8, peripheralDesiredPrint, output_buffer.items);
 }
 fn bitWidthToMask(width: u32) u32 {
     const max_supported_bits = 32;

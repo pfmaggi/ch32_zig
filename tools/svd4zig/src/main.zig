@@ -471,6 +471,10 @@ test "getChunk" {
     try std.testing.expectEqual(derived_chunk.data, expected_derived_chunk.data);
 }
 
+test {
+    _ = svd;
+}
+
 fn textToBool(data: []const u8) ?bool {
     if (ascii.eqlIgnoreCase(data, "true")) {
         return true;
