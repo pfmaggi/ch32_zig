@@ -453,6 +453,23 @@ pub const Register = struct {
         }
     }
 
+    fn alignedEndOfPaddingChunk(chunk_start: u32, last_unused: u32) u32 {
+        // Next multiple of 32 from chunk_start + 1
+        const next_multiple = (chunk_start + 32) & ~@as(u32, 31);
+        return @min(next_multiple, last_unused);
+    }
+
+    fn writePaddingField(first_unused: u32, last_unused: u32, reg_reset_value: u32, out_stream: anytype) !void {
+        const chunk_start = first_unused;
+        const chunk_end = alignedEndOfPaddingChunk(chunk_start, last_unused);
+        try out_stream.print("\n/// padding [{}:{}]", .{ first_unused, last_unused - 1 });
+        try out_stream.writeAll("\n");
+        const chunk_width = chunk_end - chunk_start;
+        const unused_value = Field.fieldResetValue(chunk_start, chunk_width, reg_reset_value);
+
+        try out_stream.print("_padding: u{} = {},", .{ chunk_width, unused_value });
+    }
+
     pub fn format(self: Self, comptime _: []const u8, _: std.fmt.FormatOptions, out_stream: anytype) !void {
         try out_stream.writeAll("\n");
         if (!self.isValid()) {
@@ -489,7 +506,7 @@ pub const Register = struct {
 
         // Check if we need padding at the end
         if (last_uncovered_bit != 32) {
-            try writeUnusedField(last_uncovered_bit, 32, self.reset_value, out_stream);
+            try writePaddingField(last_uncovered_bit, 32, self.reset_value, out_stream);
         }
 
         // close the struct and init the register
@@ -653,10 +670,8 @@ test "Register Print" {
         \\/// SEED [10:12]
         \\/// SEED comment
         \\SEED: u3 = 0,
-        \\/// unused [13:31]
-        \\_unused13: u3 = 0,
-        \\_unused16: u8 = 0,
-        \\_unused24: u8 = 0,
+        \\/// padding [13:31]
+        \\_padding: u19 = 0,
         \\};
         \\/// RND comment
         \\pub const RND = Register(RND_val).init(base_address + 0x100);
@@ -720,10 +735,8 @@ test "Peripheral Print" {
         \\/// SEED [10:12]
         \\/// SEED comment
         \\SEED: u3 = 0,
-        \\/// unused [13:31]
-        \\_unused13: u3 = 0,
-        \\_unused16: u8 = 0,
-        \\_unused24: u8 = 0,
+        \\/// padding [13:31]
+        \\_padding: u19 = 0,
         \\};
         \\/// RND comment
         \\pub const RND = Register(RND_val).init(base_address + 0x100);
