@@ -567,8 +567,8 @@ pub const Register = struct {
         }
 
         // Check if we need padding at the end
-        if (last_uncovered_bit != 32) {
-            try writePaddingField(last_uncovered_bit, 32, self.reset_value, padded_out_stream);
+        if (last_uncovered_bit != self.size) {
+            try writePaddingField(last_uncovered_bit, self.size, self.reset_value, padded_out_stream);
         }
 
         // close the struct and init the register
