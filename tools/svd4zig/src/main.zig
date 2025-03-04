@@ -42,41 +42,6 @@ const register_def =
     \\    };
     \\}
     \\
-    \\pub fn RegisterRO(comptime Register: type) type {
-    \\    return extern struct {
-    \\        raw: u32,
-    \\
-    \\        const Self = @This();
-    \\
-    \\        pub inline fn read(self: *volatile Self) Register {
-    \\            return @bitCast(self.raw);
-    \\        }
-    \\
-    \\        pub inline fn default(_: *volatile Self) Register {
-    \\            return Register{};
-    \\        }
-    \\    };
-    \\}
-    \\
-    \\pub fn RegisterWO(comptime Register: type) type {
-    \\    return extern struct {
-    \\        raw: u32,
-    \\
-    \\        const Self = @This();
-    \\
-    \\        pub inline fn write(self: *volatile Self, value: Register) void {
-    \\            self.write_raw(@bitCast(value));
-    \\        }
-    \\
-    \\        pub inline fn write_raw(self: *volatile Self, value: u32) void {
-    \\            self.raw = value;
-    \\        }
-    \\
-    \\        pub inline fn default(_: *volatile Self) Register {
-    \\            return Register{};
-    \\        }
-    \\    };
-    \\}
 ;
 
 pub fn main() anyerror!void {
@@ -181,19 +146,10 @@ pub fn main() anyerror!void {
                 if (ascii.eqlIgnoreCase(chunk.tag, "/peripherals")) {
                     state = .Device;
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "peripheral")) {
-                    if (chunk.derivedFrom) |derivedFrom| {
-                        for (dev.peripherals.items) |periph_being_checked| {
-                            if (mem.eql(u8, periph_being_checked.name.items, derivedFrom)) {
-                                try dev.peripherals.append(try periph_being_checked.copy(allocator));
-                                state = .Peripheral;
-                                break;
-                            }
-                        }
-                    } else {
-                        const periph = try svd.Peripheral.init(allocator);
-                        try dev.peripherals.append(periph);
-                        state = .Peripheral;
-                    }
+                    var periph = try svd.Peripheral.init(allocator);
+                    periph.derived_from = chunk.derivedFrom;
+                    try dev.peripherals.append(periph);
+                    state = .Peripheral;
                 }
             },
             .Peripheral => {
@@ -338,6 +294,10 @@ pub fn main() anyerror!void {
                     if (chunk.data) |data| {
                         cur_reg.reset_value = parseHexLiteral(data) orelse cur_reg.reset_value; // TODO: test orelse break
                     }
+                } else if (ascii.eqlIgnoreCase(chunk.tag, "alternateRegister")) {
+                    if (chunk.data) |data| {
+                        try cur_reg.alternate_register.insertSlice(0, data);
+                    }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "fields")) {
                     state = .Fields;
                 }
@@ -437,7 +397,8 @@ fn getChunk(line: []const u8) ?XmlChunk {
     }
 
     if (toker.next()) |chunk_data| {
-        chunk.data = chunk_data;
+        const chunk_data_trimmed = mem.trim(u8, chunk_data, " \n\t");
+        chunk.data = chunk_data_trimmed;
     }
 
     return chunk;

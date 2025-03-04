@@ -77,17 +77,37 @@ pub const Device = struct {
         if (self.cpu) |the_cpu| {
             try out_stream.print("{}\n", .{the_cpu});
         }
+
+        // TODO: add write enums and registers.
+
+        try out_stream.writeAll(
+            \\
+            \\pub const types = struct {
+        );
+
+        var padded_writer = PaddedWriter.init("    ", out_stream);
+        var padded_out_stream = padded_writer.writer();
+
         // now print peripherals
         for (self.peripherals.items) |peripheral| {
-            try out_stream.print("{}\n", .{peripheral});
+            if (peripheral.derived_from) |_| {
+                // FIXME: generate common type.
+                try padded_out_stream.print("// Peripheral {s} is derived from another peripheral, skipping\n", .{peripheral.name.items});
+                continue;
+            }
+
+            try padded_out_stream.print("{}\n", .{peripheral});
         }
+
+        try out_stream.writeAll("};\n");
+
         // now print interrupt table
-        try out_stream.writeAll("pub const interrupts = struct {\n");
+        try out_stream.writeAll("\npub const interrupts = struct {\n");
         var iter = self.interrupts.iterator();
         while (iter.next()) |entry| {
             const interrupt = entry.value_ptr.*;
             if (interrupt.value) |int_value| {
-                try out_stream.print(
+                try padded_out_stream.print(
                     "pub const {s} = {};\n",
                     .{ interrupt.name.items, int_value },
                 );
@@ -170,6 +190,7 @@ pub const Peripheral = struct {
     name: ArrayList(u8),
     group_name: ArrayList(u8),
     description: ArrayList(u8),
+    derived_from: ?[]const u8,
     base_address: ?u32,
     address_block: ?AddressBlock,
     registers: Registers,
@@ -190,6 +211,7 @@ pub const Peripheral = struct {
             .name = name,
             .group_name = group_name,
             .description = description,
+            .derived_from = null,
             .base_address = null,
             .address_block = null,
             .registers = registers,
@@ -228,6 +250,27 @@ pub const Peripheral = struct {
         return true;
     }
 
+    fn registersSortCompare(_: void, left: Register, right: Register) bool {
+        if (left.address_offset != null and right.address_offset != null) {
+            if (left.address_offset.? < right.address_offset.?) {
+                return true;
+            }
+            if (left.address_offset.? > right.address_offset.?) {
+                return false;
+            }
+        } else if (left.address_offset == null) {
+            return true;
+        }
+
+        return false;
+    }
+
+    fn writeOffsetRegister(num: usize, first_unused: u32, last_unused: u32, out_stream: anytype) !void {
+        const size = last_unused - first_unused;
+        try out_stream.print("\n/// offset 0x{x}\n", .{size});
+        try out_stream.print("_offset{}: [{}]u8,\n", .{ num, size });
+    }
+
     pub fn format(self: Self, comptime _: []const u8, _: std.fmt.FormatOptions, out_stream: anytype) !void {
         try out_stream.writeAll("\n");
         if (!self.isValid()) {
@@ -236,17 +279,42 @@ pub const Peripheral = struct {
         }
         const name = self.name.items;
         const description = if (self.description.items.len == 0) "No description" else self.description.items;
-        const base_address = self.base_address.?;
         try out_stream.print(
             \\/// {s}
-            \\pub const {s} = struct {{
+            \\pub const {s} = extern struct {{
+            \\    pub fn from(base: u32) *volatile types.{s} {{
+            \\        return @ptrFromInt(base);
+            \\    }}
             \\
-            \\const base_address = 0x{x};
-        , .{ description, name, base_address });
-        // now print registers
-        for (self.registers.items) |register| {
-            try out_stream.print("{}\n", .{register});
+        , .{ description, name, name });
+
+        // Sort registers by address offset for next step
+        std.sort.heap(Register, self.registers.items, {}, registersSortCompare);
+
+        var padded_writer = PaddedWriter.init("    ", out_stream);
+        var padded_out_stream = padded_writer.writer();
+
+        var last_uncovered_offset: u32 = 0;
+        for (self.registers.items, 0..) |register, i| {
+            if (register.alternate_register.items.len > 0) {
+                // FIXME: use union?
+                continue;
+            }
+
+            if (register.address_offset == null) {
+                try padded_out_stream.writeAll("// Not enough info to print register\n");
+                return;
+            }
+
+            const address_offset = register.address_offset.?;
+            if (last_uncovered_offset != address_offset) {
+                try writeOffsetRegister(i, last_uncovered_offset, address_offset, padded_out_stream);
+            }
+
+            try padded_out_stream.print("{}\n", .{register});
+            last_uncovered_offset = address_offset + register.size / 8;
         }
+
         // and close the peripheral
         try out_stream.print("}};", .{});
 
@@ -346,6 +414,7 @@ pub const Register = struct {
     name: ArrayList(u8),
     display_name: ArrayList(u8),
     description: ArrayList(u8),
+    alternate_register: ArrayList(u8),
     address_offset: ?u32,
     size: u32,
     reset_value: u32,
@@ -365,6 +434,8 @@ pub const Register = struct {
         errdefer display_name.deinit();
         var description = ArrayList(u8).init(allocator);
         errdefer description.deinit();
+        var alternate_register = ArrayList(u8).init(allocator);
+        errdefer alternate_register.deinit();
         var fields = Fields.init(allocator);
         errdefer fields.deinit();
 
@@ -373,6 +444,7 @@ pub const Register = struct {
             .name = name,
             .display_name = display_name,
             .description = description,
+            .alternate_register = alternate_register,
             .address_offset = null,
             .size = size,
             .reset_value = reset_value,
@@ -380,26 +452,12 @@ pub const Register = struct {
         };
     }
 
-    pub fn copy(self: Self, allocator: Allocator) !Self {
-        var the_copy = try Self.init(allocator, self.periph_containing.items, self.reset_value, self.size);
-
-        try the_copy.name.appendSlice(self.name.items);
-        try the_copy.display_name.appendSlice(self.display_name.items);
-        try the_copy.description.appendSlice(self.description.items);
-        the_copy.address_offset = self.address_offset;
-        the_copy.access = self.access;
-        for (self.fields.items) |self_field| {
-            try the_copy.fields.append(try self_field.copy(allocator));
-        }
-
-        return the_copy;
-    }
-
     pub fn deinit(self: *Self) void {
         self.periph_containing.deinit();
         self.name.deinit();
         self.display_name.deinit();
         self.description.deinit();
+        self.alternate_register.deinit();
 
         self.fields.deinit();
     }
@@ -482,40 +540,42 @@ pub const Register = struct {
         // print packed struct containing fields
         try out_stream.print(
             \\/// {s}
-            \\const {s}_val = packed struct {{
-        , .{ name, name });
+            \\{s}: RegisterRW(packed struct(u{}) {{
+        , .{ description, name, self.size });
 
         // Sort fields from LSB to MSB for next step
         std.sort.heap(Field, self.fields.items, {}, fieldsSortCompare);
 
+        var padded_writer = PaddedWriter.init("    ", out_stream);
+        var padded_out_stream = padded_writer.writer();
+
         var last_uncovered_bit: u32 = 0;
         for (self.fields.items) |field| {
             if ((field.bit_offset == null) or (field.bit_width == null)) {
-                try out_stream.writeAll("// Not enough info to print register\n");
+                try padded_out_stream.writeAll("// Not enough info to print register\n");
                 return;
             }
 
             const bit_offset = field.bit_offset.?;
             const bit_width = field.bit_width.?;
             if (last_uncovered_bit != bit_offset) {
-                try writeUnusedField(last_uncovered_bit, bit_offset, self.reset_value, out_stream);
+                try writeUnusedField(last_uncovered_bit, bit_offset, self.reset_value, padded_out_stream);
             }
-            try out_stream.print("{}", .{field});
+
+            try padded_out_stream.print("{}", .{field});
             last_uncovered_bit = bit_offset + bit_width;
         }
 
         // Check if we need padding at the end
         if (last_uncovered_bit != 32) {
-            try writePaddingField(last_uncovered_bit, 32, self.reset_value, out_stream);
+            try writePaddingField(last_uncovered_bit, 32, self.reset_value, padded_out_stream);
         }
 
         // close the struct and init the register
         try out_stream.print(
             \\
-            \\}};
-            \\/// {s}
-            \\pub const {s} = Register({s}_val).init(base_address + 0x{x});
-        , .{ description, name, name, self.address_offset.? });
+            \\}}),
+        , .{});
 
         return;
     }
@@ -627,6 +687,55 @@ pub const Field = struct {
     }
 };
 
+const PaddedWriter = struct {
+    pub fn init(indent: []const u8, out_writer: anytype) Self {
+        return .{ .indent = indent, .out_writer = out_writer };
+    }
+
+    indent: []const u8,
+    out_writer: std.io.AnyWriter,
+    needs_indent: bool = false,
+
+    const Self = @This();
+
+    pub const Writer = std.io.GenericWriter(*Self, anyerror, writerFn);
+
+    pub fn writer(self: *Self) Writer {
+        return .{ .context = self };
+    }
+
+    pub fn reset(self: *Self) void {
+        self.needs_indent = false;
+    }
+
+    fn writerFn(self: *Self, buffer: []const u8) anyerror!usize {
+        var count: usize = 0;
+        var new_buffer = buffer;
+
+        while (new_buffer.len > 0) {
+            const maybe_idx = std.mem.indexOf(u8, new_buffer, "\n");
+
+            if (self.needs_indent and (maybe_idx == null or maybe_idx.? > 0)) {
+                try self.out_writer.writeAll(self.indent);
+                self.needs_indent = false;
+            }
+
+            const idx = maybe_idx orelse {
+                count += try self.out_writer.write(new_buffer);
+                return count;
+            };
+
+            const idx_after = idx + 1;
+            count += try self.out_writer.write(new_buffer[0..idx_after]);
+
+            self.needs_indent = true;
+            new_buffer = new_buffer[idx_after..];
+        }
+
+        return count;
+    }
+};
+
 test "Field print" {
     const allocator = std.testing.allocator;
     const fieldDesiredPrint =
@@ -657,7 +766,6 @@ test "Register Print" {
     const allocator = std.testing.allocator;
     const registerDesiredPrint =
         \\
-        \\/// RND
         \\/// RND comment
         \\RND: RegisterRW(packed struct {
         \\    /// unused [0:1]
@@ -723,9 +831,11 @@ test "Peripheral Print" {
         \\        return @ptrFromInt(base);
         \\    }
         \\
-        \\    /// RND
+        \\    /// offset 0x100
+        \\    _offset0: [256]u8,
+        \\
         \\    /// RND comment
-        \\    const RND: RegisterRW(packed struct {
+        \\    RND: RegisterRW(packed struct {
         \\        /// unused [0:1]
         \\        _unused0: u2 = 1,
         \\        /// RNGEN [2:2]
