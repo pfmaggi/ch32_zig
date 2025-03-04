@@ -63,7 +63,7 @@ pub fn main() anyerror!void {
     var state = SvdParseState.Device;
     var dev = try svd.Device.init(allocator);
     var cur_interrupt: svd.Interrupt = undefined;
-    while (try stream.readUntilDelimiterOrEof(&line_buffer, '\n')) |line| {
+    while (try stream.readUntilDelimiterOrEof(&line_buffer, '<')) |line| {
         const chunk = getChunk(line) orelse continue;
         switch (state) {
             .Device => {
@@ -71,15 +71,15 @@ pub fn main() anyerror!void {
                     state = .Finished;
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "name")) {
                     if (chunk.data) |data| {
-                        try dev.name.insertSlice(0, data);
+                        try appendSliceWithFixes(&dev.name, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "version")) {
                     if (chunk.data) |data| {
-                        try dev.version.insertSlice(0, data);
+                        try appendSliceWithFixes(&dev.version, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "description")) {
                     if (chunk.data) |data| {
-                        try dev.description.insertSlice(0, data);
+                        try appendSliceWithFixes(&dev.description, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "cpu")) {
                     const cpu = try svd.Cpu.init(allocator);
@@ -114,15 +114,15 @@ pub fn main() anyerror!void {
                     state = .Device;
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "name")) {
                     if (chunk.data) |data| {
-                        try dev.cpu.?.name.insertSlice(0, data);
+                        try appendSliceWithFixes(&dev.cpu.?.name, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "revision")) {
                     if (chunk.data) |data| {
-                        try dev.cpu.?.revision.insertSlice(0, data);
+                        try appendSliceWithFixes(&dev.cpu.?.revision, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "endian")) {
                     if (chunk.data) |data| {
-                        try dev.cpu.?.endian.insertSlice(0, data);
+                        try appendSliceWithFixes(&dev.cpu.?.endian, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "mpuPresent")) {
                     if (chunk.data) |data| {
@@ -169,11 +169,11 @@ pub fn main() anyerror!void {
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "description")) {
                     if (chunk.data) |data| {
-                        try cur_periph.description.insertSlice(0, data);
+                        try appendSliceWithFixes(&cur_periph.description, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "groupName")) {
                     if (chunk.data) |data| {
-                        try cur_periph.group_name.insertSlice(0, data);
+                        try appendSliceWithFixes(&cur_periph.group_name, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "baseAddress")) {
                     if (chunk.data) |data| {
@@ -209,7 +209,7 @@ pub fn main() anyerror!void {
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "usage")) {
                     if (chunk.data) |data| {
-                        try address_block.usage.insertSlice(0, data);
+                        try appendSliceWithFixes(&address_block.usage, data);
                     }
                 }
             },
@@ -237,11 +237,11 @@ pub fn main() anyerror!void {
                     state = .Peripheral;
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "name")) {
                     if (chunk.data) |data| {
-                        try cur_interrupt.name.insertSlice(0, data);
+                        try appendSliceWithFixes(&cur_interrupt.name, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "description")) {
                     if (chunk.data) |data| {
-                        try cur_interrupt.description.insertSlice(0, data);
+                        try appendSliceWithFixes(&cur_interrupt.description, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "value")) {
                     if (chunk.data) |data| {
@@ -268,15 +268,15 @@ pub fn main() anyerror!void {
                     state = .Registers;
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "name")) {
                     if (chunk.data) |data| {
-                        try cur_reg.name.insertSlice(0, data);
+                        try appendSliceWithFixes(&cur_reg.name, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "displayName")) {
                     if (chunk.data) |data| {
-                        try cur_reg.display_name.insertSlice(0, data);
+                        try appendSliceWithFixes(&cur_reg.display_name, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "description")) {
                     if (chunk.data) |data| {
-                        try cur_reg.description.insertSlice(0, data);
+                        try appendSliceWithFixes(&cur_reg.description, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "addressOffset")) {
                     if (chunk.data) |data| {
@@ -296,7 +296,7 @@ pub fn main() anyerror!void {
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "alternateRegister")) {
                     if (chunk.data) |data| {
-                        try cur_reg.alternate_register.insertSlice(0, data);
+                        try appendSliceWithFixes(&cur_reg.alternate_register, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "fields")) {
                     state = .Fields;
@@ -321,11 +321,11 @@ pub fn main() anyerror!void {
                     state = .Fields;
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "name")) {
                     if (chunk.data) |data| {
-                        try cur_field.name.insertSlice(0, data);
+                        try appendSliceWithFixes(&cur_field.name, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "description")) {
                     if (chunk.data) |data| {
-                        try cur_field.description.insertSlice(0, data);
+                        try appendSliceWithFixes(&cur_field.description, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "bitOffset")) {
                     if (chunk.data) |data| {
@@ -402,6 +402,16 @@ fn getChunk(line: []const u8) ?XmlChunk {
     }
 
     return chunk;
+}
+
+fn appendSliceWithFixes(s: anytype, data: []const u8) !void {
+    var token = mem.tokenizeAny(u8, data, " \n\t");
+    var i: usize = 0;
+    while (token.next()) |v| {
+        if (i > 0) try s.appendSlice(" ");
+        try s.appendSlice(v);
+        i += 1;
+    }
 }
 
 test "getChunk" {
