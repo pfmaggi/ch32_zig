@@ -88,11 +88,9 @@ pub const Device = struct {
         var padded_writer = PaddedWriter.init("    ", out_stream);
         var padded_out_stream = padded_writer.writer();
 
-        // now print peripherals
         for (self.peripherals.items) |peripheral| {
-            if (peripheral.derived_from) |_| {
-                // FIXME: generate common type.
-                try padded_out_stream.print("// Peripheral {s} is derived from another peripheral, skipping\n", .{peripheral.name.items});
+            // Skip generate types for derived peripherals.
+            if (peripheral.derived_from.items.len > 0) {
                 continue;
             }
 
@@ -190,10 +188,13 @@ pub const Peripheral = struct {
     name: ArrayList(u8),
     group_name: ArrayList(u8),
     description: ArrayList(u8),
-    derived_from: ?[]const u8,
+    derived_from: ArrayList(u8),
+    derived_peripherals: Peripherals,
     base_address: ?u32,
     address_block: ?AddressBlock,
     registers: Registers,
+
+    allocator: Allocator,
 
     const Self = @This();
 
@@ -204,6 +205,10 @@ pub const Peripheral = struct {
         errdefer group_name.deinit();
         var description = ArrayList(u8).init(allocator);
         errdefer description.deinit();
+        var derived_from = ArrayList(u8).init(allocator);
+        errdefer derived_from.deinit();
+        var derived_peripherals = Peripherals.init(allocator);
+        errdefer derived_peripherals.deinit();
         var registers = Registers.init(allocator);
         errdefer registers.deinit();
 
@@ -211,33 +216,22 @@ pub const Peripheral = struct {
             .name = name,
             .group_name = group_name,
             .description = description,
-            .derived_from = null,
+            .derived_from = derived_from,
+            .derived_peripherals = derived_peripherals,
             .base_address = null,
             .address_block = null,
             .registers = registers,
+
+            .allocator = allocator,
         };
-    }
-
-    pub fn copy(self: Self, allocator: Allocator) !Self {
-        var the_copy = try Self.init(allocator);
-        errdefer the_copy.deinit();
-
-        try the_copy.name.appendSlice(self.name.items);
-        try the_copy.group_name.appendSlice(self.group_name.items);
-        try the_copy.description.appendSlice(self.description.items);
-        the_copy.base_address = self.base_address;
-        the_copy.address_block = self.address_block;
-        for (self.registers.items) |self_register| {
-            try the_copy.registers.append(try self_register.copy(allocator));
-        }
-
-        return the_copy;
     }
 
     pub fn deinit(self: *Self) void {
         self.name.deinit();
         self.group_name.deinit();
         self.description.deinit();
+        self.derived_from.deinit();
+        self.derived_peripherals.deinit();
         self.registers.deinit();
     }
 
@@ -271,22 +265,58 @@ pub const Peripheral = struct {
         try out_stream.print("_offset{}: [{}]u8,\n", .{ num, size });
     }
 
+    fn generateCommonName(allocator: Allocator, name: []const u8) ![]u8 {
+        var common_name = ArrayList(u8).init(allocator);
+        try common_name.replaceRange(0, common_name.items.len, name);
+
+        const common_prefixes = [_][]const u8{ "USART", "GPIO", "UART" };
+        for (common_prefixes) |prefix| {
+            if (std.mem.startsWith(u8, name, prefix)) {
+                try common_name.replaceRange(0, common_name.items.len, prefix);
+                try common_name.append('x');
+
+                return common_name.toOwnedSlice();
+            }
+        }
+
+        return common_name.toOwnedSlice();
+    }
+
     pub fn format(self: Self, comptime _: []const u8, _: std.fmt.FormatOptions, out_stream: anytype) !void {
         try out_stream.writeAll("\n");
         if (!self.isValid()) {
             try out_stream.writeAll("// Not enough info to print peripheral value\n");
             return;
         }
+
         const name = self.name.items;
+        const common_name = try generateCommonName(self.allocator, name);
+        defer self.allocator.free(common_name);
+
         const description = if (self.description.items.len == 0) "No description" else self.description.items;
         try out_stream.print(
             \\/// {s}
+            \\
+        , .{description});
+
+        if (!std.mem.eql(u8, name, common_name)) {
+            try out_stream.writeAll("/// Type for: ");
+
+            try out_stream.print("{s} ", .{name});
+            for (self.derived_peripherals.items) |peripheral| {
+                try out_stream.print("{s} ", .{peripheral.name.items});
+            }
+
+            try out_stream.writeAll("\n");
+        }
+
+        try out_stream.print(
             \\pub const {s} = extern struct {{
             \\    pub fn from(base: u32) *volatile types.{s} {{
             \\        return @ptrFromInt(base);
             \\    }}
             \\
-        , .{ description, name, name });
+        , .{ common_name, common_name });
 
         // Sort registers by address offset for next step
         std.sort.heap(Register, self.registers.items, {}, registersSortCompare);

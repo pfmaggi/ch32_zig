@@ -147,7 +147,9 @@ pub fn main() anyerror!void {
                     state = .Device;
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "peripheral")) {
                     var periph = try svd.Peripheral.init(allocator);
-                    periph.derived_from = chunk.derivedFrom;
+                    if (chunk.derivedFrom) |derived_from| {
+                        try periph.derived_from.appendSlice(derived_from);
+                    }
                     try dev.peripherals.append(periph);
                     state = .Peripheral;
                 }
@@ -156,16 +158,17 @@ pub fn main() anyerror!void {
                 var cur_periph = &dev.peripherals.items[dev.peripherals.items.len - 1];
                 if (ascii.eqlIgnoreCase(chunk.tag, "/peripheral")) {
                     state = .Peripherals;
-                } else if (ascii.eqlIgnoreCase(chunk.tag, "name")) {
-                    if (chunk.data) |data| {
-                        // periph could be copy, must update periph name in sub-fields
-                        try cur_periph.name.replaceRange(0, cur_periph.name.items.len, data);
-                        for (cur_periph.registers.items) |*reg| {
-                            try reg.periph_containing.replaceRange(0, reg.periph_containing.items.len, data);
-                            for (reg.fields.items) |*field| {
-                                try field.periph.replaceRange(0, field.periph.items.len, data);
+
+                    if (cur_periph.derived_from.items.len > 0) {
+                        for (dev.peripherals.items) |*periph_being_checked| {
+                            if (mem.eql(u8, periph_being_checked.name.items, cur_periph.derived_from.items)) {
+                                try periph_being_checked.derived_peripherals.append(cur_periph.*);
                             }
                         }
+                    }
+                } else if (ascii.eqlIgnoreCase(chunk.tag, "name")) {
+                    if (chunk.data) |data| {
+                        try appendSliceWithFixes(&cur_periph.name, data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "description")) {
                     if (chunk.data) |data| {
@@ -341,8 +344,6 @@ pub fn main() anyerror!void {
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "bitRange")) {
                     if (chunk.data) |data| {
-                        std.log.info("bitRange: {s}\n", .{data});
-
                         const trimmed = mem.trim(u8, data, " []");
                         var token = mem.tokenizeAny(u8, trimmed, ":");
                         if (token.next()) |start| {
