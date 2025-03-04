@@ -177,7 +177,7 @@ pub fn main() anyerror!void {
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "baseAddress")) {
                     if (chunk.data) |data| {
-                        cur_periph.base_address = parseHexLiteral(data);
+                        cur_periph.base_address = parseIntLiteral(data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "addressBlock")) {
                     if (cur_periph.address_block) |_| {
@@ -201,11 +201,11 @@ pub fn main() anyerror!void {
                     state = .Peripheral;
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "offset")) {
                     if (chunk.data) |data| {
-                        address_block.offset = parseHexLiteral(data);
+                        address_block.offset = parseIntLiteral(data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "size")) {
                     if (chunk.data) |data| {
-                        address_block.size = parseHexLiteral(data);
+                        address_block.size = parseIntLiteral(data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "usage")) {
                     if (chunk.data) |data| {
@@ -280,11 +280,11 @@ pub fn main() anyerror!void {
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "addressOffset")) {
                     if (chunk.data) |data| {
-                        cur_reg.address_offset = parseHexLiteral(data);
+                        cur_reg.address_offset = parseIntLiteral(data);
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "size")) {
                     if (chunk.data) |data| {
-                        cur_reg.size = parseHexLiteral(data) orelse cur_reg.size;
+                        cur_reg.size = parseIntLiteral(data) orelse cur_reg.size;
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "access")) {
                     if (chunk.data) |data| {
@@ -292,7 +292,7 @@ pub fn main() anyerror!void {
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "resetValue")) {
                     if (chunk.data) |data| {
-                        cur_reg.reset_value = parseHexLiteral(data) orelse cur_reg.reset_value; // TODO: test orelse break
+                        cur_reg.reset_value = parseIntLiteral(data) orelse cur_reg.reset_value;
                     }
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "alternateRegister")) {
                     if (chunk.data) |data| {
@@ -338,6 +338,28 @@ pub fn main() anyerror!void {
                 } else if (ascii.eqlIgnoreCase(chunk.tag, "access")) {
                     if (chunk.data) |data| {
                         cur_field.access = parseAccessValue(data) orelse cur_field.access;
+                    }
+                } else if (ascii.eqlIgnoreCase(chunk.tag, "bitRange")) {
+                    if (chunk.data) |data| {
+                        std.log.info("bitRange: {s}\n", .{data});
+
+                        const trimmed = mem.trim(u8, data, " []");
+                        var token = mem.tokenizeAny(u8, trimmed, ":");
+                        if (token.next()) |start| {
+                            var start_val = fmt.parseInt(u32, start, 10) catch continue;
+                            if (token.next()) |end| {
+                                var end_val = fmt.parseInt(u32, end, 10) catch continue;
+
+                                if (start_val > end_val) {
+                                    const tmp = start_val;
+                                    start_val = end_val;
+                                    end_val = tmp;
+                                }
+
+                                cur_field.bit_offset = start_val;
+                                cur_field.bit_width = 1 + end_val - start_val;
+                            }
+                        }
                     }
                 }
             },
@@ -456,9 +478,8 @@ fn textToBool(data: []const u8) ?bool {
     }
 }
 
-fn parseHexLiteral(data: []const u8) ?u32 {
-    if (data.len <= 2) return null;
-    return fmt.parseInt(u32, data[2..], 16) catch null;
+fn parseIntLiteral(data: []const u8) ?u32 {
+    return fmt.parseInt(u32, data, 0) catch null;
 }
 
 fn parseAccessValue(data: []const u8) ?svd.Access {
