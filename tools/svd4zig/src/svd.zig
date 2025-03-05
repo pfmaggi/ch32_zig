@@ -5,6 +5,8 @@ const Allocator = std.mem.Allocator;
 const AutoHashMap = std.AutoHashMap;
 const warn = std.debug.warn;
 
+pub const DeduplMap = std.StringHashMap(u32);
+
 /// Top Level
 pub const Device = struct {
     name: ArrayList(u8),
@@ -25,6 +27,8 @@ pub const Device = struct {
     reg_default_reset_mask: ?u32,
     peripherals: Peripherals,
     interrupts: Interrupts,
+
+    allocator: Allocator,
 
     const Self = @This();
 
@@ -52,6 +56,8 @@ pub const Device = struct {
             .reg_default_reset_mask = null,
             .peripherals = peripherals,
             .interrupts = interrupts,
+
+            .allocator = allocator,
         };
     }
 
@@ -86,13 +92,16 @@ pub const Device = struct {
             \\pub const peripherals = struct {
         );
 
+        var dedupl = DeduplMap.init(self.allocator);
+        defer dedupl.deinit();
+
         for (self.peripherals.items) |peripheral| {
             // Skip generate for derived peripherals.
             if (peripheral.derived_from.items.len > 0) {
                 continue;
             }
 
-            try peripheral.write_instance(padded_out_stream);
+            try peripheral.write_instance(padded_out_stream, &dedupl);
         }
 
         try out_stream.writeAll(
@@ -101,13 +110,15 @@ pub const Device = struct {
             \\pub const types = struct {
         );
 
+        dedupl.clearAndFree();
+
         for (self.peripherals.items) |peripheral| {
             // Skip generate for derived peripherals.
             if (peripheral.derived_from.items.len > 0) {
                 continue;
             }
 
-            try padded_out_stream.print("{}\n", .{peripheral});
+            try peripheral.write_type(padded_out_stream, &dedupl);
         }
 
         try out_stream.writeAll("};\n");
@@ -278,24 +289,30 @@ pub const Peripheral = struct {
         try out_stream.print("_offset{}: [{}]u8,\n", .{ num, size });
     }
 
-    fn generateCommonName(allocator: Allocator, name: []const u8) ![]u8 {
+    fn generateCommonName(allocator: Allocator, name: []const u8, dedupl: *DeduplMap) ![]u8 {
         var common_name = ArrayList(u8).init(allocator);
         try common_name.replaceRange(0, common_name.items.len, name);
 
-        const common_prefixes = [_][]const u8{ "USART", "GPIO", "UART" };
+        const common_prefixes = [_][]const u8{ "USART", "GPIO", "UART", "CAN", "I2C", "SPI" };
         for (common_prefixes) |prefix| {
             if (std.mem.startsWith(u8, name, prefix)) {
                 try common_name.replaceRange(0, common_name.items.len, prefix);
                 try common_name.append('x');
-
-                return common_name.toOwnedSlice();
+                break;
             }
         }
 
-        return common_name.toOwnedSlice();
+        if (dedupl.get(common_name.items)) |v| {
+            try dedupl.put(common_name.items, v + 1);
+            try common_name.appendSlice(try std.fmt.allocPrint(allocator, "{}", .{v + 1}));
+        } else {
+            try dedupl.put(common_name.items, 1);
+        }
+
+        return common_name.items;
     }
 
-    pub fn write_instance(self: Self, out_stream: anytype) !void {
+    pub fn write_instance(self: Self, out_stream: anytype, dedupl: *DeduplMap) !void {
         try out_stream.writeAll("\n");
         if (!self.isValid()) {
             try out_stream.writeAll("// Not enough info to print peripheral value\n");
@@ -303,8 +320,7 @@ pub const Peripheral = struct {
         }
 
         const name = self.name.items;
-        const common_name = try generateCommonName(self.allocator, name);
-        defer self.allocator.free(common_name);
+        const common_name = try generateCommonName(self.allocator, name, dedupl);
         const has_common_name = !std.mem.eql(u8, name, common_name);
 
         const description = if (self.description.items.len == 0) "No description" else self.description.items;
@@ -314,10 +330,17 @@ pub const Peripheral = struct {
         , .{description});
 
         if (self.derived_peripherals.items.len > 0 or has_common_name) {
-            try out_stream.print(
-                \\pub const {s} = enum(u32) {{
-                \\
-            , .{common_name});
+            if (has_common_name) {
+                try out_stream.print(
+                    \\pub const {s} = enum(u32) {{
+                    \\
+                , .{common_name});
+            } else {
+                try out_stream.print(
+                    \\pub const {s}x = enum(u32) {{
+                    \\
+                , .{common_name});
+            }
 
             try out_stream.print(
                 \\    {s} = 0x{x},
@@ -334,12 +357,12 @@ pub const Peripheral = struct {
 
             try out_stream.print(
                 \\
-                \\    pub inline fn get(self: GPIOx) *volatile types.GPIOx {{
-                \\        return types.GPIOx.from(@intFromEnum(self));
+                \\    pub inline fn get(self: {s}) *volatile types.{s} {{
+                \\        return types.{s}.from(@intFromEnum(self));
                 \\    }}
                 \\}};
                 \\
-            , .{});
+            , .{ common_name, common_name, common_name });
 
             try out_stream.print(
                 \\/// {s}
@@ -348,11 +371,12 @@ pub const Peripheral = struct {
 
             for (self.derived_peripherals.items) |peripheral| {
                 const derived_name = peripheral.name.items;
+                const derived_description = if (peripheral.description.items.len == 0) description else peripheral.description.items;
                 try out_stream.print(
                     \\
                     \\/// {s}
                     \\pub const {s} = {s}.{s}.get();
-                , .{ description, derived_name, common_name, derived_name });
+                , .{ derived_description, derived_name, common_name, derived_name });
             }
         } else {
             try out_stream.print(
@@ -362,7 +386,7 @@ pub const Peripheral = struct {
         try out_stream.writeAll("\n");
     }
 
-    pub fn format(self: Self, comptime _: []const u8, _: std.fmt.FormatOptions, out_stream: anytype) !void {
+    pub fn write_type(self: Self, out_stream: anytype, dedupl: *DeduplMap) !void {
         try out_stream.writeAll("\n");
         if (!self.isValid()) {
             try out_stream.writeAll("// Not enough info to print peripheral value\n");
@@ -370,8 +394,7 @@ pub const Peripheral = struct {
         }
 
         const name = self.name.items;
-        const common_name = try generateCommonName(self.allocator, name);
-        defer self.allocator.free(common_name);
+        const common_name = try generateCommonName(self.allocator, name, dedupl);
         const has_common_name = !std.mem.eql(u8, name, common_name);
 
         const description = if (self.description.items.len == 0) "No description" else self.description.items;
@@ -809,17 +832,17 @@ const PaddedWriter = struct {
 
     const Self = @This();
 
-    pub const Writer = std.io.GenericWriter(*Self, anyerror, writerFn);
-
-    pub fn writer(self: *Self) Writer {
-        return .{ .context = self };
+    pub fn writer(self: *Self) std.io.AnyWriter {
+        return .{ .context = self, .writeFn = writerFn };
     }
 
     pub fn reset(self: *Self) void {
         self.needs_indent = true;
     }
 
-    fn writerFn(self: *Self, buffer: []const u8) anyerror!usize {
+    fn writerFn(context: *const anyopaque, buffer: []const u8) anyerror!usize {
+        const self: *Self = @constCast(@alignCast(@ptrCast(context)));
+
         var count: usize = 0;
         var new_buffer = buffer;
 
@@ -827,7 +850,11 @@ const PaddedWriter = struct {
             const maybe_idx = std.mem.indexOf(u8, new_buffer, "\n");
 
             if (self.needs_indent and (maybe_idx == null or maybe_idx.? > 0)) {
-                try self.out_writer.writeAll(self.indent);
+                var index: usize = 0;
+                while (index != self.indent.len) {
+                    index += try self.out_writer.write(self.indent[index..]);
+                }
+
                 self.needs_indent = false;
             }
 
