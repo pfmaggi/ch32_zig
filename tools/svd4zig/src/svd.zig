@@ -78,18 +78,31 @@ pub const Device = struct {
             try out_stream.print("{}\n", .{the_cpu});
         }
 
-        // TODO: add write enums and registers.
+        var padded_writer = PaddedWriter.init("    ", out_stream);
+        var padded_out_stream = padded_writer.writer();
 
         try out_stream.writeAll(
+            \\
+            \\pub const peripherals = struct {
+        );
+
+        for (self.peripherals.items) |peripheral| {
+            // Skip generate for derived peripherals.
+            if (peripheral.derived_from.items.len > 0) {
+                continue;
+            }
+
+            try peripheral.write_instance(padded_out_stream);
+        }
+
+        try out_stream.writeAll(
+            \\};
             \\
             \\pub const types = struct {
         );
 
-        var padded_writer = PaddedWriter.init("    ", out_stream);
-        var padded_out_stream = padded_writer.writer();
-
         for (self.peripherals.items) |peripheral| {
-            // Skip generate types for derived peripherals.
+            // Skip generate for derived peripherals.
             if (peripheral.derived_from.items.len > 0) {
                 continue;
             }
@@ -282,6 +295,58 @@ pub const Peripheral = struct {
         return common_name.toOwnedSlice();
     }
 
+    pub fn write_instance(self: Self, out_stream: anytype) !void {
+        try out_stream.writeAll("\n");
+        if (!self.isValid()) {
+            try out_stream.writeAll("// Not enough info to print peripheral value\n");
+            return;
+        }
+
+        const name = self.name.items;
+        const common_name = try generateCommonName(self.allocator, name);
+        defer self.allocator.free(common_name);
+        const has_common_name = !std.mem.eql(u8, name, common_name);
+
+        const description = if (self.description.items.len == 0) "No description" else self.description.items;
+        try out_stream.print(
+            \\/// {s}
+            \\
+        , .{description});
+
+        if (self.derived_peripherals.items.len > 0 or has_common_name) {
+            try out_stream.print(
+                \\pub const {s} = enum(u32) {{
+                \\
+            , .{common_name});
+
+            try out_stream.print(
+                \\    {s} = 0x{x},
+                \\
+            , .{ name, self.base_address.? });
+
+            for (self.derived_peripherals.items) |peripheral| {
+                const derived_name = peripheral.name.items;
+                try out_stream.print(
+                    \\    {s} = 0x{x},
+                    \\
+                , .{ derived_name, peripheral.base_address.? });
+            }
+
+            try out_stream.print(
+                \\
+                \\    pub inline fn get(self: GPIOx) *volatile types.GPIOx {{
+                \\        return types.GPIOx.from(@intFromEnum(self));
+                \\    }}
+                \\}};
+            , .{});
+        } else {
+            try out_stream.print(
+                \\pub const {s} = types.{s}.from(0x{x});
+            , .{ common_name, common_name, self.base_address.? });
+        }
+        try out_stream.writeAll("\n");
+    }
+
     pub fn format(self: Self, comptime _: []const u8, _: std.fmt.FormatOptions, out_stream: anytype) !void {
         try out_stream.writeAll("\n");
         if (!self.isValid()) {
@@ -292,6 +357,7 @@ pub const Peripheral = struct {
         const name = self.name.items;
         const common_name = try generateCommonName(self.allocator, name);
         defer self.allocator.free(common_name);
+        const has_common_name = !std.mem.eql(u8, name, common_name);
 
         const description = if (self.description.items.len == 0) "No description" else self.description.items;
         try out_stream.print(
@@ -299,7 +365,7 @@ pub const Peripheral = struct {
             \\
         , .{description});
 
-        if (!std.mem.eql(u8, name, common_name)) {
+        if (has_common_name) {
             try out_stream.writeAll("/// Type for: ");
 
             try out_stream.print("{s} ", .{name});
@@ -724,7 +790,7 @@ const PaddedWriter = struct {
 
     indent: []const u8,
     out_writer: std.io.AnyWriter,
-    needs_indent: bool = false,
+    needs_indent: bool = true,
 
     const Self = @This();
 
@@ -735,7 +801,7 @@ const PaddedWriter = struct {
     }
 
     pub fn reset(self: *Self) void {
-        self.needs_indent = false;
+        self.needs_indent = true;
     }
 
     fn writerFn(self: *Self, buffer: []const u8) anyerror!usize {
@@ -797,7 +863,7 @@ test "Register Print" {
     const registerDesiredPrint =
         \\
         \\/// RND comment
-        \\RND: RegisterRW(packed struct {
+        \\RND: RegisterRW(packed struct(u32) {
         \\    /// unused [0:1]
         \\    _unused0: u2 = 1,
         \\    /// RNGEN [2:2]
@@ -865,7 +931,7 @@ test "Peripheral Print" {
         \\    _offset0: [256]u8,
         \\
         \\    /// RND comment
-        \\    RND: RegisterRW(packed struct {
+        \\    RND: RegisterRW(packed struct(u32) {
         \\        /// unused [0:1]
         \\        _unused0: u2 = 1,
         \\        /// RNGEN [2:2]
