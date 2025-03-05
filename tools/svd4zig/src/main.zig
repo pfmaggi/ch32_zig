@@ -404,7 +404,7 @@ fn getChunk(line: []const u8) ?XmlChunk {
         .derivedFrom = null,
     };
 
-    const trimmed = mem.trim(u8, line, " \n\t");
+    const trimmed = mem.trim(u8, line, " \r\n\t");
     var toker = mem.tokenizeAny(u8, trimmed, "<>"); //" =\n<>\"");
 
     if (toker.next()) |maybe_tag| {
@@ -420,7 +420,7 @@ fn getChunk(line: []const u8) ?XmlChunk {
     }
 
     if (toker.next()) |chunk_data| {
-        const chunk_data_trimmed = mem.trim(u8, chunk_data, " \n\t");
+        const chunk_data_trimmed = mem.trim(u8, chunk_data, " \r\n\t");
         chunk.data = chunk_data_trimmed;
     }
 
@@ -428,7 +428,7 @@ fn getChunk(line: []const u8) ?XmlChunk {
 }
 
 fn appendSliceWithFixes(s: anytype, data: []const u8) !void {
-    var token = mem.tokenizeAny(u8, data, " \n\t");
+    var token = mem.tokenizeAny(u8, data, " \r\n\t");
     var i: usize = 0;
     while (token.next()) |v| {
         if (i > 0) try s.appendSlice(" ");

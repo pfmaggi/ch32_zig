@@ -338,7 +338,22 @@ pub const Peripheral = struct {
                 \\        return types.GPIOx.from(@intFromEnum(self));
                 \\    }}
                 \\}};
+                \\
             , .{});
+
+            try out_stream.print(
+                \\/// {s}
+                \\pub const {s} = {s}.{s}.get();
+            , .{ description, name, common_name, name });
+
+            for (self.derived_peripherals.items) |peripheral| {
+                const derived_name = peripheral.name.items;
+                try out_stream.print(
+                    \\
+                    \\/// {s}
+                    \\pub const {s} = {s}.{s}.get();
+                , .{ description, derived_name, common_name, derived_name });
+            }
         } else {
             try out_stream.print(
                 \\pub const {s} = types.{s}.from(0x{x});
