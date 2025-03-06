@@ -60,11 +60,15 @@ pub fn build(b: *std.Build) void {
 
 const ChipSeries = enum {
     CH32V003,
+    CH32V103,
+    CH32V20x,
     CH32V30x,
 
     fn minimalModel(self: ChipSeries) ChipModel {
         return switch (self) {
             .CH32V003 => .CH32V003J4M6,
+            .CH32V103 => .CH32V103C6T6,
+            .CH32V20x => .CH32V203F4P6,
             .CH32V30x => .CH32V305FBP6,
         };
     }
@@ -73,6 +77,22 @@ const ChipSeries = enum {
         const qingkev2a = std.Target.riscv.featureSet(&.{
             std.Target.riscv.Feature.@"32bit",
             std.Target.riscv.Feature.e,
+            std.Target.riscv.Feature.c,
+        });
+
+        const qingkev3 = std.Target.riscv.featureSet(&.{
+            std.Target.riscv.Feature.@"32bit",
+            std.Target.riscv.Feature.i,
+            std.Target.riscv.Feature.m,
+            std.Target.riscv.Feature.a,
+            std.Target.riscv.Feature.c,
+        });
+
+        const qingkev4b = std.Target.riscv.featureSet(&.{
+            std.Target.riscv.Feature.@"32bit",
+            std.Target.riscv.Feature.i,
+            std.Target.riscv.Feature.m,
+            std.Target.riscv.Feature.a,
             std.Target.riscv.Feature.c,
         });
 
@@ -87,6 +107,8 @@ const ChipSeries = enum {
 
         const cpu_features = switch (self) {
             .CH32V003 => qingkev2a,
+            .CH32V103 => qingkev3,
+            .CH32V20x => qingkev4b,
             .CH32V30x => qingkev4f,
         };
 
@@ -105,7 +127,9 @@ const ChipSeries = enum {
 
     fn svd_name(self: ChipSeries) []const u8 {
         return switch (self) {
-            .CH32V003 => "CH32V00x",
+            .CH32V003 => "CH32V003",
+            .CH32V103 => "CH32V103",
+            .CH32V20x => "CH32V20x",
             .CH32V30x => "CH32V30x",
         };
     }
@@ -117,6 +141,15 @@ const ChipModel = enum {
     CH32V003F4U6, // 16K / 2K / QFN20 (18 GPIO)
     CH32V003A4M6, // 16K / 2K / SOP16 (14 GPIO)
     CH32V003J4M6, // 16K / 2K / SOP8 (6 GPIO)
+
+    // CH32V103 series
+    CH32V103C6T6, // 32K / 10K / LQFP48 (37 GPIO)
+    // TODO: add more.
+
+    // CH32V20x series
+    CH32V203F4P6, // 32K / 10K / TSSOP20 (16 GPIO)
+    // TODO: add more.
+
     // CH32V30x series
     CH32V305FBP6, // 128K / 32K / TSSOP20 (17 GPIO)
     CH32V305RBT6, // 128K / 32K / LQFP64M (51 GPIO)
@@ -124,6 +157,8 @@ const ChipModel = enum {
     fn series(self: ChipModel) ChipSeries {
         return switch (self) {
             .CH32V003F4P6, .CH32V003F4U6, .CH32V003A4M6, .CH32V003J4M6 => .CH32V003,
+            .CH32V103C6T6 => .CH32V103,
+            .CH32V203F4P6 => .CH32V20x,
             .CH32V305FBP6, .CH32V305RBT6 => .CH32V30x,
         };
     }
@@ -131,6 +166,8 @@ const ChipModel = enum {
     fn linkScript(self: ChipModel, b: *std.Build) std.Build.LazyPath {
         const name = switch (self) {
             .CH32V003F4P6, .CH32V003F4U6, .CH32V003A4M6, .CH32V003J4M6 => "CH32V_16K_2K.ld",
+            .CH32V103C6T6 => "CH32V_32K_10K.ld",
+            .CH32V203F4P6 => "CH32V_32K_10K.ld",
             .CH32V305FBP6, .CH32V305RBT6 => "CH32V_128K_32K.ld",
         };
 
