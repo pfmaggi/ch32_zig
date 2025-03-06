@@ -55,10 +55,16 @@ pub fn main() anyerror!void {
     _ = args.next(); // skip application name
     // Note memory will be freed on exit since using arena
 
-    const file_name = args.next() orelse return error.MandatoryFilenameArgumentNotGiven;
-    const file = try std.fs.cwd().openFile(file_name, .{});
-
+    const svd_file_name = args.next() orelse return error.MandatoryFilenameArgumentNotGiven;
+    const file = try std.fs.cwd().openFile(svd_file_name, .{});
     const stream = &file.reader();
+
+    var out_stream: std.io.AnyWriter = std.io.getStdOut().writer().any();
+    const out_file_name = args.next();
+    if (out_file_name) |file_name| {
+        const out_file = try std.fs.cwd().createFile(file_name, .{});
+        out_stream = out_file.writer().any();
+    }
 
     var state = SvdParseState.Device;
     var dev = try svd.Device.init(allocator);
@@ -370,8 +376,8 @@ pub fn main() anyerror!void {
         }
     }
     if (state == .Finished) {
-        try std.io.getStdOut().writer().print("{s}\n", .{register_def});
-        try std.io.getStdOut().writer().print("{}\n", .{dev});
+        try out_stream.print("{s}\n", .{register_def});
+        try out_stream.print("{}\n", .{dev});
     } else {
         return error.InvalidXML;
     }
