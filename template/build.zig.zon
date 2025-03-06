@@ -1,12 +1,13 @@
 .{
-    .name = "ch32_template",
-    .version = "0.0.0",
-    .dependencies = .{},
-    .paths = .{
-        "build.zig",
-        "build.zig.zon",
-        "src",
-        "README.md",
-        "LICENSE",
-    },
+  .name = "ch32_template",
+  .version = "0.0.0",
+  .paths = .{
+    "build.zig",
+    "build.zig.zon",
+    "ld",
+    "svd",
+    "src",
+    "README.md",
+    "LICENSE",
+  },
 }

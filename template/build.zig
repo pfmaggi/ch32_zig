@@ -102,6 +102,13 @@ const ChipSeries = enum {
     fn string(self: ChipSeries) []const u8 {
         return @tagName(self);
     }
+
+    fn svd_name(self: ChipSeries) []const u8 {
+        return switch (self) {
+            .CH32V003 => "CH32V00x",
+            .CH32V30x => "CH32V30x",
+        };
+    }
 };
 
 const ChipModel = enum {
@@ -236,6 +243,10 @@ fn addFirmware(b: *std.Build, options: FirmwareOptions) *std.Build.Step.Compile 
                 .name = "config",
                 .module = config_options.createModule(),
             },
+            .{
+                .name = "svd",
+                .module = svd_module(b, options.target),
+            },
         },
     });
 
@@ -251,6 +262,17 @@ fn addFirmware(b: *std.Build, options: FirmwareOptions) *std.Build.Step.Compile 
     firmware.linker_script = options.target.chip.linkScript(b);
 
     return firmware;
+}
+
+fn svd_module(b: *std.Build, target: Target) *std.Build.Module {
+    const svd_path = b.path("svd").join(b.allocator, b.fmt("{s}.zig", .{target.chip.as_series().svd_name()})) catch @panic("OOM");
+    const module = b.createModule(.{
+        .root_source_file = svd_path,
+        .target = b.resolveTargetQuery(target.chip.target()),
+        .single_threaded = true,
+    });
+
+    return module;
 }
 
 const FirmwareFormat = union(enum) {
