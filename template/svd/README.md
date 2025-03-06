@@ -52,7 +52,7 @@ rm ./CH32V317xx.svd
 Rename files:
 
 ```shell
-mv CH32V003xx.svd CH32V00x.svd
+mv CH32V003xx.svd CH32V003.svd
 mv CH32V103xx.svd CH32V103.svd
 mv CH32V203xx.svd CH32V20x.svd
 mv CH32V303xx.svd CH32V30x.svd
@@ -61,10 +61,10 @@ mv CH32V303xx.svd CH32V30x.svd
 Replace name in files:
 
 ```shell
-sed -i '' 's/CH32V00xxx/CH32V00x/g' CH32V00x.svd
-sed -i '' 's/CH32V103xx/CH32V103/g' CH32V103.svd
-sed -i '' 's/CH32V203xx/CH32V20x/g' CH32V20x.svd
-sed -i '' 's/CH32V30[37]xx/CH32V30x/g' CH32V30x.svd
+sed -i 's/CH32V00xxx/CH32V003/g' CH32V003.svd
+sed -i 's/CH32V103xx/CH32V103/g' CH32V103.svd
+sed -i 's/CH32V203xx/CH32V20x/g' CH32V20x.svd
+sed -i 's/CH32V30[37]xx/CH32V30x/g' CH32V30x.svd
 ```
 
 Generate Zig files:

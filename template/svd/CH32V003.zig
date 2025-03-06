@@ -31,9 +31,9 @@ pub fn RegisterRW(comptime Register: type) type {
     };
 }
 
-pub const device_name = "CH32V00x";
+pub const device_name = "CH32V003";
 pub const device_revision = "1.2";
-pub const device_description = "CH32V00x View File";
+pub const device_description = "CH32V003 View File";
 
 pub const peripherals = struct {
     /// Power control
