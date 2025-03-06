@@ -402,6 +402,28 @@ pub const Peripheral = struct {
         const has_common_name = !std.mem.eql(u8, name, common_name);
 
         const description = if (self.description.items.len == 0) "No description" else self.description.items;
+
+        // Handle special case for timers
+        if (std.mem.eql(u8, "Advanced timer", description)) {
+            try out_stream.print(
+                \\/// {s}
+                \\pub const AdvancedTimer = types.{s};
+                \\
+            , .{ description, name });
+        } else if (std.mem.eql(u8, "General purpose timer", description)) {
+            try out_stream.print(
+                \\/// {s}
+                \\pub const GeneralPurposeTimer = types.{s};
+                \\
+            , .{ description, name });
+        } else if (std.mem.eql(u8, "Basic timer", description)) {
+            try out_stream.print(
+                \\/// {s}
+                \\pub const BasicTimer = types.{s};
+                \\
+            , .{ description, name });
+        }
+
         try out_stream.print(
             \\/// {s}
             \\
