@@ -302,6 +302,10 @@ pub const Peripheral = struct {
             }
         }
 
+        // Because a HashMap is used, we should not free the memory occupied by
+        // common_name(otherwise it will cause a panic), so it is necessary to
+        // consciously allow a memory leak. But this is not a problem, as we use
+        // ArenaAllocator and the application has a very short lifespan.
         if (dedupl.get(common_name.items)) |v| {
             try dedupl.put(common_name.items, v + 1);
             try common_name.appendSlice(try std.fmt.allocPrint(allocator, "{}", .{v + 1}));
@@ -833,38 +837,43 @@ const PaddedWriter = struct {
     const Self = @This();
 
     pub fn writer(self: *Self) std.io.AnyWriter {
-        return .{ .context = self, .writeFn = writerFn };
+        return .{ .context = self, .writeFn = anyWriterFn };
     }
 
     pub fn reset(self: *Self) void {
         self.needs_indent = true;
     }
 
-    fn writerFn(context: *const anyopaque, buffer: []const u8) anyerror!usize {
+    fn anyWriterFn(context: *const anyopaque, buffer: []const u8) anyerror!usize {
         const self: *Self = @constCast(@alignCast(@ptrCast(context)));
+        return self.writerFn(buffer);
+    }
 
+    fn writerFn(self: *Self, buffer: []const u8) anyerror!usize {
         var count: usize = 0;
         var new_buffer = buffer;
 
         while (new_buffer.len > 0) {
             const maybe_idx = std.mem.indexOf(u8, new_buffer, "\n");
 
+            const out = self.out_writer;
+
             if (self.needs_indent and (maybe_idx == null or maybe_idx.? > 0)) {
                 var index: usize = 0;
                 while (index != self.indent.len) {
-                    index += try self.out_writer.write(self.indent[index..]);
+                    index += try out.write(self.indent[index..]);
                 }
 
                 self.needs_indent = false;
             }
 
             const idx = maybe_idx orelse {
-                count += try self.out_writer.write(new_buffer);
+                count += try out.write(new_buffer);
                 return count;
             };
 
             const idx_after = idx + 1;
-            count += try self.out_writer.write(new_buffer[0..idx_after]);
+            count += try out.write(new_buffer[0..idx_after]);
 
             self.needs_indent = true;
             new_buffer = new_buffer[idx_after..];
@@ -960,7 +969,10 @@ test "Register Print" {
 }
 
 test "Peripheral Print" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const peripheralDesiredPrint =
         \\
         \\/// PERIPH comment
@@ -994,7 +1006,7 @@ test "Peripheral Print" {
 
     var output_buffer = ArrayList(u8).init(allocator);
     defer output_buffer.deinit();
-    var buf_stream = output_buffer.writer();
+    const buf_stream = output_buffer.writer().any();
 
     var peripheral = try Peripheral.init(allocator);
     defer peripheral.deinit();
@@ -1032,9 +1044,13 @@ test "Peripheral Print" {
 
     try peripheral.registers.append(register);
 
-    try buf_stream.print("{}\n", .{peripheral});
+    var dedupl = DeduplMap.init(allocator);
+    defer dedupl.deinit();
+
+    try peripheral.write_type(buf_stream, &dedupl);
     try std.testing.expectEqualStrings(peripheralDesiredPrint, output_buffer.items);
 }
+
 fn bitWidthToMask(width: u32) u32 {
     const max_supported_bits = 32;
     const width_to_mask = blk: {
