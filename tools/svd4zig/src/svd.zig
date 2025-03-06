@@ -450,7 +450,7 @@ pub const Peripheral = struct {
         }
 
         // and close the peripheral
-        try out_stream.print("}};", .{});
+        try out_stream.print("}};\n", .{});
 
         return;
     }
