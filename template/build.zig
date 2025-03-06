@@ -130,8 +130,8 @@ const ChipModel = enum {
 
     fn linkScript(self: ChipModel, b: *std.Build) std.Build.LazyPath {
         const name = switch (self) {
-            .CH32V003F4P6, .CH32V003F4U6, .CH32V003A4M6, .CH32V003J4M6 => "ch32v003_16k_2k.ld",
-            .CH32V305FBP6, .CH32V305RBT6 => "ch32v30x_128k_32k.ld",
+            .CH32V003F4P6, .CH32V003F4U6, .CH32V003A4M6, .CH32V003J4M6 => "CH32V_16K_2K.ld",
+            .CH32V305FBP6, .CH32V305RBT6 => "CH32V_128K_32K.ld",
         };
 
         return b.path(b.pathJoin(&.{ "ld", name }));
@@ -259,7 +259,7 @@ fn addFirmware(b: *std.Build, options: FirmwareOptions) *std.Build.Step.Compile 
     firmware.link_gc_sections = true;
     firmware.link_function_sections = true;
     firmware.link_data_sections = true;
-    firmware.linker_script = options.target.chip.linkScript(b);
+    firmware.linker_script = options.target.linker_script orelse options.target.chip.linkScript(b);
 
     return firmware;
 }
