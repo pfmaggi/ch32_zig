@@ -36,6 +36,8 @@ const ch32v003 = MCU{
             std.Target.riscv.Feature.@"32bit",
             std.Target.riscv.Feature.e,
             std.Target.riscv.Feature.c,
+            // WCH/QingKe additional compressed opcodes
+            std.Target.riscv.Feature.xwchc,
         }),
         .os_tag = .freestanding,
         .abi = .eabi,

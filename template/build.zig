@@ -78,6 +78,8 @@ const ChipSeries = enum {
             std.Target.riscv.Feature.@"32bit",
             std.Target.riscv.Feature.e,
             std.Target.riscv.Feature.c,
+            // WCH/QingKe additional compressed opcodes
+            std.Target.riscv.Feature.xwchc,
         });
 
         const qingkev3 = std.Target.riscv.featureSet(&.{
@@ -86,6 +88,8 @@ const ChipSeries = enum {
             std.Target.riscv.Feature.m,
             std.Target.riscv.Feature.a,
             std.Target.riscv.Feature.c,
+            // WCH/QingKe additional compressed opcodes
+            std.Target.riscv.Feature.xwchc,
         });
 
         const qingkev4b = std.Target.riscv.featureSet(&.{
@@ -94,6 +98,8 @@ const ChipSeries = enum {
             std.Target.riscv.Feature.m,
             std.Target.riscv.Feature.a,
             std.Target.riscv.Feature.c,
+            // WCH/QingKe additional compressed opcodes
+            std.Target.riscv.Feature.xwchc,
         });
 
         const qingkev4f = std.Target.riscv.featureSet(&.{
@@ -103,6 +109,8 @@ const ChipSeries = enum {
             std.Target.riscv.Feature.a,
             std.Target.riscv.Feature.f,
             std.Target.riscv.Feature.c,
+            // WCH/QingKe additional compressed opcodes
+            std.Target.riscv.Feature.xwchc,
         });
 
         const cpu_features = switch (self) {
