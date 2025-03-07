@@ -97,6 +97,7 @@
             xmlstarlet
             coreutils
             bash
+            jq
             git
             clang
             minichlink

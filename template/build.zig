@@ -1,4 +1,5 @@
 const std = @import("std");
+const chip = @import("chip/chip.zig");
 
 pub fn build(b: *std.Build) void {
     const optimize = b.option(
@@ -58,181 +59,8 @@ pub fn build(b: *std.Build) void {
     }
 }
 
-const ChipSeries = enum {
-    CH32V003,
-    CH32V103,
-    CH32V20x,
-    CH32V30x,
-
-    fn minimalModel(self: ChipSeries) ChipModel {
-        return switch (self) {
-            .CH32V003 => .CH32V003J4M6,
-            .CH32V103 => .CH32V103C6T6,
-            .CH32V20x => .CH32V203F4P6,
-            .CH32V30x => .CH32V305FBP6,
-        };
-    }
-
-    fn target(self: ChipSeries) std.Target.Query {
-        const qingkev2a = std.Target.riscv.featureSet(&.{
-            std.Target.riscv.Feature.@"32bit",
-            std.Target.riscv.Feature.e,
-            std.Target.riscv.Feature.c,
-            // WCH/QingKe additional compressed opcodes
-            std.Target.riscv.Feature.xwchc,
-        });
-
-        const qingkev3 = std.Target.riscv.featureSet(&.{
-            std.Target.riscv.Feature.@"32bit",
-            std.Target.riscv.Feature.i,
-            std.Target.riscv.Feature.m,
-            std.Target.riscv.Feature.a,
-            std.Target.riscv.Feature.c,
-            // WCH/QingKe additional compressed opcodes
-            std.Target.riscv.Feature.xwchc,
-        });
-
-        const qingkev4b = std.Target.riscv.featureSet(&.{
-            std.Target.riscv.Feature.@"32bit",
-            std.Target.riscv.Feature.i,
-            std.Target.riscv.Feature.m,
-            std.Target.riscv.Feature.a,
-            std.Target.riscv.Feature.c,
-            // WCH/QingKe additional compressed opcodes
-            std.Target.riscv.Feature.xwchc,
-        });
-
-        const qingkev4f = std.Target.riscv.featureSet(&.{
-            std.Target.riscv.Feature.@"32bit",
-            std.Target.riscv.Feature.i,
-            std.Target.riscv.Feature.m,
-            std.Target.riscv.Feature.a,
-            std.Target.riscv.Feature.f,
-            std.Target.riscv.Feature.c,
-            // WCH/QingKe additional compressed opcodes
-            std.Target.riscv.Feature.xwchc,
-        });
-
-        const cpu_features = switch (self) {
-            .CH32V003 => qingkev2a,
-            .CH32V103 => qingkev3,
-            .CH32V20x => qingkev4b,
-            .CH32V30x => qingkev4f,
-        };
-
-        return .{
-            .cpu_arch = .riscv32,
-            .cpu_model = .{ .explicit = &std.Target.riscv.cpu.generic },
-            .cpu_features_add = cpu_features,
-            .os_tag = .freestanding,
-            .abi = .eabi,
-        };
-    }
-
-    fn string(self: ChipSeries) []const u8 {
-        return @tagName(self);
-    }
-
-    fn svd_name(self: ChipSeries) []const u8 {
-        return switch (self) {
-            .CH32V003 => "CH32V003",
-            .CH32V103 => "CH32V103",
-            .CH32V20x => "CH32V20x",
-            .CH32V30x => "CH32V30x",
-        };
-    }
-};
-
-const ChipModel = enum {
-    // CH32V003 series
-    CH32V003F4P6, // 16K / 2K / TSSOP20 (18 GPIO)
-    CH32V003F4U6, // 16K / 2K / QFN20 (18 GPIO)
-    CH32V003A4M6, // 16K / 2K / SOP16 (14 GPIO)
-    CH32V003J4M6, // 16K / 2K / SOP8 (6 GPIO)
-
-    // CH32V103 series
-    CH32V103C6T6, // 32K / 10K / LQFP48 (37 GPIO)
-    // TODO: add more.
-
-    // CH32V20x series
-    CH32V203F4P6, // 32K / 10K / TSSOP20 (16 GPIO)
-    // TODO: add more.
-
-    // CH32V30x series
-    CH32V305FBP6, // 128K / 32K / TSSOP20 (17 GPIO)
-    CH32V305RBT6, // 128K / 32K / LQFP64M (51 GPIO)
-
-    fn series(self: ChipModel) ChipSeries {
-        return switch (self) {
-            .CH32V003F4P6, .CH32V003F4U6, .CH32V003A4M6, .CH32V003J4M6 => .CH32V003,
-            .CH32V103C6T6 => .CH32V103,
-            .CH32V203F4P6 => .CH32V20x,
-            .CH32V305FBP6, .CH32V305RBT6 => .CH32V30x,
-        };
-    }
-
-    fn linkScript(self: ChipModel, b: *std.Build) std.Build.LazyPath {
-        const name = switch (self) {
-            .CH32V003F4P6, .CH32V003F4U6, .CH32V003A4M6, .CH32V003J4M6 => "CH32V_16K_2K.ld",
-            .CH32V103C6T6 => "CH32V_32K_10K.ld",
-            .CH32V203F4P6 => "CH32V_32K_10K.ld",
-            .CH32V305FBP6, .CH32V305RBT6 => "CH32V_128K_32K.ld",
-        };
-
-        return b.path(b.pathJoin(&.{ "ld", name }));
-    }
-
-    fn target(self: ChipModel) std.Target.Query {
-        return self.series().target();
-    }
-
-    fn string(self: ChipModel) []const u8 {
-        return @tagName(self);
-    }
-};
-
-const Chip = union(enum) {
-    series: ChipSeries,
-    model: ChipModel,
-
-    fn linkScript(chip: Chip, b: *std.Build) std.Build.LazyPath {
-        return switch (chip) {
-            .model => |v| v.linkScript(b),
-            .series => |v| v.minimalModel().linkScript(b),
-        };
-    }
-
-    fn target(chip: Chip) std.Target.Query {
-        return switch (chip) {
-            .model => |v| v.target(),
-            .series => |v| v.target(),
-        };
-    }
-
-    fn string(chip: Chip) []const u8 {
-        return switch (chip) {
-            .model => |v| v.string(),
-            .series => |v| v.string(),
-        };
-    }
-
-    fn as_series(chip: Chip) ChipSeries {
-        return switch (chip) {
-            .model => |v| v.series(),
-            .series => |v| v,
-        };
-    }
-
-    fn as_model(chip: Chip) ChipModel {
-        return switch (chip) {
-            .model => |v| v,
-            .series => |v| v.minimalModel(),
-        };
-    }
-};
-
 const Target = struct {
-    chip: Chip,
+    chip: chip.Chip,
     // Override the default linker script for the chip.
     linker_script: ?std.Build.LazyPath = null,
 };
@@ -267,11 +95,11 @@ fn buildAndInstallFirmware(
     _ = installFirmware(b, firmware_no_strip, FirmwareFormat.elf);
 }
 
-fn buildConfigOptions(b: *std.Build, name: []const u8, chip: Chip) *std.Build.Step.Options {
+fn buildConfigOptions(b: *std.Build, name: []const u8, c: chip.Chip) *std.Build.Step.Options {
     const config_options = b.addOptions();
     config_options.addOption([]const u8, "name", name);
-    config_options.addOption(ChipModel, "chip_model", chip.as_model());
-    config_options.addOption(ChipSeries, "chip_series", chip.as_series());
+    config_options.addOption(chip.Model, "chip_model", c.as_model());
+    config_options.addOption(chip.Series, "chip_series", c.as_series());
     return config_options;
 }
 
