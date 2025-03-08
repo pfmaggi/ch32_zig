@@ -7,11 +7,11 @@ pub const DeadlineFn = fn () bool;
 pub fn simpleDeadline(count: u32) ?DeadlineFn {
     return struct {
         var counter = count;
-        pub fn deadline() bool {
+        pub fn check() bool {
             counter -= 1;
             return counter == 0;
         }
-    }.deadline;
+    }.check;
 }
 
 pub const Config = struct {
@@ -48,11 +48,7 @@ pub const FlowControl = enum {
     CTS_RTS,
 };
 
-pub const TransmitError = error{
-    Timeout,
-};
-
-pub const ReceiveError = error{
+pub const Timeout = error{
     Timeout,
 };
 
@@ -181,69 +177,48 @@ pub const UART = struct {
         });
     }
 
-    pub inline fn isReadable(self: UART) bool {
+    pub fn isReadable(self: UART) bool {
         return self.uart.STATR.read().RXNE == 1;
     }
 
-    pub inline fn isWriteable(self: UART) bool {
+    pub fn isWriteable(self: UART) bool {
         return self.uart.STATR.read().TXE == 1;
     }
 
-    pub inline fn isWriteComplete(self: UART) bool {
+    pub fn isWriteComplete(self: UART) bool {
         return self.uart.STATR.read().TC == 1;
     }
 
-    pub noinline fn writeBlocking(self: UART, payload: []const u8, deadlineFn: ?DeadlineFn) TransmitError!usize {
+    pub noinline fn writeBlocking(self: UART, payload: []const u8, deadlineFn: ?DeadlineFn) Timeout!usize {
         var offset: usize = 0;
         while (offset < payload.len) {
-            while (!self.isWriteable()) {
-                if (deadlineFn) |deadline| {
-                    if (deadline()) {
-                        if (offset > 0) {
-                            return offset;
-                        }
-
-                        return error.Timeout;
-                    }
+            self.wait(isWriteable, deadlineFn) catch |err| {
+                if (offset > 0) {
+                    return offset;
                 }
-                asm volatile ("" ::: "memory");
-            }
+                return err;
+            };
 
             self.uart.DATAR.raw = payload[offset];
             offset += 1;
 
-            while (!self.isWriteComplete()) {
-                if (deadlineFn) |deadline| {
-                    if (deadline()) {
-                        if (offset > 0) {
-                            return offset;
-                        }
-
-                        return error.Timeout;
-                    }
-                }
-                asm volatile ("" ::: "memory");
-            }
+            self.wait(isWriteComplete, deadlineFn) catch {
+                return offset;
+            };
         }
 
         return offset;
     }
 
-    pub fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) ReceiveError!usize {
+    pub fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
         var count: u32 = 0;
         for (buffer) |*byte| {
-            while (!self.isReadable()) {
-                if (deadlineFn) |deadline| {
-                    if (deadline()) {
-                        if (count > 0) {
-                            return count;
-                        }
-
-                        return error.Timeout;
-                    }
+            self.wait(isReadable, deadlineFn) catch |err| {
+                if (count > 0) {
+                    return count;
                 }
-                asm volatile ("" ::: "memory");
-            }
+                return err;
+            };
 
             byte.* = @truncate(self.uart.DATAR.raw & 0xFF);
             count += 1;
@@ -271,5 +246,17 @@ pub const UART = struct {
             .FE = 0,
             .NE = 0,
         });
+    }
+
+    // Wait for a condition to be true.
+    fn wait(self: UART, conditionFn: fn (self: UART) bool, deadlineFn: ?DeadlineFn) Timeout!void {
+        while (!conditionFn(self)) {
+            if (deadlineFn) |check| {
+                if (check()) {
+                    return error.Timeout;
+                }
+            }
+            asm volatile ("" ::: "memory");
+        }
     }
 };

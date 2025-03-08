@@ -20,8 +20,8 @@ pub fn main() !void {
     hal.gpio.Port.enable(.GPIOC);
     // hal.gpio.Port.disable(.GPIOC);
 
-    const USART1 = hal.uart.UART.from(.USART1);
-    USART1.setup(hal.uart.Config{
+    const USART1 = hal.UART.from(.USART1);
+    USART1.setup(.{
         .cpu_frequency = 8_000_000,
         .baud_rate = 115_200,
     });
@@ -29,7 +29,7 @@ pub fn main() !void {
     const led = hal.gpio.Pin.init(.GPIOC, 0);
     led.as_output(.{ .speed = .max_50mhz, .mode = .push_pull });
 
-    _ = try USART1.writeBlocking("Hello, World!\r\n", null);
+    _ = try USART1.writeBlocking("Hello, World!\r\n", hal.uart.simpleDeadline(100_000));
 
     var count: u32 = 0;
     var buffer: [10]u8 = undefined;
