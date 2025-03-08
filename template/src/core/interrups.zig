@@ -17,6 +17,8 @@ const interrups: Interrups = if (@hasDecl(root, "interrups")) root.interrups els
 pub const Interrups = switch (config.chip_series) {
     .CH32V003 => @import("interrups/ch32v003.zig").Interrups,
     .CH32V30x => @import("interrups/ch32v30x.zig").Interrups,
+    // TODO: implement other chips
+    else => @compileError("Unsupported chip series"),
 };
 
 pub inline fn enable() void {
