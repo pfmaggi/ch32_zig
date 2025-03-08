@@ -26,7 +26,7 @@ const register_def =
     \\        pub inline fn modify(self: *volatile Self, new_value: anytype) void {
     \\            var old_value = self.read();
     \\            const info = @typeInfo(@TypeOf(new_value));
-    \\            inline for (info.Struct.fields) |field| {
+    \\            inline for (info.@"struct".fields) |field| {
     \\                @field(old_value, field.name) = @field(new_value, field.name);
     \\            }
     \\            self.write(old_value);
