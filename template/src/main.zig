@@ -1,5 +1,6 @@
 const config = @import("config");
 const std = @import("std");
+const svd = @import("svd");
 const core = @import("core/core.zig");
 const hal = @import("hal/hal.zig");
 
@@ -16,13 +17,14 @@ pub const panic = core.panic.silent;
 pub const interrups: core.Interrups = .{};
 
 pub fn main() !void {
-    hal.gpio.Port.C.enable();
+    hal.gpio.Port.enable(.GPIOC);
+    // hal.gpio.Port.disable(.GPIOC);
     hal.uart.USART1.setup(hal.uart.Config{
         .cpu_frequency = 8_000_000,
         .baud_rate = 115_200,
     });
 
-    const led = hal.gpio.Pin.init(.C, 0);
+    const led = hal.gpio.Pin.init(.GPIOC, 0);
     led.as_output(.{ .speed = .max_50mhz, .mode = .push_pull });
 
     _ = try hal.uart.USART1.writeBlocking("Hello, World!\r\n", null);
@@ -44,8 +46,6 @@ pub fn main() !void {
             asm volatile ("" ::: "memory");
         }
     }
-
-    unreachable;
 }
 
 fn intToStr(buf: []u8, value: u32) []u8 {

@@ -1,4 +1,6 @@
+const std = @import("std");
 const config = @import("config");
+const svd = @import("svd");
 
 pub const InputConfig = enum(u4) {
     analog = 0b00_00,
@@ -24,34 +26,12 @@ pub const OutputMode = enum(u2) {
     alt_open_drain = 0b11,
 };
 
-pub const Port = switch (config.chip_series) {
-    .CH32V003 => enum(u3) {
-        A = 0,
-        C = 2,
-        D = 3,
-
-        // FIXME: need to eliminate duplicates in different configurations.
-        pub const enable = port_enable;
-        pub const disable = port_disable;
-    },
-    .CH32V30x => enum(u5) {
-        A,
-        B,
-        C,
-        D,
-        E,
-
-        pub const enable = port_enable;
-        pub const disable = port_disable;
-    },
-};
-
 pub const Pin = packed struct {
-    port: Port,
+    port: *volatile svd.types.GPIOx,
     num: u4, // 0-15
 
-    pub fn init(port: Port, num: u4) Pin {
-        return .{ .port = port, .num = num };
+    pub fn init(port: svd.peripherals.GPIOx, num: u4) Pin {
+        return .{ .port = port.get(), .num = num };
     }
 
     pub fn as_input(self: Pin, cfg: InputConfig) void {
@@ -68,78 +48,86 @@ pub const Pin = packed struct {
         self.write_cfgr(data);
     }
 
-    pub fn toggle(pin: Pin) void {
-        const gpio_base = port_reg(pin.port);
-        // ODR: Port output data register.
-        const GPIOx_OUTDR: *volatile u32 = @ptrFromInt(gpio_base + GPIOx_OUTDR_offset);
-        GPIOx_OUTDR.* ^= mask(pin);
+    pub fn toggle(self: Pin) void {
+        self.port.OUTDR.raw ^= mask(self);
     }
 
-    pub fn write(pin: Pin, value: bool) void {
-        const gpio_base = port_reg(pin.port);
+    pub fn write(self: Pin, value: bool) void {
         // BSHR - Port set(low 16 bits) and reset(high 16 bits) register.
-        const GPIOx_BSHR: *volatile u32 = @ptrFromInt(gpio_base + GPIOx_BSHR_offset);
         if (value) {
             // Set.
-            GPIOx_BSHR.* = mask(pin);
+            self.port.BSHR.raw = mask(self);
         } else {
             // Reset.
-            GPIOx_BSHR.* = @as(u32, mask(pin)) << 16;
+            self.port.BSHR.raw = @as(u32, mask(self)) << 16;
         }
     }
 
-    pub fn read(pin: Pin) bool {
-        const gpio_base = port_reg(pin.port);
-        const GPIOx_INDR: *volatile u32 = @ptrFromInt(gpio_base + GPIOx_INDR_offset);
-        return (GPIOx_INDR.* & mask(pin)) != 0;
+    pub fn read(self: Pin) bool {
+        return (self.port.INDR.raw & mask(self)) != 0;
     }
 
     inline fn mask(pin: Pin) u16 {
         return @as(u16, 1) << pin.num;
     }
 
-    fn write_cfgr(self: Pin, data: u4) void {
-        const gpio_base = port_reg(self.port);
-        const GPIOx_CFGLR: *volatile u32 = @ptrFromInt(gpio_base + GPIOx_CFGLR_offset);
-        const offset_bits = self.num * 4; // or use `<< 2`?
+    inline fn write_cfgr(self: Pin, data: u4) void {
+        const bit_offset = self.num * 4; // or use `<< 2`?
         // Clear the bits first, then set the new value.
-        GPIOx_CFGLR.* &= ~(@as(u32, 0b1111) << offset_bits);
-        GPIOx_CFGLR.* |= @as(u32, data) << offset_bits;
+        self.port.CFGLR.raw &= ~(@as(u32, 0b1111) << bit_offset);
+        self.port.CFGLR.raw |= @as(u32, data) << bit_offset;
     }
 };
 
-inline fn port_reg(p: Port) u32 {
-    return GPIOA_BASE + GPIOx_offset * @intFromEnum(p);
-}
+pub const Port = struct {
+    const IOPAEN_bit_offset: u5 = 2;
 
-fn port_enable(p: Port) void {
-    // PA port module clock enable bit for I/O.
-    const IOPAEN = 2;
-    RCC_APB2PCENR.* |= @as(u32, 1) << (@intFromEnum(p) + IOPAEN);
-}
+    pub fn enable(port: svd.peripherals.GPIOx) void {
+        svd.peripherals.RCC.APB2PCENR.raw |= @as(u32, 1) << (bit_offset(port) + IOPAEN_bit_offset);
+    }
 
-fn port_disable(p: Port) void {
-    // PA port module clock enable bit for I/O.
-    const IOPAEN = 2;
-    RCC_APB2PCENR.* &= ~(@as(u32, 1) << (@intFromEnum(p) + IOPAEN));
-}
+    pub fn disable(port: svd.peripherals.GPIOx) void {
+        svd.peripherals.RCC.APB2PCENR.raw &= ~(@as(u32, 1) << (bit_offset(port) + IOPAEN_bit_offset));
+    }
 
-// TODO: extract RCC staff to a separate module.
-const RCC_BASE: u32 = 0x40021000;
-const RCC_APB2PCENR: *volatile u32 = @ptrFromInt(RCC_BASE + 0x18);
+    pub fn bit_offset(port: svd.peripherals.GPIOx) u5 {
+        const port_addr = @intFromEnum(port);
+        const port_A_addr = @intFromEnum(svd.peripherals.GPIOx.GPIOA);
+        return @truncate((port_addr - port_A_addr) / GPIOx_distance);
+    }
+};
 
-const GPIOA_BASE: u32 = 0x40010800;
-const GPIOx_offset: u32 = 0x400;
+// Distance between GPIOx registers.
+const GPIOx_distance: u32 = 0x400;
 
-const GPIOx_CFGLR_offset: u32 = 0x00;
-const GPIOx_INDR_offset: u32 = 0x08;
-const GPIOx_OUTDR_offset: u32 = 0x0C;
-const GPIOx_BSHR_offset: u32 = 0x10;
+// Comptime GPIOx_distance check.
+comptime {
+    const GPIOx_info = @typeInfo(svd.peripherals.GPIOx);
 
-const testing = @import("std").testing;
+    var last_field_name_suffix = '-';
+    var last_field_value = 0;
+    for (GPIOx_info.@"enum".fields) |field| {
+        const field_suffix = field.name[field.name.len - 1];
 
-test "port_reg" {
-    const actual = port_reg(.C);
-    const expected = 0x40011000;
-    try testing.expectEqual(expected, actual);
+        // Fill with the first value, as we need something to compare with.
+        if (last_field_name_suffix == '-') {
+            last_field_name_suffix = field_suffix;
+            last_field_value = field.value;
+            continue;
+        }
+
+        // When the field name differs by the next character, it means it's the next port.
+        // We can compare the distance between addresses.
+        if (field.name[field.name.len - 1] - last_field_name_suffix == 1) {
+            const distance = field.value - last_field_value;
+            if (distance != GPIOx_distance) {
+                @compileError("GPIOx distance is not correct");
+            }
+            break;
+        }
+
+        // Move on to the next field, as the previous condition was not met.
+        last_field_name_suffix = field_suffix;
+        last_field_value = field.value;
+    }
 }
