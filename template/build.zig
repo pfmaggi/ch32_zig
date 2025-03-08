@@ -38,6 +38,7 @@ pub fn build(b: *std.Build) void {
         });
         const config_options = buildConfigOptions(b, unit_tests.name, target.chip);
         unit_tests.root_module.addImport("config", config_options.createModule());
+        unit_tests.root_module.addImport("svd", svd_module(b, target));
 
         const unit_tests_run = b.addRunArtifact(unit_tests);
         test_step.dependOn(&unit_tests_run.step);
