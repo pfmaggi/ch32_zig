@@ -1,5 +1,5 @@
 .{
-  .name = "svd",
+  .name = .svd,
   .version = "0.0.0",
   .dependencies = .{
     .svd4zig = .{ .path = "../../tools/svd4zig" },
@@ -9,4 +9,5 @@
     "build.zig.zon",
     "README.md",
   },
+  .fingerprint = 0x9a4c742a4b827837,
 }

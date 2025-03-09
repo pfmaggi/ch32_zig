@@ -43,18 +43,26 @@ pub const peripherals = struct {
     pub const USB = types.USB.from(0x40005c00);
 
     /// Controller area network
-    pub const CANx = enum(u32) {
+    pub const CAN = enum(u32) {
         CAN1 = 0x40006400,
         CAN2 = 0x40006800,
 
-        pub inline fn get(self: CANx) *volatile types.CANx {
-            return types.CANx.from(@intFromEnum(self));
+        pub inline fn addr(self: CAN) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: CAN) *volatile types.CAN {
+            return types.CAN.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) CAN {
+            return types.CAN.from(address);
         }
     };
     /// Controller area network
-    pub const CAN1 = CANx.CAN1.get();
+    pub const CAN1 = CAN.CAN1.get();
     /// Controller area network
-    pub const CAN2 = CANx.CAN2.get();
+    pub const CAN2 = CAN.CAN2.get();
 
     /// Ethernet: media access control
     pub const ETHERNET_MAC = types.ETHERNET_MAC.from(0x40028000);
@@ -90,27 +98,35 @@ pub const peripherals = struct {
     pub const EXTEND = types.EXTEND.from(0x40023800);
 
     /// General purpose I/O
-    pub const GPIOx = enum(u32) {
+    pub const GPIO = enum(u32) {
         GPIOA = 0x40010800,
         GPIOB = 0x40010c00,
         GPIOC = 0x40011000,
         GPIOD = 0x40011400,
         GPIOE = 0x40011800,
 
-        pub inline fn get(self: GPIOx) *volatile types.GPIOx {
-            return types.GPIOx.from(@intFromEnum(self));
+        pub inline fn addr(self: GPIO) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: GPIO) *volatile types.GPIO {
+            return types.GPIO.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) GPIO {
+            return types.GPIO.from(address);
         }
     };
     /// General purpose I/O
-    pub const GPIOA = GPIOx.GPIOA.get();
+    pub const GPIOA = GPIO.GPIOA.get();
     /// General purpose I/O
-    pub const GPIOB = GPIOx.GPIOB.get();
+    pub const GPIOB = GPIO.GPIOB.get();
     /// General purpose I/O
-    pub const GPIOC = GPIOx.GPIOC.get();
+    pub const GPIOC = GPIO.GPIOC.get();
     /// General purpose I/O
-    pub const GPIOD = GPIOx.GPIOD.get();
+    pub const GPIOD = GPIO.GPIOD.get();
     /// General purpose I/O
-    pub const GPIOE = GPIOx.GPIOE.get();
+    pub const GPIOE = GPIO.GPIOE.get();
 
     /// Alternate function I/O
     pub const AFIO = types.AFIO.from(0x40010000);
@@ -137,100 +153,148 @@ pub const peripherals = struct {
     pub const WWDG = types.WWDG.from(0x40002c00);
 
     /// Advanced timer
-    pub const TIM1x = enum(u32) {
+    pub const AdvancedTimer = enum(u32) {
         TIM1 = 0x40012c00,
         TIM8 = 0x40013400,
         TIM9 = 0x40014c00,
         TIM10 = 0x40015000,
 
-        pub inline fn get(self: TIM1) *volatile types.TIM1 {
-            return types.TIM1.from(@intFromEnum(self));
+        pub inline fn addr(self: AdvancedTimer) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: AdvancedTimer) *volatile types.AdvancedTimer {
+            return types.AdvancedTimer.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) AdvancedTimer {
+            return types.AdvancedTimer.from(address);
         }
     };
     /// Advanced timer
-    pub const TIM1 = TIM1.TIM1.get();
+    pub const TIM1 = AdvancedTimer.TIM1.get();
     /// Advanced timer
-    pub const TIM8 = TIM1.TIM8.get();
+    pub const TIM8 = AdvancedTimer.TIM8.get();
     /// Advanced timer
-    pub const TIM9 = TIM1.TIM9.get();
+    pub const TIM9 = AdvancedTimer.TIM9.get();
     /// Advanced timer
-    pub const TIM10 = TIM1.TIM10.get();
+    pub const TIM10 = AdvancedTimer.TIM10.get();
 
     /// General purpose timer
-    pub const TIM2x = enum(u32) {
+    pub const GeneralPurposeTimer = enum(u32) {
         TIM2 = 0x40000000,
         TIM3 = 0x40000400,
         TIM4 = 0x40000800,
         TIM5 = 0x40000c00,
 
-        pub inline fn get(self: TIM2) *volatile types.TIM2 {
-            return types.TIM2.from(@intFromEnum(self));
+        pub inline fn addr(self: GeneralPurposeTimer) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: GeneralPurposeTimer) *volatile types.GeneralPurposeTimer {
+            return types.GeneralPurposeTimer.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) GeneralPurposeTimer {
+            return types.GeneralPurposeTimer.from(address);
         }
     };
     /// General purpose timer
-    pub const TIM2 = TIM2.TIM2.get();
+    pub const TIM2 = GeneralPurposeTimer.TIM2.get();
     /// General purpose timer
-    pub const TIM3 = TIM2.TIM3.get();
+    pub const TIM3 = GeneralPurposeTimer.TIM3.get();
     /// General purpose timer
-    pub const TIM4 = TIM2.TIM4.get();
+    pub const TIM4 = GeneralPurposeTimer.TIM4.get();
     /// General purpose timer
-    pub const TIM5 = TIM2.TIM5.get();
+    pub const TIM5 = GeneralPurposeTimer.TIM5.get();
 
     /// Basic timer
-    pub const TIM6x = enum(u32) {
+    pub const BasicTimer = enum(u32) {
         TIM6 = 0x40001000,
         TIM7 = 0x40001400,
 
-        pub inline fn get(self: TIM6) *volatile types.TIM6 {
-            return types.TIM6.from(@intFromEnum(self));
+        pub inline fn addr(self: BasicTimer) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: BasicTimer) *volatile types.BasicTimer {
+            return types.BasicTimer.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) BasicTimer {
+            return types.BasicTimer.from(address);
         }
     };
     /// Basic timer
-    pub const TIM6 = TIM6.TIM6.get();
+    pub const TIM6 = BasicTimer.TIM6.get();
     /// Basic timer
-    pub const TIM7 = TIM6.TIM7.get();
+    pub const TIM7 = BasicTimer.TIM7.get();
 
     /// Inter integrated circuit
-    pub const I2Cx = enum(u32) {
+    pub const I2C = enum(u32) {
         I2C1 = 0x40005400,
         I2C2 = 0x40005800,
 
-        pub inline fn get(self: I2Cx) *volatile types.I2Cx {
-            return types.I2Cx.from(@intFromEnum(self));
+        pub inline fn addr(self: I2C) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: I2C) *volatile types.I2C {
+            return types.I2C.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) I2C {
+            return types.I2C.from(address);
         }
     };
     /// Inter integrated circuit
-    pub const I2C1 = I2Cx.I2C1.get();
+    pub const I2C1 = I2C.I2C1.get();
     /// Inter integrated circuit
-    pub const I2C2 = I2Cx.I2C2.get();
+    pub const I2C2 = I2C.I2C2.get();
 
     /// Serial peripheral interface
-    pub const SPIx = enum(u32) {
+    pub const SPI = enum(u32) {
         SPI1 = 0x40013000,
 
-        pub inline fn get(self: SPIx) *volatile types.SPIx {
-            return types.SPIx.from(@intFromEnum(self));
+        pub inline fn addr(self: SPI) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: SPI) *volatile types.SPI {
+            return types.SPI.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) SPI {
+            return types.SPI.from(address);
         }
     };
     /// Serial peripheral interface
-    pub const SPI1 = SPIx.SPI1.get();
+    pub const SPI1 = SPI.SPI1.get();
 
     /// Serial peripheral interface
-    pub const SPIx2 = enum(u32) {
+    pub const SPI_2 = enum(u32) {
         SPI2 = 0x40003800,
         SPI3 = 0x40003c00,
 
-        pub inline fn get(self: SPIx2) *volatile types.SPIx2 {
-            return types.SPIx2.from(@intFromEnum(self));
+        pub inline fn addr(self: SPI_2) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: SPI_2) *volatile types.SPI_2 {
+            return types.SPI_2.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) SPI_2 {
+            return types.SPI_2.from(address);
         }
     };
     /// Serial peripheral interface
-    pub const SPI2 = SPIx2.SPI2.get();
+    pub const SPI2 = SPI_2.SPI2.get();
     /// Serial peripheral interface
-    pub const SPI3 = SPIx2.SPI3.get();
+    pub const SPI3 = SPI_2.SPI3.get();
 
     /// Universal synchronous asynchronous receiver transmitter
-    pub const USARTx = enum(u32) {
+    pub const USART = enum(u32) {
         USART1 = 0x40013800,
         USART2 = 0x40004400,
         USART3 = 0x40004800,
@@ -240,26 +304,34 @@ pub const peripherals = struct {
         UART7 = 0x40001c00,
         UART8 = 0x40002000,
 
-        pub inline fn get(self: USARTx) *volatile types.USARTx {
-            return types.USARTx.from(@intFromEnum(self));
+        pub inline fn addr(self: USART) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: USART) *volatile types.USART {
+            return types.USART.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) USART {
+            return types.USART.from(address);
         }
     };
     /// Universal synchronous asynchronous receiver transmitter
-    pub const USART1 = USARTx.USART1.get();
+    pub const USART1 = USART.USART1.get();
     /// Universal synchronous asynchronous receiver transmitter
-    pub const USART2 = USARTx.USART2.get();
+    pub const USART2 = USART.USART2.get();
     /// Universal synchronous asynchronous receiver transmitter
-    pub const USART3 = USARTx.USART3.get();
+    pub const USART3 = USART.USART3.get();
     /// Universal synchronous asynchronous receiver transmitter
-    pub const UART4 = USARTx.UART4.get();
+    pub const UART4 = USART.UART4.get();
     /// Universal synchronous asynchronous receiver transmitter
-    pub const UART5 = USARTx.UART5.get();
+    pub const UART5 = USART.UART5.get();
     /// Universal synchronous asynchronous receiver transmitter
-    pub const UART6 = USARTx.UART6.get();
+    pub const UART6 = USART.UART6.get();
     /// Universal synchronous asynchronous receiver transmitter
-    pub const UART7 = USARTx.UART7.get();
+    pub const UART7 = USART.UART7.get();
     /// Universal synchronous asynchronous receiver transmitter
-    pub const UART8 = USARTx.UART8.get();
+    pub const UART8 = USART.UART8.get();
 
     /// Analog to digital converter
     pub const ADC1 = types.ADC1.from(0x40012400);
@@ -288,6 +360,10 @@ pub const types = struct {
     pub const RNG = extern struct {
         pub fn from(base: u32) *volatile types.RNG {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.RNG) u32 {
+            return @intFromPtr(self);
         }
 
         /// control register
@@ -339,6 +415,10 @@ pub const types = struct {
     pub const USB = extern struct {
         pub fn from(base: u32) *volatile types.USB {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.USB) u32 {
+            return @intFromPtr(self);
         }
 
         /// endpoint 0 register
@@ -777,10 +857,14 @@ pub const types = struct {
     };
 
     /// Controller area network
-    /// Type for: CAN1 CAN2 
-    pub const CANx = extern struct {
-        pub fn from(base: u32) *volatile types.CANx {
+    /// Type for: CAN1 CAN2
+    pub const CAN = extern struct {
+        pub fn from(base: u32) *volatile types.CAN {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.CAN) u32 {
+            return @intFromPtr(self);
         }
 
         /// CAN Master control register
@@ -7244,6 +7328,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.ETHERNET_MAC) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Ethernet MAC configuration register (ETH_MACCR)
         MACCR: RegisterRW(packed struct(u32) {
             /// unused [0:0]
@@ -7643,6 +7731,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.ETHERNET_MMC) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Ethernet MMC control register (ETH_MMCCR)
         MMCCR: RegisterRW(packed struct(u32) {
             /// CR [0:0]
@@ -7787,6 +7879,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.ETHERNET_PTP) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Ethernet PTP time stamp control register (ETH_PTPTSCR)
         PTPTSCR: RegisterRW(packed struct(u32) {
             /// TSE [0:0]
@@ -7880,6 +7976,10 @@ pub const types = struct {
     pub const ETHERNET_DMA = extern struct {
         pub fn from(base: u32) *volatile types.ETHERNET_DMA {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.ETHERNET_DMA) u32 {
+            return @intFromPtr(self);
         }
 
         /// Ethernet DMA bus mode register
@@ -8150,6 +8250,10 @@ pub const types = struct {
     pub const SDIO = extern struct {
         pub fn from(base: u32) *volatile types.SDIO {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.SDIO) u32 {
+            return @intFromPtr(self);
         }
 
         /// Bits 1:0 = PWRCTRL: Power supply control bits
@@ -8582,6 +8686,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.FSMC) u32 {
+            return @intFromPtr(self);
+        }
+
         /// SRAM/NOR-Flash chip-select control register 1
         BCR1: RegisterRW(packed struct(u32) {
             /// MBKEN [0:0]
@@ -8783,6 +8891,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.DVP) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Digital Video control register (DVP_CR0)
         CR0: RegisterRW(packed struct(u8) {
             /// RB_DVP_ENABLE [0:0]
@@ -8980,6 +9092,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.DAC) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Control register (DAC_CR)
         CTLR: RegisterRW(packed struct(u32) {
             /// EN1 [0:0]
@@ -9165,6 +9281,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.PWR) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Power control register (PWR_CTRL)
         CTLR: RegisterRW(packed struct(u32) {
             /// LPDS [0:0]
@@ -9234,6 +9354,10 @@ pub const types = struct {
     pub const RCC = extern struct {
         pub fn from(base: u32) *volatile types.RCC {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.RCC) u32 {
+            return @intFromPtr(self);
         }
 
         /// Clock control register
@@ -9884,6 +10008,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.EXTEND) u32 {
+            return @intFromPtr(self);
+        }
+
         /// EXTEND register
         EXTEND_CTR: RegisterRW(packed struct(u32) {
             /// USBDLS [0:0]
@@ -9996,10 +10124,14 @@ pub const types = struct {
     };
 
     /// General purpose I/O
-    /// Type for: GPIOA GPIOB GPIOC GPIOD GPIOE 
-    pub const GPIOx = extern struct {
-        pub fn from(base: u32) *volatile types.GPIOx {
+    /// Type for: GPIOA GPIOB GPIOC GPIOD GPIOE
+    pub const GPIO = extern struct {
+        pub fn from(base: u32) *volatile types.GPIO {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.GPIO) u32 {
+            return @intFromPtr(self);
         }
 
         /// Port configuration register low (GPIOn_CFGLR)
@@ -10432,6 +10564,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.AFIO) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Event Control Register (AFIO_ECR)
         ECR: RegisterRW(packed struct(u32) {
             /// PIN [0:3]
@@ -10647,6 +10783,10 @@ pub const types = struct {
     pub const EXTI = extern struct {
         pub fn from(base: u32) *volatile types.EXTI {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.EXTI) u32 {
+            return @intFromPtr(self);
         }
 
         /// Interrupt mask register (EXTI_INTENR)
@@ -11086,6 +11226,10 @@ pub const types = struct {
     pub const DMA1 = extern struct {
         pub fn from(base: u32) *volatile types.DMA1 {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.DMA1) u32 {
+            return @intFromPtr(self);
         }
 
         /// DMA interrupt status register (DMA_INTFR)
@@ -11746,6 +11890,10 @@ pub const types = struct {
     pub const DMA2 = extern struct {
         pub fn from(base: u32) *volatile types.DMA2 {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.DMA2) u32 {
+            return @intFromPtr(self);
         }
 
         /// DMA interrupt status register (DMA_INTFR)
@@ -12776,6 +12924,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.RTC) u32 {
+            return @intFromPtr(self);
+        }
+
         /// RTC Control Register High
         CTLRH: RegisterRW(packed struct(u32) {
             /// SECIE [0:0]
@@ -12892,6 +13044,10 @@ pub const types = struct {
     pub const BKP = extern struct {
         pub fn from(base: u32) *volatile types.BKP {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.BKP) u32 {
+            return @intFromPtr(self);
         }
 
         /// offset 0x4
@@ -13338,6 +13494,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.IWDG) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Key register (IWDG_CTLR)
         CTLR: RegisterRW(packed struct(u32) {
             /// KEY [0:15]
@@ -13384,6 +13544,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.WWDG) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Control register (WWDG_CR)
         CTLR: RegisterRW(packed struct(u32) {
             /// T [0:6]
@@ -13422,11 +13586,14 @@ pub const types = struct {
     };
 
     /// Advanced timer
-    pub const AdvancedTimer = types.TIM1;
-    /// Advanced timer
-    pub const TIM1 = extern struct {
-        pub fn from(base: u32) *volatile types.TIM1 {
+    /// Type for: TIM1 TIM8 TIM9 TIM10
+    pub const AdvancedTimer = extern struct {
+        pub fn from(base: u32) *volatile types.AdvancedTimer {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.AdvancedTimer) u32 {
+            return @intFromPtr(self);
         }
 
         /// control register 1
@@ -13919,11 +14086,14 @@ pub const types = struct {
     };
 
     /// General purpose timer
-    pub const GeneralPurposeTimer = types.TIM2;
-    /// General purpose timer
-    pub const TIM2 = extern struct {
-        pub fn from(base: u32) *volatile types.TIM2 {
+    /// Type for: TIM2 TIM3 TIM4 TIM5
+    pub const GeneralPurposeTimer = extern struct {
+        pub fn from(base: u32) *volatile types.GeneralPurposeTimer {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.GeneralPurposeTimer) u32 {
+            return @intFromPtr(self);
         }
 
         /// control register 1
@@ -14345,11 +14515,14 @@ pub const types = struct {
     };
 
     /// Basic timer
-    pub const BasicTimer = types.TIM6;
-    /// Basic timer
-    pub const TIM6 = extern struct {
-        pub fn from(base: u32) *volatile types.TIM6 {
+    /// Type for: TIM6 TIM7
+    pub const BasicTimer = extern struct {
+        pub fn from(base: u32) *volatile types.BasicTimer {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.BasicTimer) u32 {
+            return @intFromPtr(self);
         }
 
         /// control register 1
@@ -14453,10 +14626,14 @@ pub const types = struct {
     };
 
     /// Inter integrated circuit
-    /// Type for: I2C1 I2C2 
-    pub const I2Cx = extern struct {
-        pub fn from(base: u32) *volatile types.I2Cx {
+    /// Type for: I2C1 I2C2
+    pub const I2C = extern struct {
+        pub fn from(base: u32) *volatile types.I2C {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.I2C) u32 {
+            return @intFromPtr(self);
         }
 
         /// Control register 1
@@ -14693,10 +14870,14 @@ pub const types = struct {
     };
 
     /// Serial peripheral interface
-    /// Type for: SPI1 
-    pub const SPIx = extern struct {
-        pub fn from(base: u32) *volatile types.SPIx {
+    /// Type for: SPI1
+    pub const SPI = extern struct {
+        pub fn from(base: u32) *volatile types.SPI {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.SPI) u32 {
+            return @intFromPtr(self);
         }
 
         /// control register 1
@@ -14890,10 +15071,14 @@ pub const types = struct {
     };
 
     /// Serial peripheral interface
-    /// Type for: SPI2 SPI3 
-    pub const SPIx2 = extern struct {
-        pub fn from(base: u32) *volatile types.SPIx2 {
+    /// Type for: SPI2 SPI3
+    pub const SPI_2 = extern struct {
+        pub fn from(base: u32) *volatile types.SPI_2 {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.SPI_2) u32 {
+            return @intFromPtr(self);
         }
 
         /// control register 1
@@ -15095,10 +15280,14 @@ pub const types = struct {
     };
 
     /// Universal synchronous asynchronous receiver transmitter
-    /// Type for: USART1 USART2 USART3 UART4 UART5 UART6 UART7 UART8 
-    pub const USARTx = extern struct {
-        pub fn from(base: u32) *volatile types.USARTx {
+    /// Type for: USART1 USART2 USART3 UART4 UART5 UART6 UART7 UART8
+    pub const USART = extern struct {
+        pub fn from(base: u32) *volatile types.USART {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.USART) u32 {
+            return @intFromPtr(self);
         }
 
         /// Status register
@@ -15322,6 +15511,10 @@ pub const types = struct {
     pub const ADC1 = extern struct {
         pub fn from(base: u32) *volatile types.ADC1 {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.ADC1) u32 {
+            return @intFromPtr(self);
         }
 
         /// status register
@@ -15787,6 +15980,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.ADC2) u32 {
+            return @intFromPtr(self);
+        }
+
         /// status register
         STATR: RegisterRW(packed struct(u32) {
             /// AWD [0:0]
@@ -16247,6 +16444,10 @@ pub const types = struct {
     pub const USBHS = extern struct {
         pub fn from(base: u32) *volatile types.USBHS {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.USBHS) u32 {
+            return @intFromPtr(self);
         }
 
         /// USB base control
@@ -17604,6 +17805,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.CRC) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Data register
         DATAR: RegisterRW(packed struct(u32) {
             /// DR [0:31]
@@ -17634,6 +17839,10 @@ pub const types = struct {
     pub const FLASH = extern struct {
         pub fn from(base: u32) *volatile types.FLASH {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.FLASH) u32 {
+            return @intFromPtr(self);
         }
 
         /// offset 0x4
@@ -17808,6 +18017,10 @@ pub const types = struct {
     pub const USB_OTG_FS = extern struct {
         pub fn from(base: u32) *volatile types.USB_OTG_FS {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.USB_OTG_FS) u32 {
+            return @intFromPtr(self);
         }
 
         /// USB base control
@@ -18494,6 +18707,10 @@ pub const types = struct {
     pub const PFIC = extern struct {
         pub fn from(base: u32) *volatile types.PFIC {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.PFIC) u32 {
+            return @intFromPtr(self);
         }
 
         /// Interrupt Status Register

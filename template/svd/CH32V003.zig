@@ -46,21 +46,29 @@ pub const peripherals = struct {
     pub const EXTEN = types.EXTEN.from(0x40023800);
 
     /// General purpose I/O
-    pub const GPIOx = enum(u32) {
+    pub const GPIO = enum(u32) {
         GPIOA = 0x40010800,
         GPIOC = 0x40011000,
         GPIOD = 0x40011400,
 
-        pub inline fn get(self: GPIOx) *volatile types.GPIOx {
-            return types.GPIOx.from(@intFromEnum(self));
+        pub inline fn addr(self: GPIO) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: GPIO) *volatile types.GPIO {
+            return types.GPIO.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) GPIO {
+            return types.GPIO.from(address);
         }
     };
     /// General purpose I/O
-    pub const GPIOA = GPIOx.GPIOA.get();
+    pub const GPIOA = GPIO.GPIOA.get();
     /// General purpose I/O
-    pub const GPIOC = GPIOx.GPIOC.get();
+    pub const GPIOC = GPIO.GPIOC.get();
     /// General purpose I/O
-    pub const GPIOD = GPIOx.GPIOD.get();
+    pub const GPIOD = GPIO.GPIOD.get();
 
     /// Alternate function I/O
     pub const AFIO = types.AFIO.from(0x40010000);
@@ -78,43 +86,99 @@ pub const peripherals = struct {
     pub const WWDG = types.WWDG.from(0x40002c00);
 
     /// Advanced timer
-    pub const TIM1 = types.TIM1.from(0x40012c00);
+    pub const AdvancedTimer = enum(u32) {
+        TIM1 = 0x40012c00,
+
+        pub inline fn addr(self: AdvancedTimer) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: AdvancedTimer) *volatile types.AdvancedTimer {
+            return types.AdvancedTimer.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) AdvancedTimer {
+            return types.AdvancedTimer.from(address);
+        }
+    };
+    /// Advanced timer
+    pub const TIM1 = AdvancedTimer.TIM1.get();
 
     /// General purpose timer
-    pub const TIM2 = types.TIM2.from(0x40000000);
+    pub const GeneralPurposeTimer = enum(u32) {
+        TIM2 = 0x40000000,
+
+        pub inline fn addr(self: GeneralPurposeTimer) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: GeneralPurposeTimer) *volatile types.GeneralPurposeTimer {
+            return types.GeneralPurposeTimer.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) GeneralPurposeTimer {
+            return types.GeneralPurposeTimer.from(address);
+        }
+    };
+    /// General purpose timer
+    pub const TIM2 = GeneralPurposeTimer.TIM2.get();
 
     /// Inter integrated circuit
-    pub const I2Cx = enum(u32) {
+    pub const I2C = enum(u32) {
         I2C1 = 0x40005400,
 
-        pub inline fn get(self: I2Cx) *volatile types.I2Cx {
-            return types.I2Cx.from(@intFromEnum(self));
+        pub inline fn addr(self: I2C) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: I2C) *volatile types.I2C {
+            return types.I2C.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) I2C {
+            return types.I2C.from(address);
         }
     };
     /// Inter integrated circuit
-    pub const I2C1 = I2Cx.I2C1.get();
+    pub const I2C1 = I2C.I2C1.get();
 
     /// Serial peripheral interface
-    pub const SPIx = enum(u32) {
+    pub const SPI = enum(u32) {
         SPI1 = 0x40013000,
 
-        pub inline fn get(self: SPIx) *volatile types.SPIx {
-            return types.SPIx.from(@intFromEnum(self));
+        pub inline fn addr(self: SPI) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: SPI) *volatile types.SPI {
+            return types.SPI.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) SPI {
+            return types.SPI.from(address);
         }
     };
     /// Serial peripheral interface
-    pub const SPI1 = SPIx.SPI1.get();
+    pub const SPI1 = SPI.SPI1.get();
 
     /// Universal synchronous asynchronous receiver transmitter
-    pub const USARTx = enum(u32) {
+    pub const USART = enum(u32) {
         USART1 = 0x40013800,
 
-        pub inline fn get(self: USARTx) *volatile types.USARTx {
-            return types.USARTx.from(@intFromEnum(self));
+        pub inline fn addr(self: USART) u32 {
+            return @intFromEnum(self);
+        }
+
+        pub inline fn get(self: USART) *volatile types.USART {
+            return types.USART.from(self.addr());
+        }
+
+        pub inline fn from(address: u32) USART {
+            return types.USART.from(address);
         }
     };
     /// Universal synchronous asynchronous receiver transmitter
-    pub const USART1 = USARTx.USART1.get();
+    pub const USART1 = USART.USART1.get();
 
     /// Analog to digital converter
     pub const ADC1 = types.ADC1.from(0x40012400);
@@ -137,6 +201,10 @@ pub const types = struct {
     pub const PWR = extern struct {
         pub fn from(base: u32) *volatile types.PWR {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.PWR) u32 {
+            return @intFromPtr(self);
         }
 
         /// Power control register (PWR_CTRL)
@@ -203,6 +271,10 @@ pub const types = struct {
     pub const RCC = extern struct {
         pub fn from(base: u32) *volatile types.RCC {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.RCC) u32 {
+            return @intFromPtr(self);
         }
 
         /// Clock control register
@@ -530,6 +602,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.EXTEN) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Configure the extended control register
         EXTEN_CTR: RegisterRW(packed struct(u32) {
             /// unused [0:5]
@@ -563,9 +639,13 @@ pub const types = struct {
 
     /// General purpose I/O
     /// Type for: GPIOA GPIOC GPIOD 
-    pub const GPIOx = extern struct {
-        pub fn from(base: u32) *volatile types.GPIOx {
+    pub const GPIO = extern struct {
+        pub fn from(base: u32) *volatile types.GPIO {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.GPIO) u32 {
+            return @intFromPtr(self);
         }
 
         /// Port configuration register low (GPIOn_CFGLR)
@@ -809,6 +889,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.AFIO) u32 {
+            return @intFromPtr(self);
+        }
+
         /// offset 0x4
         _offset0: [4]u8,
 
@@ -897,6 +981,10 @@ pub const types = struct {
     pub const EXTI = extern struct {
         pub fn from(base: u32) *volatile types.EXTI {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.EXTI) u32 {
+            return @intFromPtr(self);
         }
 
         /// Interrupt mask register (EXTI_INTENR)
@@ -1120,6 +1208,10 @@ pub const types = struct {
     pub const DMA1 = extern struct {
         pub fn from(base: u32) *volatile types.DMA1 {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.DMA1) u32 {
+            return @intFromPtr(self);
         }
 
         /// DMA interrupt status register (DMA_INTFR)
@@ -1782,6 +1874,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.IWDG) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Key register (IWDG_CTLR)
         CTLR: RegisterRW(packed struct(u32) {
             /// KEY [0:15]
@@ -1828,6 +1924,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.WWDG) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Control register (WWDG_CR)
         CTLR: RegisterRW(packed struct(u32) {
             /// T [0:6]
@@ -1866,11 +1966,14 @@ pub const types = struct {
     };
 
     /// Advanced timer
-    pub const AdvancedTimer = types.TIM1;
-    /// Advanced timer
-    pub const TIM1 = extern struct {
-        pub fn from(base: u32) *volatile types.TIM1 {
+    /// Type for: TIM1 
+    pub const AdvancedTimer = extern struct {
+        pub fn from(base: u32) *volatile types.AdvancedTimer {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.AdvancedTimer) u32 {
+            return @intFromPtr(self);
         }
 
         /// control register 1
@@ -2356,11 +2459,14 @@ pub const types = struct {
     };
 
     /// General purpose timer
-    pub const GeneralPurposeTimer = types.TIM2;
-    /// General purpose timer
-    pub const TIM2 = extern struct {
-        pub fn from(base: u32) *volatile types.TIM2 {
+    /// Type for: TIM2 
+    pub const GeneralPurposeTimer = extern struct {
+        pub fn from(base: u32) *volatile types.GeneralPurposeTimer {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.GeneralPurposeTimer) u32 {
+            return @intFromPtr(self);
         }
 
         /// control register 1
@@ -2765,9 +2871,13 @@ pub const types = struct {
 
     /// Inter integrated circuit
     /// Type for: I2C1 
-    pub const I2Cx = extern struct {
-        pub fn from(base: u32) *volatile types.I2Cx {
+    pub const I2C = extern struct {
+        pub fn from(base: u32) *volatile types.I2C {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.I2C) u32 {
+            return @intFromPtr(self);
         }
 
         /// Control register 1
@@ -2969,9 +3079,13 @@ pub const types = struct {
 
     /// Serial peripheral interface
     /// Type for: SPI1 
-    pub const SPIx = extern struct {
-        pub fn from(base: u32) *volatile types.SPIx {
+    pub const SPI = extern struct {
+        pub fn from(base: u32) *volatile types.SPI {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.SPI) u32 {
+            return @intFromPtr(self);
         }
 
         /// control register 1
@@ -3129,9 +3243,13 @@ pub const types = struct {
 
     /// Universal synchronous asynchronous receiver transmitter
     /// Type for: USART1 
-    pub const USARTx = extern struct {
-        pub fn from(base: u32) *volatile types.USARTx {
+    pub const USART = extern struct {
+        pub fn from(base: u32) *volatile types.USART {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.USART) u32 {
+            return @intFromPtr(self);
         }
 
         /// Status register
@@ -3332,6 +3450,10 @@ pub const types = struct {
     pub const ADC1 = extern struct {
         pub fn from(base: u32) *volatile types.ADC1 {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.ADC1) u32 {
+            return @intFromPtr(self);
         }
 
         /// status register
@@ -3718,6 +3840,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.DBG) u32 {
+            return @intFromPtr(self);
+        }
+
         /// DBGMCU_CFGR1
         CR: RegisterRW(packed struct(u32) {
             /// SLEEP [0:0]
@@ -3756,6 +3882,10 @@ pub const types = struct {
             return @ptrFromInt(base);
         }
 
+        pub fn addr(self: *volatile types.ESIG) u32 {
+            return @intFromPtr(self);
+        }
+
         /// Flash capacity register
         FLACAP: RegisterRW(packed struct(u16) {
             /// F_SIZE_15_0 [0:15]
@@ -3792,6 +3922,10 @@ pub const types = struct {
     pub const FLASH = extern struct {
         pub fn from(base: u32) *volatile types.FLASH {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.FLASH) u32 {
+            return @intFromPtr(self);
         }
 
         /// Flash key register
@@ -3974,6 +4108,10 @@ pub const types = struct {
     pub const PFIC = extern struct {
         pub fn from(base: u32) *volatile types.PFIC {
             return @ptrFromInt(base);
+        }
+
+        pub fn addr(self: *volatile types.PFIC) u32 {
+            return @intFromPtr(self);
         }
 
         /// Interrupt Status Register
