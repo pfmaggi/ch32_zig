@@ -17,19 +17,19 @@ pub const panic = core.panic.silent;
 pub const interrups: core.Interrups = .{};
 
 pub fn main() !void {
-    hal.gpio.Port.enable(.GPIOC);
-    // hal.gpio.Port.disable(.GPIOC);
+    hal.port.enable(.GPIOC);
+    // hal.port.disable(.GPIOC);
 
-    const USART1 = hal.UART.from(.USART1);
+    const USART1 = hal.Uart.from(.USART1);
     USART1.setup(.{
         .cpu_frequency = 8_000_000,
         .baud_rate = 115_200,
     });
 
-    const led = hal.gpio.Pin.init(.GPIOC, 0);
+    const led = hal.Pin.init(.GPIOC, 0);
     led.as_output(.{ .speed = .max_50mhz, .mode = .push_pull });
 
-    _ = try USART1.writeBlocking("Hello, World!\r\n", hal.uart.simpleDeadline(100_000));
+    _ = try USART1.writeBlocking("Hello, World!\r\n", hal.deadline.simple(100_000));
 
     var count: u32 = 0;
     var buffer: [10]u8 = undefined;
