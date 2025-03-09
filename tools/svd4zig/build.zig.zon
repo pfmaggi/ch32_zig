@@ -1,6 +1,7 @@
 .{
-  .name = "svd4zig",
+  .name = .svd4zig,
   .version = "1.0.0",
+  .minimum_zig_version = "0.14.0",
   .dependencies = .{},
   .paths = .{
     "build.zig",
@@ -9,4 +10,5 @@
     "README.md",
     "LICENSE",
   },
+  .fingerprint = 0xb0e38cfca596f54d,
 }

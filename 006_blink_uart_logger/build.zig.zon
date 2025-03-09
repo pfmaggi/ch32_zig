@@ -1,6 +1,7 @@
 .{
-    .name = "002_blink_ld",
+    .name = .blink_uart_logger,
     .version = "0.0.0",
+    .minimum_zig_version = "0.14.0",
     .dependencies = .{},
     .paths = .{
         "build.zig",
@@ -9,4 +10,5 @@
         "README.md",
         "LICENSE",
     },
+    .fingerprint = 0x9fb48e56b7835278,
 }

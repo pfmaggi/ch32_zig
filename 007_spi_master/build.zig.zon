@@ -1,6 +1,7 @@
 .{
-    .name = "002_blink_ld",
+    .name = .spi_master,
     .version = "0.0.0",
+    .minimum_zig_version = "0.14.0",
     .dependencies = .{},
     .paths = .{
         "build.zig",
@@ -9,4 +10,5 @@
         "README.md",
         "LICENSE",
     },
+    .fingerprint = 0x88a5b583ce67c97e,
 }

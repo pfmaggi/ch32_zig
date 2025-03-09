@@ -19,7 +19,7 @@
     };
 
     zigscient-src = {
-      url = "github:llogick/zigscient";
+      url = "github:llogick/zigscient/0.14.x";
       flake = false;
     };
   };
@@ -34,10 +34,10 @@
       overlays = [
         (
           _final: prev: with prev; rec {
-            zig = inputs.zig.packages.${system}.master;
+            zig = inputs.zig.packages.${system}."0.14.0";
             zls = stdenvNoCC.mkDerivation {
-              name = "zigscient";
-              version = "master";
+              pname = "zigscient";
+              version = "0.14.x";
               src = "${inputs.zigscient-src}";
               nativeBuildInputs = [ zig ];
               phases = [

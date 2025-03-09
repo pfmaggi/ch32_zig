@@ -11,7 +11,7 @@ pub fn build(b: *std.Build) void {
     const name = "template";
     const targets: []const Target = &.{
         .{ .chip = .{ .model = .CH32V003F4P6 } },
-        .{ .chip = .{ .series = .CH32V30x } },
+        // .{ .chip = .{ .series = .CH32V30x } },
     };
 
     //      ┌──────────────────────────────────────────────────────────┐
