@@ -13,7 +13,7 @@ const Series = @import("series.zig").Series;
 pub const Model = enum {
 EOF
 
-cat chip-list.json | jq -r '.data[] | select(.["Part NO."] | startswith("CH32V")) | ["    ", .["Part NO."], ", // ", .Flash, " / ", .SRAM, " / ", .Freq, " / ", .Package, " (", .GPIO, " GPIO)"] | join("")' >>"$OUTPUT_FILE"
+cat chip-list.json | jq -r '.data[] | select(.["Part NO."] | startswith("CH32V")) | ["    ", (.["Part NO."] | ascii_downcase), ", // ", .Flash, " / ", .SRAM, " / ", .Freq, " / ", .Package, " (", .GPIO, " GPIO)"] | join("")' >>"$OUTPUT_FILE"
 
 cat <<EOF >>"$OUTPUT_FILE"
 
@@ -24,9 +24,9 @@ EOF
 declare -A model_series
 
 while IFS='|' read -r key value; do
-  key=$(echo "$key" | sed -e 's/CH32V20[0-9]/CH32V20x/g' -e 's/CH32V30[0-9]/CH32V30x/g')
+  key=$(echo "$key" | sed -e 's/ch32v20[0-9]/ch32v20x/g' -e 's/ch32v30[0-9]/ch32v30x/g')
   model_series["$key"]+=".$value, "
-done < <(cat chip-list.json | jq -r '.data[] | select(.["Part NO."] | startswith("CH32V")) | [(.["url"] | split("/")[-1] | split(".")[0]), "|", .["Part NO."] ] | join("")' | sort)
+done < <(cat chip-list.json | jq -r '.data[] | select(.["Part NO."] | startswith("CH32V")) | [(.["url"] | split("/")[-1] | split(".")[0]), "|", .["Part NO."] ] |  join("") | ascii_downcase' | sort)
 
 for key in $(printf "%s\n" "${!model_series[@]}" | sort); do
   formatted_value=$(echo "${model_series[$key]}" | sed 's/, $//')
@@ -45,14 +45,14 @@ declare -A model_link_script
 
 while IFS='|' read -r key value; do
   model_link_script["$key"]+=".$value, "
-done < <(cat chip-list.json | jq -r '.data[] | select(.["Part NO."] | startswith("CH32V")) | [ .Flash, "_", .SRAM, "|", .["Part NO."] ] | join("")' | sort)
+done < <(cat chip-list.json | jq -r '.data[] | select(.["Part NO."] | startswith("CH32V")) | [ .Flash, "_", .SRAM, "|", (.["Part NO."] | ascii_downcase) ] | join("")' | sort)
 
-for key in $(printf "%s\n" "${!model_link_script[@]}" | sort); do
+for key in $(printf "%s\n" "${!model_link_script[@]}" | sort -n -t'|' -k1); do
   formatted_value=$(echo "${model_link_script[$key]}" | sed 's/, $//')
   flash=$(echo "$key" | cut -d"_" -f1)
   sram=$(echo "$key" | cut -d"_" -f2)
 
-  echo "            ${formatted_value} => \"CH32V_${flash}_${sram}.ld\"," >>"$OUTPUT_FILE"
+  echo "            ${formatted_value} => \"ch32v_${flash}_${sram}.ld\"," >>"$OUTPUT_FILE"
 done
 
 cat <<EOF >>"$OUTPUT_FILE"

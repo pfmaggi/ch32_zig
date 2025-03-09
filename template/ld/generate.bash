@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-PREFIX="CH32V"
+PREFIX="ch32v"
 
 flashRamArray=("16K_2K" "32K_10K" "64K_20K" "128K_32K" "128K_64K" "256K_64K")
 

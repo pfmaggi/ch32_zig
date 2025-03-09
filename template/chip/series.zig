@@ -2,18 +2,18 @@ const std = @import("std");
 const Model = @import("model.zig").Model;
 
 pub const Series = enum {
-    CH32V003,
-    CH32V103,
-    CH32V20x,
-    CH32V30x,
+    ch32v003,
+    ch32v103,
+    ch32v20x,
+    ch32v30x,
 
     /// Minimal model for the series by Flash, RAM size and GPIO count.
     pub fn minimalModel(self: Series) Model {
         return switch (self) {
-            .CH32V003 => .CH32V003J4M6,
-            .CH32V103 => .CH32V103C6T6,
-            .CH32V20x => .CH32V203F6P6,
-            .CH32V30x => .CH32V305FBP6,
+            .ch32v003 => .ch32v003j4m6,
+            .ch32v103 => .ch32v103c6t6,
+            .ch32v20x => .ch32v203f6p6,
+            .ch32v30x => .ch32v305fbp6,
         };
     }
 
@@ -58,10 +58,10 @@ pub const Series = enum {
         });
 
         const cpu_features = switch (self) {
-            .CH32V003 => qingkev2a,
-            .CH32V103 => qingkev3,
-            .CH32V20x => qingkev4b,
-            .CH32V30x => qingkev4f,
+            .ch32v003 => qingkev2a,
+            .ch32v103 => qingkev3,
+            .ch32v20x => qingkev4b,
+            .ch32v30x => qingkev4f,
         };
 
         return .{
@@ -79,10 +79,10 @@ pub const Series = enum {
 
     pub fn svd_name(self: Series) []const u8 {
         return switch (self) {
-            .CH32V003 => "CH32V003",
-            .CH32V103 => "CH32V103",
-            .CH32V20x => "CH32V20x",
-            .CH32V30x => "CH32V30x",
+            .ch32v003 => "CH32V003",
+            .ch32v103 => "CH32V103",
+            .ch32v20x => "CH32V20X",
+            .ch32v30x => "CH32V30X",
         };
     }
 };
