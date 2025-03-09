@@ -61,9 +61,9 @@ pub const ErrorStates = packed struct(u4) {
 };
 
 pub const UART = struct {
-    uart: *volatile svd.types.USARTx,
+    uart: *volatile svd.types.USART,
 
-    pub fn from(uart: svd.peripherals.USARTx) UART {
+    pub fn from(uart: svd.peripherals.USART) UART {
         return .{ .uart = uart.get() };
     }
 

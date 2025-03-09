@@ -27,10 +27,10 @@ pub const OutputMode = enum(u2) {
 };
 
 pub const Pin = packed struct {
-    port: *volatile svd.types.GPIOx,
+    port: *volatile svd.types.GPIO,
     num: u4, // 0-15
 
-    pub fn init(port: svd.peripherals.GPIOx, num: u4) Pin {
+    pub fn init(port: svd.peripherals.GPIO, num: u4) Pin {
         return .{ .port = port.get(), .num = num };
     }
 
@@ -82,45 +82,45 @@ pub const Pin = packed struct {
 pub const Port = struct {
     const IOPAEN_bit_offset: u5 = 2;
 
-    pub fn enable(port: svd.peripherals.GPIOx) void {
-        svd.peripherals.RCC.APB2PCENR.raw |= @as(u32, 1) << (bit_offset(port) + IOPAEN_bit_offset);
+    pub fn enable(port: svd.peripherals.GPIO) void {
+        svd.peripherals.RCC.APB2PCENR.raw |= @as(u32, 1) << (bit_offset(port.addr()) + IOPAEN_bit_offset);
     }
 
-    pub fn disable(port: svd.peripherals.GPIOx) void {
-        svd.peripherals.RCC.APB2PCENR.raw &= ~(@as(u32, 1) << (bit_offset(port) + IOPAEN_bit_offset));
+    pub fn disable(port: svd.peripherals.GPIO) void {
+        svd.peripherals.RCC.APB2PCENR.raw &= ~(@as(u32, 1) << (bit_offset(port.addr()) + IOPAEN_bit_offset));
     }
 
-    pub fn bit_offset(port: svd.peripherals.GPIOx) u5 {
-        const port_addr = @intFromEnum(port);
-        const port_A_addr = @intFromEnum(svd.peripherals.GPIOx.GPIOA);
-        return @truncate((port_addr - port_A_addr) / GPIOx_distance);
+    pub fn bit_offset(port_addr: u32) u5 {
+        const port_A_addr = svd.peripherals.GPIO.GPIOA.addr();
+        return @truncate((port_addr - port_A_addr) / GPIO_distance);
     }
 };
 
 // Distance between GPIOx registers.
-const GPIOx_distance: u32 = 0x400;
+const GPIO_distance: u32 = 0x400;
 
 // Comptime GPIOx_distance check.
 comptime {
-    const GPIOx_info = @typeInfo(svd.peripherals.GPIOx);
+    const GPIO_info = @typeInfo(svd.peripherals.GPIO);
 
     var last_field_name_suffix = '-';
     var last_field_value = 0;
-    for (GPIOx_info.@"enum".fields) |field| {
+    for (GPIO_info.@"enum".fields) |field| {
         const field_suffix = field.name[field.name.len - 1];
+        const field_value = field.value;
 
         // Fill with the first value, as we need something to compare with.
         if (last_field_name_suffix == '-') {
             last_field_name_suffix = field_suffix;
-            last_field_value = field.value;
+            last_field_value = field_value;
             continue;
         }
 
         // When the field name differs by the next character, it means it's the next port.
         // We can compare the distance between addresses.
         if (field.name[field.name.len - 1] - last_field_name_suffix == 1) {
-            const distance = field.value - last_field_value;
-            if (distance != GPIOx_distance) {
+            const distance = field_value - last_field_value;
+            if (distance != GPIO_distance) {
                 @compileError("GPIOx distance is not correct");
             }
             break;
@@ -128,6 +128,6 @@ comptime {
 
         // Move on to the next field, as the previous condition was not met.
         last_field_name_suffix = field_suffix;
-        last_field_value = field.value;
+        last_field_value = field_value;
     }
 }
