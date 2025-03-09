@@ -289,17 +289,38 @@ pub const Peripheral = struct {
         try out_stream.print("_offset{}: [{}]u8,\n", .{ num, size });
     }
 
-    fn generateCommonName(allocator: Allocator, name: []const u8, dedupl: *DeduplMap) ![]u8 {
-        var common_name = ArrayList(u8).init(allocator);
-        try common_name.replaceRange(0, common_name.items.len, name);
+    fn generateCommonName(self: Self, dedupl: *DeduplMap) !struct { []u8, bool } {
+        const name = self.name.items;
+        const description = self.description.items;
+
+        var common_name = ArrayList(u8).init(self.allocator);
+        var has_common_name = false;
+
+        // Handle special case for timers
+        const timer_name, const has_timer_name = if (std.mem.eql(u8, "Advanced timer", description))
+            .{ "AdvancedTimer", true }
+        else if (std.mem.eql(u8, "General purpose timer", description))
+            .{ "GeneralPurposeTimer", true }
+        else if (std.mem.eql(u8, "Basic timer", description))
+            .{ "BasicTimer", true }
+        else
+            .{ "", false };
+        if (has_timer_name) {
+            try common_name.replaceRange(0, common_name.items.len, timer_name);
+            has_common_name = true;
+        }
 
         const common_prefixes = [_][]const u8{ "USART", "GPIO", "UART", "CAN", "I2C", "SPI" };
         for (common_prefixes) |prefix| {
             if (std.mem.startsWith(u8, name, prefix)) {
                 try common_name.replaceRange(0, common_name.items.len, prefix);
-                try common_name.append('x');
+                has_common_name = true;
                 break;
             }
+        }
+
+        if (!has_common_name) {
+            return .{ common_name.items, has_common_name };
         }
 
         // Because a HashMap is used, we should not free the memory occupied by
@@ -308,12 +329,12 @@ pub const Peripheral = struct {
         // ArenaAllocator and the application has a very short lifespan.
         if (dedupl.get(common_name.items)) |v| {
             try dedupl.put(common_name.items, v + 1);
-            try common_name.appendSlice(try std.fmt.allocPrint(allocator, "{}", .{v + 1}));
+            try common_name.appendSlice(try std.fmt.allocPrint(self.allocator, "_{}", .{v + 1}));
         } else {
             try dedupl.put(common_name.items, 1);
         }
 
-        return common_name.items;
+        return .{ common_name.items, has_common_name };
     }
 
     pub fn write_instance(self: Self, out_stream: anytype, dedupl: *DeduplMap) !void {
@@ -324,8 +345,7 @@ pub const Peripheral = struct {
         }
 
         const name = self.name.items;
-        const common_name = try generateCommonName(self.allocator, name, dedupl);
-        const has_common_name = !std.mem.eql(u8, name, common_name);
+        const common_name, const has_common_name = try self.generateCommonName(dedupl);
 
         const description = if (self.description.items.len == 0) "No description" else self.description.items;
         try out_stream.print(
@@ -334,17 +354,20 @@ pub const Peripheral = struct {
         , .{description});
 
         if (self.derived_peripherals.items.len > 0 or has_common_name) {
+            var periph_name = ArrayList(u8).init(self.allocator);
+            defer periph_name.deinit();
+
             if (has_common_name) {
-                try out_stream.print(
-                    \\pub const {s} = enum(u32) {{
-                    \\
-                , .{common_name});
+                try periph_name.replaceRange(0, periph_name.items.len, common_name);
             } else {
-                try out_stream.print(
-                    \\pub const {s}x = enum(u32) {{
-                    \\
-                , .{common_name});
+                try periph_name.replaceRange(0, periph_name.items.len, name);
+                try periph_name.append('x');
             }
+
+            try out_stream.print(
+                \\pub const {s} = enum(u32) {{
+                \\
+            , .{periph_name.items});
 
             try out_stream.print(
                 \\    {s} = 0x{x},
@@ -361,17 +384,25 @@ pub const Peripheral = struct {
 
             try out_stream.print(
                 \\
+                \\    pub inline fn addr(self: {s}) u32 {{
+                \\        return @intFromEnum(self);
+                \\    }}
+                \\
                 \\    pub inline fn get(self: {s}) *volatile types.{s} {{
-                \\        return types.{s}.from(@intFromEnum(self));
+                \\        return types.{s}.from(self.addr());
+                \\    }}
+                \\
+                \\    pub inline fn from(address: u32) {s} {{
+                \\        return types.{s}.from(address);
                 \\    }}
                 \\}};
                 \\
-            , .{ common_name, common_name, common_name });
+            , .{ periph_name.items, periph_name.items, periph_name.items, periph_name.items, periph_name.items, periph_name.items });
 
             try out_stream.print(
                 \\/// {s}
                 \\pub const {s} = {s}.{s}.get();
-            , .{ description, name, common_name, name });
+            , .{ description, name, periph_name.items, name });
 
             for (self.derived_peripherals.items) |peripheral| {
                 const derived_name = peripheral.name.items;
@@ -380,12 +411,12 @@ pub const Peripheral = struct {
                     \\
                     \\/// {s}
                     \\pub const {s} = {s}.{s}.get();
-                , .{ derived_description, derived_name, common_name, derived_name });
+                , .{ derived_description, derived_name, periph_name.items, derived_name });
             }
         } else {
             try out_stream.print(
                 \\pub const {s} = types.{s}.from(0x{x});
-            , .{ common_name, common_name, self.base_address.? });
+            , .{ name, name, self.base_address.? });
         }
         try out_stream.writeAll("\n");
     }
@@ -398,36 +429,21 @@ pub const Peripheral = struct {
         }
 
         const name = self.name.items;
-        const common_name = try generateCommonName(self.allocator, name, dedupl);
-        const has_common_name = !std.mem.eql(u8, name, common_name);
+        const common_name, const has_common_name = try self.generateCommonName(dedupl);
 
         const description = if (self.description.items.len == 0) "No description" else self.description.items;
-
-        // Handle special case for timers
-        if (std.mem.eql(u8, "Advanced timer", description)) {
-            try out_stream.print(
-                \\/// {s}
-                \\pub const AdvancedTimer = types.{s};
-                \\
-            , .{ description, name });
-        } else if (std.mem.eql(u8, "General purpose timer", description)) {
-            try out_stream.print(
-                \\/// {s}
-                \\pub const GeneralPurposeTimer = types.{s};
-                \\
-            , .{ description, name });
-        } else if (std.mem.eql(u8, "Basic timer", description)) {
-            try out_stream.print(
-                \\/// {s}
-                \\pub const BasicTimer = types.{s};
-                \\
-            , .{ description, name });
-        }
-
         try out_stream.print(
             \\/// {s}
             \\
         , .{description});
+
+        var periph_name = ArrayList(u8).init(self.allocator);
+        defer periph_name.deinit();
+        if (has_common_name) {
+            try periph_name.replaceRange(0, periph_name.items.len, common_name);
+        } else {
+            try periph_name.replaceRange(0, periph_name.items.len, name);
+        }
 
         if (has_common_name) {
             try out_stream.writeAll("/// Type for: ");
@@ -446,7 +462,11 @@ pub const Peripheral = struct {
             \\        return @ptrFromInt(base);
             \\    }}
             \\
-        , .{ common_name, common_name });
+            \\    pub fn addr(self: *volatile types.{s}) u32 {{
+            \\        return @intFromPtr(self);
+            \\    }}
+            \\
+        , .{ periph_name.items, periph_name.items, periph_name.items });
 
         // Sort registers by address offset for next step
         std.sort.heap(Register, self.registers.items, {}, registersSortCompare);
@@ -1082,9 +1102,9 @@ fn bitWidthToMask(width: u32) u32 {
             // This is needed to support both Zig 0.7 and 0.8
             const int_type_info =
                 if (@hasField(builtin.TypeInfo.Int, "signedness"))
-                .{ .signedness = .unsigned, .bits = i_use }
-            else
-                .{ .is_signed = false, .bits = i_use };
+                    .{ .signedness = .unsigned, .bits = i_use }
+                else
+                    .{ .is_signed = false, .bits = i_use };
 
             item.* = std.math.maxInt(@Type(builtin.TypeInfo{ .Int = int_type_info }));
         }
