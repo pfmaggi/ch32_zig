@@ -9,9 +9,14 @@ const svd = @import("svd.zig");
 var line_buffer: [1024 * 1024]u8 = undefined;
 
 const register_def =
+    \\const std = @import("std");
+    \\
     \\pub fn RegisterRW(comptime Register: type) type {
+    \\    const size = @bitSizeOf(Register);
+    \\    const IntSize = std.meta.Int(.unsigned, size);
+    \\
     \\    return extern struct {
-    \\        raw: u32,
+    \\        raw: IntSize,
     \\
     \\        const Self = @This();
     \\
@@ -20,7 +25,7 @@ const register_def =
     \\        }
     \\
     \\        pub inline fn write(self: *volatile Self, value: Register) void {
-    \\            self.write_raw(@bitCast(value));
+    \\            self.writeRaw(@bitCast(value));
     \\        }
     \\
     \\        pub inline fn modify(self: *volatile Self, new_value: anytype) void {
@@ -32,8 +37,30 @@ const register_def =
     \\            self.write(old_value);
     \\        }
     \\
-    \\        pub inline fn write_raw(self: *volatile Self, value: u32) void {
+    \\        pub inline fn writeRaw(self: *volatile Self, value: IntSize) void {
     \\            self.raw = value;
+    \\        }
+    \\
+    \\        pub inline fn setBits(self: *volatile Self, pos: u5, width: u6, value: IntSize) void {
+    \\            if (pos + width > size) {
+    \\                return;
+    \\            }
+    \\
+    \\            const IntSizePlus1 = std.meta.Int(.unsigned, size + 1);
+    \\            const mask: IntSize = @as(IntSize, (@as(IntSizePlus1, 1) << width) - 1) << pos;
+    \\            self.raw = (self.raw & ~mask) | ((value << pos) & mask);
+    \\        }
+    \\
+    \\        pub inline fn setBit(self: *volatile Self, pos: u5, value: u1) void {
+    \\            if (pos >= size) {
+    \\                return;
+    \\            }
+    \\
+    \\            if (value == 1) {
+    \\                self.raw |= @as(IntSize, 1) << pos;
+    \\            } else {
+    \\                self.raw &= ~(@as(IntSize, 1) << pos);
+    \\            }
     \\        }
     \\
     \\        pub inline fn default(_: *volatile Self) Register {
@@ -471,10 +498,6 @@ test "getChunk" {
     try std.testing.expectEqual(expected_derived_chunk.data, derived_chunk.data);
 }
 
-test {
-    _ = svd;
-}
-
 fn textToBool(data: []const u8) ?bool {
     if (ascii.eqlIgnoreCase(data, "true")) {
         return true;
@@ -498,4 +521,9 @@ fn parseAccessValue(data: []const u8) ?svd.Access {
         return .WriteOnly;
     }
     return null;
+}
+
+test {
+    _ = svd;
+    _ = @import("register.zig");
 }

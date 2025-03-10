@@ -458,15 +458,36 @@ pub const Peripheral = struct {
 
         try out_stream.print(
             \\pub const {s} = extern struct {{
-            \\    pub fn from(base: u32) *volatile types.{s} {{
+            \\
+        , .{periph_name.items});
+
+        if (self.derived_peripherals.items.len > 0 or has_common_name) {
+            try out_stream.print(
+                \\    pub const {s} = types.{s}.from(0x{x});
+                \\
+            , .{ name, periph_name.items, self.base_address.? });
+
+            for (self.derived_peripherals.items) |peripheral| {
+                const derived_name = peripheral.name.items;
+                try out_stream.print(
+                    \\    pub const {s} = types.{s}.from(0x{x});
+                    \\
+                , .{ derived_name, periph_name.items, peripheral.base_address.? });
+            }
+
+            try out_stream.writeAll("\n");
+        }
+
+        try out_stream.print(
+            \\    pub inline fn from(base: u32) *volatile types.{s} {{
             \\        return @ptrFromInt(base);
             \\    }}
             \\
-            \\    pub fn addr(self: *volatile types.{s}) u32 {{
+            \\    pub inline fn addr(self: *volatile types.{s}) u32 {{
             \\        return @intFromPtr(self);
             \\    }}
             \\
-        , .{ periph_name.items, periph_name.items, periph_name.items });
+        , .{ periph_name.items, periph_name.items });
 
         // Sort registers by address offset for next step
         std.sort.heap(Register, self.registers.items, {}, registersSortCompare);
@@ -496,7 +517,7 @@ pub const Peripheral = struct {
         }
 
         // and close the peripheral
-        try out_stream.print("}};\n", .{});
+        try out_stream.writeAll("};\n");
 
         return;
     }
@@ -1019,8 +1040,12 @@ test "Peripheral Print" {
         \\
         \\/// PERIPH comment
         \\pub const PERIPH = extern struct {
-        \\    pub fn from(base: u32) *volatile types.PERIPH {
+        \\    pub inline fn from(base: u32) *volatile types.PERIPH {
         \\        return @ptrFromInt(base);
+        \\    }
+        \\
+        \\    pub inline fn addr(self: *volatile types.PERIPH) u32 {
+        \\        return @intFromPtr(self);
         \\    }
         \\
         \\    /// offset 0x100
