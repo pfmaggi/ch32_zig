@@ -13,7 +13,7 @@ compiled using `zig build` as well.
 
 ### Install Zig
 
-Currently, the examples are tested with `0.14.0-dev.3328`.\
+Currently, the examples are tested with `0.14.0`.\
 You can download the latest version from:
 https://ziglang.org/download/
 
