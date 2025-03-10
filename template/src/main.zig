@@ -27,7 +27,7 @@ pub fn main() !void {
     });
 
     const led = hal.Pin.init(.GPIOC, 0);
-    led.as_output(.{ .speed = .max_50mhz, .mode = .push_pull });
+    led.asOutput(.{ .speed = .max_50mhz, .mode = .push_pull });
 
     _ = try USART1.writeBlocking("Hello, World!\r\n", hal.deadline.simple(100_000));
 

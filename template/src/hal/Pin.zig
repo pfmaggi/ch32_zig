@@ -26,55 +26,53 @@ pub const OutputMode = enum(u2) {
     alt_open_drain = 0b11,
 };
 
-port: *volatile svd.types.GPIO,
+port: svd.peripherals.GPIO,
 num: u4, // 0-15
 
 const Pin = @This();
 
 pub fn init(port: svd.peripherals.GPIO, num: u4) Pin {
-    return .{ .port = port.get(), .num = num };
+    return .{ .port = port, .num = num };
 }
 
-pub fn as_input(self: Pin, cfg: InputConfig) void {
+pub fn asInput(self: Pin, cfg: InputConfig) void {
     const data: u4 = @intFromEnum(cfg);
-    self.write_cfgr(data);
+    self.writeCfgr(data);
 }
 
-pub fn as_output(self: Pin, cfg: OutputConfig) void {
+pub fn asOutput(self: Pin, cfg: OutputConfig) void {
     // const speed_bits = @as(u2, @intFromEnum(cfg.speed));
     // const mode_bits = @as(u4, @intFromEnum(cfg.mode));
     // const data = (mode_bits << 2) | speed_bits;
     // equivalent to:
     const data: u4 = @bitCast(cfg);
-    self.write_cfgr(data);
+    self.writeCfgr(data);
 }
 
 pub fn toggle(self: Pin) void {
-    self.port.OUTDR.raw ^= mask(self);
+    self.port.get().OUTDR.raw ^= mask(self);
 }
 
 pub fn write(self: Pin, value: bool) void {
     // BSHR - Port set(low 16 bits) and reset(high 16 bits) register.
     if (value) {
         // Set.
-        self.port.BSHR.raw = mask(self);
+        self.port.get().BSHR.raw = mask(self);
     } else {
         // Reset.
-        self.port.BSHR.raw = @as(u32, mask(self)) << 16;
+        self.port.get().BSHR.raw = @as(u32, mask(self)) << 16;
     }
 }
 
 pub fn read(self: Pin) bool {
-    return (self.port.INDR.raw & mask(self)) != 0;
+    return (self.port.get().INDR.raw & mask(self)) != 0;
 }
 
 inline fn mask(pin: Pin) u16 {
     return @as(u16, 1) << pin.num;
 }
 
-inline fn write_cfgr(self: Pin, data: u4) void {
-    const bit_offset = self.num * 4; // or use `<< 2`?
-    // Clear the bits first, then set the new value.
-    self.port.CFGLR.raw &= ~(@as(u32, 0b1111) << bit_offset);
-    self.port.CFGLR.raw |= @as(u32, data) << bit_offset;
+inline fn writeCfgr(self: Pin, data: u4) void {
+    const bit_offset = @as(u5, self.num) * 4; // or use `<< 2`?
+    self.port.get().CFGLR.setBits(bit_offset, 4, data);
 }

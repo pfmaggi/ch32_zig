@@ -2,20 +2,22 @@ const std = @import("std");
 const config = @import("config");
 const svd = @import("svd");
 
-const IOPAEN_bit_offset: u5 = 2;
-
 pub fn enable(p: svd.peripherals.GPIO) void {
-    svd.peripherals.RCC.APB2PCENR.raw |= @as(u32, 1) << (bit_offset(p.addr()) + IOPAEN_bit_offset);
+    const pos = bitOffset(p.addr()) + IOPAEN_bit_offset;
+    svd.peripherals.RCC.APB2PCENR.setBit(pos, 1);
 }
 
 pub fn disable(p: svd.peripherals.GPIO) void {
-    svd.peripherals.RCC.APB2PCENR.raw &= ~(@as(u32, 1) << (bit_offset(p.addr()) + IOPAEN_bit_offset));
+    const pos = bitOffset(p.addr()) + IOPAEN_bit_offset;
+    svd.peripherals.RCC.APB2PCENR.setBit(pos, 0);
 }
 
-pub fn bit_offset(port_addr: u32) u5 {
+pub fn bitOffset(port_addr: u32) u5 {
     const port_A_addr = svd.peripherals.GPIO.GPIOA.addr();
     return @truncate((port_addr - port_A_addr) / GPIO_distance);
 }
+
+const IOPAEN_bit_offset: u5 = @bitOffsetOf(@TypeOf(svd.peripherals.RCC.APB2PCENR.default()), "IOPAEN");
 
 // Distance between GPIOx registers.
 const GPIO_distance: u32 = 0x400;
