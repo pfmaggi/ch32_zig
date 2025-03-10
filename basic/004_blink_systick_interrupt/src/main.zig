@@ -1,28 +1,37 @@
+// Registers adresses are taken from CH32V003 reference manual.
 const RCC_BASE: u32 = 0x40021000;
 const GPIOC_BASE: u32 = 0x40011000;
-
 const RCC_APB2PCENR: *volatile u32 = @ptrFromInt(RCC_BASE + 0x18);
 const GPIOC_CFGLR: *volatile u32 = @ptrFromInt(GPIOC_BASE + 0x00);
 const GPIOC_OUTDR: *volatile u32 = @ptrFromInt(GPIOC_BASE + 0x0C);
 
+// Port bit offset for Port C.
+const io_port_bit = 4;
+const led_pin_num = 0;
+
+// 6.5.2 PFIC Registers
+// PFIC interrupt enable setting register 1
 const PFIC_IENR1: *volatile u32 = @ptrFromInt(0xE000E100);
 // 6.5.4 STK Register Description
+// System count control register.
 const STK_CTLR: *volatile u32 = @ptrFromInt(0xE000F000);
+// System count status register.
 const STK_SR: *volatile u32 = @ptrFromInt(0xE000F004);
+// System counter register.
 const STK_CNTL: *volatile u32 = @ptrFromInt(0xE000F008);
+// Counting comparison register.
 const STK_CMPLR: *volatile u32 = @ptrFromInt(0xE000F010);
 
-const cpu_freq: u32 = 8_000_000; // 8MHz
+// By default, the CPU frequency is 8MHz.
+const cpu_freq: u32 = 8_000_000;
 const systick_one_second = cpu_freq;
 
-pub fn main() void {
-    RCC_APB2PCENR.* |= @as(u32, 1 << 4); // Enable Port C clock.
-    GPIOC_CFGLR.* &= ~@as(u32, 0b1111 << 0); // Clear all bits for PC0
-    GPIOC_CFGLR.* |= @as(u32, 0b0011 << 0); // Set push-pull output for PC0
+pub fn main() noreturn {
+    RCC_APB2PCENR.* |= @as(u32, 1) << io_port_bit; // Enable Port clock.
+    GPIOC_CFGLR.* &= ~(@as(u32, 0b1111) << led_pin_num * 4); // Clear all bits for pin.
+    GPIOC_CFGLR.* |= @as(u32, 0b0011) << led_pin_num * 4; // Set push-pull output for pin.
 
-    GPIOC_OUTDR.* |= @as(u16, 1 << 0); // Set PC0 (disable led)
-
-    // Setup SysTick
+    // Configure SysTick
 
     // Reset configuration.
     STK_CTLR.* = 0;
@@ -49,7 +58,7 @@ pub fn main() void {
 }
 
 export fn sysTickHandler() callconv(.c) noreturn {
-    GPIOC_OUTDR.* ^= @as(u16, 1 << 0); // Toggle PC0
+    GPIOC_OUTDR.* ^= @as(u16, 1 << led_pin_num); // Toggle pin.
 
     // Clear the trigger state for the next interrupt.
     STK_SR.* = 0;
@@ -68,8 +77,8 @@ export fn _start() linksection(".init") callconv(.naked) noreturn {
     // Add interrupt vector table here.
     // We need only the SysTick.
     asm volatile (
-        \\.set SysTicK_IRQn, 12
-        \\.skip    4*(SysTicK_IRQn - 1)
+        \\.set SysTicKInterruptNum, 12
+        \\.skip    4*(SysTicKInterruptNum - 1)
         \\.word sysTickHandler
     );
 }
@@ -133,11 +142,4 @@ export fn resetHandler() callconv(.c) noreturn {
         ::: "a0", "memory");
 
     main();
-
-    // If main() returns, disable interrupts and enter to sleep mode.
-    asm volatile ("csrci mstatus, 0b1000");
-    while (true) {
-        // wfi - Wait For Interrupt, but we disable interrupts above.
-        asm volatile ("wfi");
-    }
 }
