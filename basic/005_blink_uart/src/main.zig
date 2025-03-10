@@ -1,127 +1,73 @@
+// Registers adresses are taken from CH32V003 reference manual.
 const RCC_BASE: u32 = 0x40021000;
 const GPIOC_BASE: u32 = 0x40011000;
-
 const RCC_APB2PCENR: *volatile u32 = @ptrFromInt(RCC_BASE + 0x18);
 const GPIOC_CFGLR: *volatile u32 = @ptrFromInt(GPIOC_BASE + 0x00);
 const GPIOC_OUTDR: *volatile u32 = @ptrFromInt(GPIOC_BASE + 0x0C);
 
-const PFIC_IENR1: *volatile u32 = @ptrFromInt(0xE000E100);
-const STK_CTLR: *volatile u32 = @ptrFromInt(0xE000F000);
-const STK_SR: *volatile u32 = @ptrFromInt(0xE000F004);
-const STK_CNTL: *volatile u32 = @ptrFromInt(0xE000F008);
-const STK_CMPLR: *volatile u32 = @ptrFromInt(0xE000F010);
+// Port bit offset for Port C.
+const io_port_bit = 4;
+const led_pin_num = 0;
 
-var cpu_freq: u32 = 8_000_000; // 8MHz
+// By default, the CPU frequency is 8MHz.
+const cpu_freq: u32 = 8_000_000;
+const uart_baud_rate: u32 = 115_200;
 
-const std = @import("std");
-const builtin = @import("builtin");
 const start = @import("start.zig");
-const irq = @import("interrups.zig");
 const uart = @import("uart.zig");
 
-pub const interrups: irq.Interrups = .{
-    .SysTick = sysTickHandler,
-};
-
 comptime {
+    // Import comptime definitions from start.zig.
     _ = start;
-    _ = irq;
 }
 
-// Configure the RCC to use the HSI clock and PLL to get 48MHz.
-fn rcc_init_hsi_pll() void {
-    const RCC_CTLR: *volatile u32 = @ptrFromInt(RCC_BASE + 0x00);
+// Use hang function from start.zig as panic function.
+pub const panic = start.panic_hang;
 
-    // const CFG0_PLL_TRIM: *u8 = @ptrFromInt(0x1FFFF7D4); // Factory HSI clock trim value
-    // const HSITRIM = @as(u5, @truncate(CFG0_PLL_TRIM.*));
-    // if (CFG0_PLL_TRIM.* != 0xFF) {
-    //     // HSITRIM
-    //     RCC_CTLR.* = (RCC_CTLR.* & ~@as(u32, 0b11111) << 3) | @as(u32, HSITRIM) << 3;
-    // }
-
-    const FLASH_ACTLR: *volatile u32 = @ptrFromInt(0x40022000);
-    // LATENCY: Flash wait state 1 for 48MHz clock
-    FLASH_ACTLR.* = (FLASH_ACTLR.* & ~@as(u32, 0b11)) | 0b01;
-
-    const RCC_CFGR0: *volatile u32 = @ptrFromInt(RCC_BASE + 0x04);
-    var v = RCC_CFGR0.*;
-    // PLLSRC: HSI
-    v = (v & ~@as(u32, 0b1) << 16) | 0b0 << 16;
-    // HPRE: Prescaler off
-    v = (v & ~@as(u32, 0b1111 << 4)) | 0b0000 << 4;
-    RCC_CFGR0.* = v;
-
-    RCC_CTLR.* |= 1 << 24; // PLLON
-
-    // Spin until PLL ready
-    while (RCC_CTLR.* >> 25 & 1 != 1) {
-        asm volatile ("nop" ::: "memory");
-    }
-
-    // Select PLL clock source
-    // RCC_CFGR0.* |= 0b10 << 0; // SW: PLL
-    RCC_CFGR0.* = (RCC_CFGR0.* & ~@as(u32, 0b11)) | 0b10;
-
-    // Spin until PLL selected
-    while (RCC_CFGR0.* >> 2 & 0b11 != 0b10) {
-        asm volatile ("nop" ::: "memory");
-    }
-
-    cpu_freq = 48_000_000; // 48MHz
-}
-
-// To save space in a flash, you can use `noreturn` or `void`.
 pub fn main() !void {
-    rcc_init_hsi_pll();
-
-    const systick_one_second = cpu_freq;
-
-    RCC_APB2PCENR.* |= @as(u32, 1 << 4); // Enable Port C clock.
-    GPIOC_CFGLR.* &= ~@as(u32, 0b1111 << 0); // Clear all bits for PC0
-    GPIOC_CFGLR.* |= @as(u32, 0b0011 << 0); // Set push-pull output for PC0
-
-    GPIOC_OUTDR.* |= @as(u16, 1 << 0); // Set PC0 (disable led)
-
-    // Setup SysTick
-
-    // Reset configuration.
-    STK_CTLR.* = 0;
-    // Reset the Count Register.
-    STK_CNTL.* = 0;
-    // Set the compare register to trigger once per second.
-    STK_CMPLR.* = systick_one_second - 1;
-    // Set the SysTick Configuration.
-    // Bits:
-    //   0 - Turn on the system counter STK
-    //   1 - Enable counter interrupt.
-    //   2 - HCLK for time base.
-    //   3 - Re-counting from 0 after counting up to the comparison value.
-    STK_CTLR.* = 0b1111;
-
-    // Enable SysTick interrupt.
-    // Bit 12 - SysTick interrupt.
-    PFIC_IENR1.* |= @as(u32, 1 << 12);
+    RCC_APB2PCENR.* |= @as(u32, 1) << io_port_bit; // Enable Port clock.
+    GPIOC_CFGLR.* &= ~(@as(u32, 0b1111) << led_pin_num * 4); // Clear all bits for pin.
+    GPIOC_CFGLR.* |= @as(u32, 0b0011) << led_pin_num * 4; // Set push-pull output for pin.
 
     uart.USART1.setup(.{
         .cpu_frequency = cpu_freq,
-        .baud_rate = 115200,
+        .baud_rate = uart_baud_rate,
     });
 
-    _ = try uart.USART1.writeBlocking("UART initialized\n", null);
+    _ = uart.USART1.writeBlocking("UART initialized\r\n");
 
+    var count: u32 = 0;
+    var buffer: [10]u8 = undefined;
     while (true) {
-        // Wait for interrupt.
-        start.wfi();
+        // Print counter value.
+        _ = uart.USART1.writeBlocking(intToStr(&buffer, count));
+        _ = uart.USART1.writeBlocking("\r\n");
+        count += 1;
+
+        // Toggle pin.
+        GPIOC_OUTDR.* ^= @as(u16, 1 << led_pin_num);
+
+        // Simple delay.
+        var i: u32 = 0;
+        while (i < 1_000_000) : (i += 1) {
+            // ZIG please don't optimize this loop away.
+            asm volatile ("" ::: "memory");
+        }
     }
 }
 
-pub fn sysTickHandler() callconv(.c) noreturn {
-    GPIOC_OUTDR.* ^= @as(u16, 1 << 0); // Toggle PC0
+fn intToStr(buf: []u8, value: u32) []u8 {
+    var i: u32 = buf.len;
+    var v: u32 = value;
+    if (v == 0) {
+        buf[0] = '0';
+        return buf[0..1];
+    }
 
-    // Clear the trigger state for the next interrupt.
-    STK_SR.* = 0;
+    while (v > 0) : (v /= 10) {
+        i -= 1;
+        buf[i] = @as(u8, @truncate(v % 10)) + '0';
+    }
 
-    // All interrupts must end with mret instruction.
-    asm volatile ("mret");
-    unreachable;
+    return buf[i..];
 }

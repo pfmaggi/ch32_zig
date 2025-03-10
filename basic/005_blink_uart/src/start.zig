@@ -74,9 +74,11 @@ fn _start() callconv(.c) noreturn {
     hang();
 }
 
-pub fn hang() noreturn {
-    disableInterrupts();
+pub fn panic_hang(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+    hang();
+}
 
+pub fn hang() noreturn {
     // Fast blink.
     const GPIOC_OUTDR: *volatile u32 = @ptrFromInt(0x40011000 + 0x0C);
     while (true) {
@@ -87,18 +89,4 @@ pub fn hang() noreturn {
             asm volatile ("" ::: "memory");
         }
     }
-
-    // while (true) {
-    //     wfi();
-    // }
-}
-
-// Wait for interrupt.
-// This will put the processor into a low power state until an interrupt occurs.
-pub inline fn wfi() void {
-    asm volatile ("wfi");
-}
-
-inline fn disableInterrupts() void {
-    asm volatile ("csrci mstatus, 0b1000");
 }
