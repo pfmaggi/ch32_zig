@@ -21,7 +21,7 @@ pub fn main() !void {
     // hal.port.disable(.GPIOC);
 
     const USART1 = hal.Uart.from(.USART1);
-    USART1.setup(.{
+    USART1.configure(.{
         .cpu_frequency = 8_000_000,
         .baud_rate = 115_200,
     });

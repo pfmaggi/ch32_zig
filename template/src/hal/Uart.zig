@@ -2,15 +2,25 @@ const std = @import("std");
 const config = @import("config");
 const svd = @import("svd");
 
+const port = @import("port.zig");
+
 pub const DeadlineFn = fn () bool;
 
 pub const Config = struct {
     cpu_frequency: u32,
     baud_rate: u32,
+    mode: Mode = .TX_RX,
     word_bits: WordBits = .eight,
     stop_bits: StopBits = .one,
     parity: Parity = .none,
     flow_control: FlowControl = .none,
+    pins: ?Pins = null,
+};
+
+pub const Mode = enum {
+    TX,
+    RX,
+    TX_RX,
 };
 
 pub const WordBits = enum {
@@ -38,6 +48,18 @@ pub const FlowControl = enum {
     CTS_RTS,
 };
 
+pub const Pins = switch (config.chip_series) {
+    .ch32v003 => @import("uart/ch32v003.zig").Pins,
+    // TODO: implement other chips
+    else => @compileError("Unsupported chip series"),
+};
+
+const RccBits = switch (config.chip_series) {
+    .ch32v003 => @import("uart/ch32v003.zig").RccBits,
+    // TODO: implement other chips
+    else => @compileError("Unsupported chip series"),
+};
+
 pub const Timeout = error{
     Timeout,
 };
@@ -58,47 +80,40 @@ pub fn from(uart: svd.peripherals.USART) UART {
     return .{ .uart = uart.get() };
 }
 
-pub fn setup(self: UART, cfg: Config) void {
-    self.setupPins();
-    self.setupBrr(cfg);
-    self.setupCtrl(cfg);
+pub fn configure(self: UART, comptime cfg: Config) void {
+    self.enable();
+    self.configurePins(cfg);
+    self.configureBrr(cfg);
+    self.configureCtrl(cfg);
 }
 
-fn setupPins(self: UART) void {
-    _ = self;
+fn configurePins(self: UART, comptime cfg: Config) void {
+    const pins = cfg.pins orelse Pins.get_default(self.uart);
 
-    const RCC = svd.peripherals.RCC;
-    RCC.APB2PCENR.modify(.{
-        // Enable Port D clock.
-        .IOPDEN = 1,
-        // Enable USART1 clock.
-        .USART1EN = 1,
-    });
+    if (pins.remap.has()) {
+        // Alternate function I/O clock enable
+        svd.peripherals.RCC.APB2PCENR.modify(.{ .AFIOEN = 1 });
+        // Remap the pins.
+        svd.peripherals.AFIO.PCFR1.modify(pins.remap.afio_pcfr1);
+    }
 
-    // GPIOD
-    // TX - GPIO D5
-    svd.peripherals.GPIOD.CFGLR.modify(.{
-        // Mode 01: Output max 10MHz
-        .MODE5 = 0b01,
-        // CNF 10: Multiplexed Push-Pull
-        .CNF5 = 0b10,
-    });
+    if (cfg.mode == .TX or cfg.mode == .TX_RX) {
+        port.enable(pins.tx.port);
+        pins.tx.asOutput(.{ .speed = .max_10mhz, .mode = .alt_push_pull });
+    }
 
-    // RX - GPIO D6
-    svd.peripherals.GPIOD.CFGLR.modify(.{
-        // Mode 00: Input
-        .MODE6 = 0b00,
-        // CNF 01: Floating
-        .CNF6 = 0b01,
-    });
+    if (cfg.mode == .RX or cfg.mode == .TX_RX) {
+        port.enable(pins.rx.port);
+        pins.rx.asInput(.floating);
+    }
 }
 
-fn setupBrr(self: UART, cfg: Config) void {
+fn configureBrr(self: UART, comptime cfg: Config) void {
     const brr = (cfg.cpu_frequency + cfg.baud_rate / 2) / cfg.baud_rate;
     self.uart.BRR.raw = brr;
 }
 
-fn setupCtrl(self: UART, cfg: Config) void {
+fn configureCtrl(self: UART, comptime cfg: Config) void {
     const parityBit = switch (cfg.parity) {
         .none => @as(u1, 0),
         .even, .odd => @as(u1, 1),
@@ -166,6 +181,28 @@ fn setupCtrl(self: UART, cfg: Config) void {
     self.uart.CTLR1.modify(.{
         .UE = 1,
     });
+}
+
+pub fn enable(self: UART) void {
+    const RCC = svd.peripherals.RCC;
+    const bits = RccBits.get(self.uart);
+    if (bits.apb2) |pos| {
+        RCC.APB2PCENR.setBit(pos, 1);
+    }
+    if (bits.apb1) |pos| {
+        RCC.APB1PCENR.setBit(pos, 1);
+    }
+}
+
+pub fn disable(self: UART) void {
+    const RCC = svd.peripherals.RCC;
+    const bits = RccBits.get(self.uart);
+    if (bits.apb2) |pos| {
+        RCC.APB2PCENR.setBit(pos, 0);
+    }
+    if (bits.apb1) |pos| {
+        RCC.APB1PCENR.setBit(pos, 0);
+    }
 }
 
 pub fn isReadable(self: UART) bool {
