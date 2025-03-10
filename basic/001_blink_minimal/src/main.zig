@@ -16,7 +16,7 @@ export fn _start() callconv(.c) noreturn {
     GPIOC_CFGLR.* |= @as(u32, 0b0011) << led_pin_num * 4; // Set push-pull output for pin.
 
     while (true) {
-        GPIOC_OUTDR.* ^= @as(u16, 1 << led_pin_num); // Toggle PC0
+        GPIOC_OUTDR.* ^= @as(u16, 1 << led_pin_num); // Toggle pin.
 
         // Simple delay.
         var i: u32 = 0;
