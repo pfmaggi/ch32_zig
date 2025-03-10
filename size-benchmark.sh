@@ -24,12 +24,12 @@ build() {
   echo $size
 }
 
-for dir in */; do
+for dir in basic/*/; do
   if [ ! -f "${dir}build.zig" ]; then
     continue
   fi
 
-  dir=${dir//\//}
+  dir=$(sed 's/\/$//' <<<"$dir")
 
   if [ "$dir" == "template" ]; then
     continue

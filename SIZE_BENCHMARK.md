@@ -4,43 +4,43 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 `Failed` means that the firmware is too large to fit in the flash memory.
 
-## 001_blink_minimal
+## basic/001_blink_minimal
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|
 | 56 | 62 | 67316 | 356528 |
 
-## 002_blink_ld_zig
+## basic/002_blink_ld_zig
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|
 | 188 | 528 | 568 | 573 |
 
-## 003_blink_ld_asm
+## basic/003_blink_ld_asm
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|
 | 184 | 188 | 200 | 397 |
 
-## 004_blink_systick_interrupt
+## basic/004_blink_systick_interrupt
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|
 | 268 | 286 | 290 | 407 |
 
-## 005_blink_uart
+## basic/005_blink_uart
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|
 | 830 | 946 | 1006 | Failed |
 
-## 006_blink_uart_logger
+## basic/006_blink_uart_logger
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|
 | 5536 | 8272 | 13784 | Failed |
 
-## 007_spi_master
+## basic/007_spi_master
 
 | ReleaseSmall | ReleaseFast | ReleaseSafe | Debug |
 |--------|--------|--------|--------|

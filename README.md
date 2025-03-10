@@ -30,7 +30,7 @@ export PATH=$PATH:$(pwd)/zig-out/bin
 ### Build and upload the example
 
 ```shell
-cd 001_blink_minimal
+cd basic/001_blink_minimal
 zig build
 minichlink -w zig-out/firmware/ch32v003_blink.bin flash -b
 ```

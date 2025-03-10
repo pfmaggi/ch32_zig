@@ -2,7 +2,7 @@
 
 echo "Clean all firmwares"
 
-for dir in */; do
+for dir in basic/*/; do
   if [ -f "${dir}build.zig" ]; then
     echo "Clean: ${dir}"
     (cd "${dir}" && rm -rf .zig-cache zig-out)

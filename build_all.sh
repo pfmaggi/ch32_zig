@@ -2,10 +2,10 @@
 
 echo "Build all firmwares"
 
-for dir in */; do
+for dir in basic/*/; do
   if [ -f "${dir}build.zig" ]; then
     echo "Building: ${dir}"
-    (cd "${dir}" && zig build --release=small)
+    (cd "${dir}" && zig build)
   fi
 done
 
