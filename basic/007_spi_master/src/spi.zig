@@ -4,7 +4,7 @@ const RCC_APB2PRSTR: *volatile u32 = @ptrFromInt(0x4002100C);
 const RCC_APB2PCENR: *volatile u32 = @ptrFromInt(0x40021018);
 const GPIOC_CFGLR: *volatile u32 = @ptrFromInt(0x40011000);
 
-pub const SPI1: SPI = @enumFromInt(0x40013000);
+pub const SPI1: SPI = @bitCast(@as(u32, 0x40013000));
 
 pub const Mode = enum {
     master,
@@ -15,47 +15,25 @@ pub const Config = struct {
     mode: Mode,
 };
 
-pub const TransmitError = error{
-    Timeout,
-};
-
-pub const ReceiveError = error{
-    Timeout,
-};
-
-pub const SPI = enum(u32) {
-    _,
+pub const SPI = packed struct(u32) {
+    addr: u32,
 
     const CTLR1_offset = 0x00;
     const CTLR2_offset = 0x04;
     const STATR_offset = 0x08;
     const DATAR_offset = 0x0C;
 
-    pub const DeadlineFn = fn () bool;
-
-    pub fn simpleDeadline(count: u32) ?DeadlineFn {
-        return struct {
-            var counter = count;
-            pub fn deadline() bool {
-                counter -= 1;
-                return counter == 0;
-            }
-        }.deadline;
-    }
-
     fn ptr(self: SPI, offset: u32) *volatile u32 {
-        return @ptrFromInt(@intFromEnum(self) + offset);
+        return @ptrFromInt(self.addr + offset);
     }
 
-    pub fn setup(comptime self: SPI, cfg: Config) void {
-        self.setupPins(cfg);
-        self.setupCtrl(cfg);
+    pub fn configure(comptime self: SPI, comptime cfg: Config) void {
+        self.configurePins(cfg);
+        self.configureCtrl(cfg);
     }
 
-    fn setupPins(comptime self: SPI, cfg: Config) void {
+    fn configurePins(comptime self: SPI, comptime cfg: Config) void {
         if (self != SPI1) {
-            @compileLog(@intFromEnum(self));
-            @compileLog(SPI1);
             @compileError("SPI not supported");
         }
 
@@ -91,10 +69,12 @@ pub const SPI = enum(u32) {
             // Mode 00: Input
             // CNF 01: Floating
             GPIOC_CFGLR.* |= @as(u32, 0b01_00 << 4 * 7);
+        } else {
+            @compileError("SPI slave mode not implemented");
         }
     }
 
-    fn setupCtrl(comptime self: SPI, cfg: Config) void {
+    fn configureCtrl(comptime self: SPI, comptime cfg: Config) void {
         _ = cfg;
 
         const SPI_CTLR1: *volatile u32 = self.ptr(CTLR1_offset);
@@ -102,88 +82,62 @@ pub const SPI = enum(u32) {
 
         // Reset.
         SPI_CTLR1.* = 0;
-        var v: u32 = 0;
+        SPI_CTLR2.* = 0;
+
         // BR: Baund rate control.
         // BR[2:0] = 011: fPCLK/16
-        v |= @as(u32, 0b011 << 3);
-        // DEF: Data frame format.
-        // DEF = 0: 8-bit data frame format.
-        // DEF = 1: 16-bit data frame format.
-        // SPI_CTLR1.* |= @as(u32, 1 << 11);
-        // LSBFIRST: Frame format control bit.
-        // LSBFIRST = 0: The data transfer starts from the MSB bit.
-        // LSBFIRST = 1: The data transfer starts from the LSB bit.
-        // SPI_CTLR1.* |= @as(u32, 1 << 7);
-        // MSTR: Master-slave select.
-        // MSTR = 0: Slave.
-        // MSTR = 1: Master.
-        v |= @as(u32, 1 << 2);
+        SPI_CTLR1.* |= @as(u32, 0b011) << 3;
+
         // SSM: Software slave management.
         // SSM = 0: Hardware control of the NSS pin.
         // SSM = 1: Software control of the NSS pin.
-        // v |= @as(u32, 1 << 9);
-        // SSI: Internal slave select.
+        SPI_CTLR1.* |= @as(u32, 1) << 9;
+
+        // SSI: Internal slave select. Required for master mode.
         // SSI = 0: NSS is low.
         // SSI = 1: NSS is high.
-        // v |= @as(u32, 1 << 8);
+        SPI_CTLR1.* |= @as(u32, 1 << 8);
 
-        SPI_CTLR1.* = v;
+        // MSTR: Master-slave select.
+        // MSTR = 0: Slave.
+        // MSTR = 1: Master.
+        SPI_CTLR1.* |= @as(u32, 1) << 2;
 
-        // Reset.
-        SPI_CTLR2.* = 0;
+        // DFF: Data frame format.
+        // DFF = 0: 8-bit data frame format.
+        // DFF = 1: 16-bit data frame format.
+        SPI_CTLR1.* &= ~(@as(u32, 1) << 11);
+        // SPI_CTLR1.* |= @as(u32, 1) << 11;
 
         // SPE: SPI enable.
         SPI_CTLR1.* |= @as(u32, 1 << 6);
     }
 
-    pub inline fn isReadable(self: SPI) bool {
-        const SPI_STATR: *volatile u32 = self.ptr(STATR_offset);
-        const RXNE = 0;
-        return (SPI_STATR.* >> RXNE) & 1 == 1;
-    }
-
     pub inline fn isWriteable(self: SPI) bool {
         const SPI_STATR: *volatile u32 = self.ptr(STATR_offset);
-        const TXE = 1;
-        return (SPI_STATR.* >> TXE) & 1 == 1;
+        const TXE = @as(u32, 1) << 1;
+        return (SPI_STATR.* & TXE) != 0;
     }
 
     pub inline fn isBusy(self: SPI) bool {
         const SPI_STATR: *volatile u32 = self.ptr(STATR_offset);
-        const BSY = 7;
-        return (SPI_STATR.* >> BSY) & 1 == 1;
+        const BSY = @as(u32, 1) << 7;
+        return (SPI_STATR.* & BSY) != 0;
     }
 
-    pub noinline fn writeBlocking(self: SPI, payload: []const u8, deadlineFn: ?DeadlineFn) TransmitError!usize {
+    pub noinline fn writeBlocking(self: SPI, payload: []const u8) usize {
         const SPI_DATAR: *volatile u32 = self.ptr(DATAR_offset);
 
         var offset: usize = 0;
         while (offset < payload.len) {
             while (!self.isWriteable()) {
-                if (deadlineFn) |deadline| {
-                    if (deadline()) {
-                        if (offset > 0) {
-                            return offset;
-                        }
-
-                        return error.Timeout;
-                    }
-                }
                 asm volatile ("" ::: "memory");
             }
+
             SPI_DATAR.* = (SPI_DATAR.* & ~@as(u32, 0xFF)) | payload[offset];
             offset += 1;
 
             while (self.isBusy()) {
-                if (deadlineFn) |deadline| {
-                    if (deadline()) {
-                        if (offset > 0) {
-                            return offset;
-                        }
-
-                        return error.Timeout;
-                    }
-                }
                 asm volatile ("" ::: "memory");
             }
         }
