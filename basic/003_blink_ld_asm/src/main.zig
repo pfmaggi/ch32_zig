@@ -5,18 +5,23 @@ const RCC_APB2PCENR: *volatile u32 = @ptrFromInt(RCC_BASE + 0x18);
 const GPIOC_CFGLR: *volatile u32 = @ptrFromInt(GPIOC_BASE + 0x00);
 const GPIOC_OUTDR: *volatile u32 = @ptrFromInt(GPIOC_BASE + 0x0C);
 
+// Port bit offset for Port C.
+const io_port_bit = 4;
+const led_pin_num = 0;
+
 // Global variable in memory.
 // Code with such a variable will not work without a linker script
 // and without copying the .data section to RAM.
 var step: u32 = 1;
 
-pub fn main() void {
-    RCC_APB2PCENR.* |= @as(u32, 1 << 4); // Enable Port C clock.
-    GPIOC_CFGLR.* &= ~@as(u32, 0b1111 << 0); // Clear all bits for PC0
-    GPIOC_CFGLR.* |= @as(u32, 0b0011 << 0); // Set push-pull output for PC0
+// Now we can use the main(or any other) function for the program logic.
+pub fn main() noreturn {
+    RCC_APB2PCENR.* |= @as(u32, 1) << io_port_bit; // Enable Port clock.
+    GPIOC_CFGLR.* &= ~(@as(u32, 0b1111) << led_pin_num * 4); // Clear all bits for pin.
+    GPIOC_CFGLR.* |= @as(u32, 0b0011) << led_pin_num * 4; // Set push-pull output for pin.
 
     while (true) {
-        GPIOC_OUTDR.* ^= @as(u16, 1 << 0); // Toggle PC0
+        GPIOC_OUTDR.* ^= @as(u16, 1 << led_pin_num); // Toggle PC0
 
         var i: u32 = 0;
         while (i < 1_000_000) : (i += step) {
@@ -81,10 +86,4 @@ export fn resetHandler() callconv(.c) noreturn {
     );
 
     main();
-
-    // If main() returns, enter to sleep mode.
-    while (true) {
-        // wfi - Wait For Interrupt, but we not enable any interrupt.
-        asm volatile ("wfi");
-    }
 }
