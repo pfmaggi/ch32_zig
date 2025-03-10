@@ -48,7 +48,7 @@ pub fn main() void {
     }
 }
 
-export fn sysTickHandler() callconv(.C) noreturn {
+export fn sysTickHandler() callconv(.c) noreturn {
     GPIOC_OUTDR.* ^= @as(u16, 1 << 0); // Toggle PC0
 
     // Clear the trigger state for the next interrupt.
@@ -60,7 +60,7 @@ export fn sysTickHandler() callconv(.C) noreturn {
 }
 
 // This is the entry point of the program.
-export fn _start() linksection(".init") callconv(.Naked) noreturn {
+export fn _start() linksection(".init") callconv(.naked) noreturn {
     // We need to make a jump because right below this code
     // is the interrupt vector table.
     asm volatile ("j resetHandler");
@@ -74,7 +74,7 @@ export fn _start() linksection(".init") callconv(.Naked) noreturn {
     );
 }
 
-export fn resetHandler() callconv(.C) noreturn {
+export fn resetHandler() callconv(.c) noreturn {
     // Set global pointer.
     asm volatile (
         \\.option push

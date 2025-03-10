@@ -28,8 +28,10 @@
       "*.[Pp][Dd][Ff]" # "*.pdf", case insensitive
       "*.ld"
       "*.png"
+      "*.svd"
       "LICENSE"
       "gitignore"
+      "template/chip/*.json"
     ];
   };
 }

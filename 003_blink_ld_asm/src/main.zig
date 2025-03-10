@@ -32,13 +32,13 @@ pub fn main() void {
 }
 
 // This is the entry point of the program.
-export fn _start() linksection(".init") callconv(.Naked) noreturn {
+export fn _start() linksection(".init") callconv(.naked) noreturn {
     // We need to make a jump because right below this code
     // is the interrupt vector table, which we will deal with later.
     asm volatile ("j resetHandler");
 }
 
-export fn resetHandler() callconv(.C) noreturn {
+export fn resetHandler() callconv(.c) noreturn {
     // Set global pointer.
     asm volatile (
         \\.option push

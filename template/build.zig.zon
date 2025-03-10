@@ -1,15 +1,15 @@
 .{
-  .name = .template,
-  .version = "0.0.0",
-  .minimum_zig_version = "0.14.0",
-  .paths = .{
-    "build.zig",
-    "build.zig.zon",
-    "ld",
-    "svd",
-    "src",
-    "README.md",
-    "LICENSE",
-  },
-  .fingerprint = 0x97601f83303ff561,
+    .name = .template,
+    .version = "0.0.0",
+    .minimum_zig_version = "0.14.0",
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "ld",
+        "svd",
+        "src",
+        "README.md",
+        "LICENSE",
+    },
+    .fingerprint = 0x97601f83303ff561,
 }

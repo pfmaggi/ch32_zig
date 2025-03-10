@@ -838,7 +838,7 @@ pub const types = struct {
     };
 
     /// General purpose I/O
-    /// Type for: GPIOA GPIOB GPIOC GPIOD 
+    /// Type for: GPIOA GPIOB GPIOC GPIOD
     pub const GPIO = extern struct {
         pub const GPIOA = types.GPIO.from(0x40010800);
         pub const GPIOB = types.GPIO.from(0x40010c00);
@@ -2888,7 +2888,7 @@ pub const types = struct {
     };
 
     /// Advanced timer
-    /// Type for: TIM1 
+    /// Type for: TIM1
     pub const AdvancedTimer = extern struct {
         pub const TIM1 = types.AdvancedTimer.from(0x40012c00);
 
@@ -3405,7 +3405,7 @@ pub const types = struct {
     };
 
     /// General purpose timer
-    /// Type for: TIM2 TIM3 TIM4 
+    /// Type for: TIM2 TIM3 TIM4
     pub const GeneralPurposeTimer = extern struct {
         pub const TIM2 = types.GeneralPurposeTimer.from(0x40000000);
         pub const TIM3 = types.GeneralPurposeTimer.from(0x40000400);
@@ -3845,7 +3845,7 @@ pub const types = struct {
     };
 
     /// Inter integrated circuit
-    /// Type for: I2C1 I2C2 
+    /// Type for: I2C1 I2C2
     pub const I2C = extern struct {
         pub const I2C1 = types.I2C.from(0x40005400);
         pub const I2C2 = types.I2C.from(0x40005800);
@@ -4103,7 +4103,7 @@ pub const types = struct {
     };
 
     /// Serial peripheral interface
-    /// Type for: SPI1 SPI2 
+    /// Type for: SPI1 SPI2
     pub const SPI = extern struct {
         pub const SPI1 = types.SPI.from(0x40013000);
         pub const SPI2 = types.SPI.from(0x40003800);
@@ -4274,7 +4274,7 @@ pub const types = struct {
     };
 
     /// Universal synchronous asynchronous receiver transmitter
-    /// Type for: USART1 USART2 USART3 
+    /// Type for: USART1 USART2 USART3
     pub const USART = extern struct {
         pub const USART1 = types.USART.from(0x40013800);
         pub const USART2 = types.USART.from(0x40004400);

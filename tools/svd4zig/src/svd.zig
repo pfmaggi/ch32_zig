@@ -448,9 +448,9 @@ pub const Peripheral = struct {
         if (has_common_name) {
             try out_stream.writeAll("/// Type for: ");
 
-            try out_stream.print("{s} ", .{name});
+            try out_stream.print("{s}", .{name});
             for (self.derived_peripherals.items) |peripheral| {
-                try out_stream.print("{s} ", .{peripheral.name.items});
+                try out_stream.print(" {s}", .{peripheral.name.items});
             }
 
             try out_stream.writeAll("\n");

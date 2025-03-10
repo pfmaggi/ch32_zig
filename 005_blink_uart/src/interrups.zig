@@ -13,7 +13,7 @@ const interrups: Interrups = if (@hasDecl(root, "interrups")) root.interrups els
 
 pub const Interrups = extern struct {
     // const Handler = *const fn () callconv(.{ .riscv32_interrupt = .{.mode = .machine}}) void;
-    const Handler = *const fn () callconv(.C) noreturn;
+    const Handler = *const fn () callconv(.c) noreturn;
     _reserved1: [1]u32 = undefined,
     NMI: Handler = unhandledInterrupt,
     EXC: Handler = unhandledInterrupt,
@@ -47,7 +47,7 @@ pub const Interrups = extern struct {
     TIM2: Handler = unhandledInterrupt,
 };
 
-pub fn unhandledInterrupt() callconv(.C) noreturn {
+pub fn unhandledInterrupt() callconv(.c) noreturn {
     switch (builtin.mode) {
         .Debug, .ReleaseSafe => {
             @panic("unhandled interrupt: see mcause.");

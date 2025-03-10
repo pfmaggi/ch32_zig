@@ -11,7 +11,7 @@ comptime {
     @export(&_start, .{ .name = "_start" });
 }
 
-fn _start() callconv(.C) noreturn {
+fn _start() callconv(.c) noreturn {
     // Set global pointer.
     asm volatile (
         \\.option push

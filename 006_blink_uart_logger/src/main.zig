@@ -126,7 +126,7 @@ pub fn main() !void {
     }
 }
 
-pub fn sysTickHandler() callconv(.C) noreturn {
+pub fn sysTickHandler() callconv(.c) noreturn {
     GPIOC_OUTDR.* ^= @as(u16, 1 << 0); // Toggle PC0
 
     // Clear the trigger state for the next interrupt.

@@ -9,9 +9,9 @@ Made for use with CH32V (RISC-V) MCU.
 
 ## New features
 
-+ Supports Zig 0.14.0-dev.
-+ Fixed bugs when generating from SVD files for CH32V.
-+ New format for the generated file (code has become more interchangeable between different MCUs).
+- Supports Zig 0.14.0-dev.
+- Fixed bugs when generating from SVD files for CH32V.
+- New format for the generated file (code has become more interchangeable between different MCUs).
 
 ## Usage
 

@@ -6,7 +6,7 @@ const GPIOC_CFGLR: *volatile u32 = @ptrFromInt(GPIOC_BASE + 0x00);
 const GPIOC_OUTDR: *volatile u32 = @ptrFromInt(GPIOC_BASE + 0x0C);
 
 // This is the entry point of the program.
-export fn _start() callconv(.C) noreturn {
+export fn _start() callconv(.c) noreturn {
     RCC_APB2PCENR.* |= @as(u32, 1 << 4); // Enable Port C clock.
     GPIOC_CFGLR.* &= ~@as(u32, 0b1111 << 0); // Clear all bits for PC0
     GPIOC_CFGLR.* |= @as(u32, 0b0011 << 0); // Set push-pull output for PC0
