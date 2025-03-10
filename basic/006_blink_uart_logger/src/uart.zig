@@ -3,9 +3,7 @@ const std = @import("std");
 const RCC_APB2PCENR: *volatile u32 = @ptrFromInt(0x40021018);
 const GPIOD_CFGLR: *volatile u32 = @ptrFromInt(0x40011400);
 
-pub const USART1: UART = @enumFromInt(0x40013800);
-
-pub const DeadlineFn = fn () bool;
+pub const USART1: UART = @bitCast(@as(u32, 0x40013800));
 
 pub const Config = struct {
     cpu_frequency: u32,
@@ -41,19 +39,6 @@ pub const FlowControl = enum {
     CTS_RTS,
 };
 
-pub const TransmitError = error{
-    Timeout,
-};
-
-pub const ReceiveError = error{
-    OverrunError,
-    BreakError,
-    ParityError,
-    FramingError,
-    NoiseError,
-    Timeout,
-};
-
 pub const ErrorStates = packed struct(u4) {
     overrun_error: bool = false,
     break_error: bool = false,
@@ -62,8 +47,8 @@ pub const ErrorStates = packed struct(u4) {
     noise_error: bool = false,
 };
 
-pub const UART = enum(u32) {
-    _,
+pub const UART = packed struct(u32) {
+    addr: u32,
 
     // Table 12-2 USART-related registers list (CH32V003 Reference Manual).
     const STATR_offset: u32 = 0x00;
@@ -73,40 +58,21 @@ pub const UART = enum(u32) {
     const CTLR2_offset: u32 = 0x10;
     const CTLR3_offset: u32 = 0x14;
 
-    pub const Writer = std.io.GenericWriter(UART, TransmitError, genericWriterFn);
-    pub const Reader = std.io.GenericReader(UART, ReceiveError, genericReaderFn);
+    pub const Writer = std.io.GenericWriter(UART, error{}, genericWriterFn);
 
     pub fn writer(self: UART) Writer {
         return .{ .context = self };
     }
 
-    pub fn reader(self: UART) Reader {
-        return .{ .context = self };
-    }
-
-    fn simpleDeadline(count: u32) ?DeadlineFn {
-        return struct {
-            var counter = count;
-            pub fn deadline() bool {
-                counter -= 1;
-                return counter == 0;
-            }
-        }.deadline;
-    }
-
-    fn genericWriterFn(self: UART, buffer: []const u8) TransmitError!usize {
-        return self.writeBlocking(buffer, simpleDeadline(10000));
-    }
-
-    fn genericReaderFn(self: UART, buffer: []u8) ReceiveError!usize {
-        return self.readBlocking(buffer, simpleDeadline(10000));
+    pub fn genericWriterFn(self: UART, buffer: []const u8) error{}!usize {
+        return self.writeBlocking(buffer);
     }
 
     fn ptr(self: UART, offset: u32) *volatile u32 {
-        return @ptrFromInt(@intFromEnum(self) + offset);
+        return @ptrFromInt(self.addr + offset);
     }
 
-    pub fn setup(comptime self: UART, cfg: Config) void {
+    pub fn setup(comptime self: UART, comptime cfg: Config) void {
         self.setupPins();
         self.setupBrr(cfg);
         self.setupCtrl(cfg);
@@ -114,8 +80,6 @@ pub const UART = enum(u32) {
 
     fn setupPins(comptime self: UART) void {
         if (self != USART1) {
-            @compileLog(@intFromEnum(self));
-            @compileLog(USART1);
             @compileError("UART not supported");
         }
 
@@ -141,14 +105,14 @@ pub const UART = enum(u32) {
         GPIOD_CFGLR.* |= @as(u32, 0b01_00 << 4 * 6);
     }
 
-    fn setupBrr(self: UART, cfg: Config) void {
+    fn setupBrr(self: UART, comptime cfg: Config) void {
         const USART_BRR: *volatile u32 = self.ptr(BRR_offset);
 
         const brr = (cfg.cpu_frequency + cfg.baud_rate / 2) / cfg.baud_rate;
         USART_BRR.* = brr;
     }
 
-    fn setupCtrl(self: UART, cfg: Config) void {
+    fn setupCtrl(self: UART, comptime cfg: Config) void {
         const parityBit = switch (cfg.parity) {
             .none => @as(u1, 0),
             .even, .odd => @as(u1, 1),
@@ -208,13 +172,6 @@ pub const UART = enum(u32) {
         // CTSE: CTS enable.
         USART_CTLR3.* |= @as(u32, cts_bit) << 9;
 
-        // Enable the interrupt for RX
-        // const PFIC_IENR2: *volatile u32 = @ptrFromInt(0xE000E104);
-        // // RXNEIE: RXNE interrupt enable.
-        // USART_CTLR1.* |= @as(u32, 1) << 5;
-        // // 32 - interrupt enable control.
-        // PFIC_IENR2.* = 1;
-
         // UE: UART enable bit.
         USART_CTLR1.* |= @as(u32, 1) << 13;
     }
@@ -237,36 +194,19 @@ pub const UART = enum(u32) {
         return (USART_STATR.* & TC) != 0;
     }
 
-    pub noinline fn writeBlocking(self: UART, payload: []const u8, deadlineFn: ?DeadlineFn) TransmitError!usize {
+    pub noinline fn writeBlocking(self: UART, payload: []const u8) usize {
         const USART_DATAR: *volatile u32 = self.ptr(DATAR_offset);
 
         var offset: usize = 0;
         while (offset < payload.len) {
             while (!self.isWriteable()) {
-                if (deadlineFn) |deadline| {
-                    if (deadline()) {
-                        if (offset > 0) {
-                            return offset;
-                        }
-
-                        return error.Timeout;
-                    }
-                }
                 asm volatile ("" ::: "memory");
             }
+
             USART_DATAR.* = payload[offset];
             offset += 1;
 
             while (!self.isWriteComplete()) {
-                if (deadlineFn) |deadline| {
-                    if (deadline()) {
-                        if (offset > 0) {
-                            return offset;
-                        }
-
-                        return error.Timeout;
-                    }
-                }
                 asm volatile ("" ::: "memory");
             }
         }
@@ -274,21 +214,12 @@ pub const UART = enum(u32) {
         return offset;
     }
 
-    pub fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) ReceiveError!usize {
+    pub fn readBlocking(self: UART, buffer: []u8) usize {
         const USART_DATAR: *volatile u32 = self.ptr(DATAR_offset);
 
         var count: u32 = 0;
         for (buffer) |*byte| {
             while (!self.isReadable()) {
-                if (deadlineFn) |deadline| {
-                    if (deadline()) {
-                        if (count > 0) {
-                            return count;
-                        }
-
-                        return error.Timeout;
-                    }
-                }
                 asm volatile ("" ::: "memory");
             }
 
