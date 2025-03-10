@@ -1,6 +1,11 @@
+const std = @import("std");
+
 pub fn RegisterRW(comptime Register: type) type {
+    const size = @bitSizeOf(Register);
+    const IntSize = std.meta.Int(.unsigned, size);
+
     return extern struct {
-        raw: u32,
+        raw: IntSize,
 
         const Self = @This();
 
@@ -9,7 +14,7 @@ pub fn RegisterRW(comptime Register: type) type {
         }
 
         pub inline fn write(self: *volatile Self, value: Register) void {
-            self.write_raw(@bitCast(value));
+            self.writeRaw(@bitCast(value));
         }
 
         pub inline fn modify(self: *volatile Self, new_value: anytype) void {
@@ -21,8 +26,30 @@ pub fn RegisterRW(comptime Register: type) type {
             self.write(old_value);
         }
 
-        pub inline fn write_raw(self: *volatile Self, value: u32) void {
+        pub inline fn writeRaw(self: *volatile Self, value: IntSize) void {
             self.raw = value;
+        }
+
+        pub inline fn setBits(self: *volatile Self, pos: u5, width: u6, value: IntSize) void {
+            if (pos + width > size) {
+                return;
+            }
+
+            const IntSizePlus1 = std.meta.Int(.unsigned, size + 1);
+            const mask: IntSize = @as(IntSize, (@as(IntSizePlus1, 1) << width) - 1) << pos;
+            self.raw = (self.raw & ~mask) | ((value << pos) & mask);
+        }
+
+        pub inline fn setBit(self: *volatile Self, pos: u5, value: u1) void {
+            if (pos >= size) {
+                return;
+            }
+
+            if (value == 1) {
+                self.raw |= @as(IntSize, 1) << pos;
+            } else {
+                self.raw &= ~(@as(IntSize, 1) << pos);
+            }
         }
 
         pub inline fn default(_: *volatile Self) Register {
@@ -238,11 +265,11 @@ pub const peripherals = struct {
 pub const types = struct {
     /// Power control
     pub const PWR = extern struct {
-        pub fn from(base: u32) *volatile types.PWR {
+        pub inline fn from(base: u32) *volatile types.PWR {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.PWR) u32 {
+        pub inline fn addr(self: *volatile types.PWR) u32 {
             return @intFromPtr(self);
         }
 
@@ -296,11 +323,11 @@ pub const types = struct {
 
     /// Reset and clock control
     pub const RCC = extern struct {
-        pub fn from(base: u32) *volatile types.RCC {
+        pub inline fn from(base: u32) *volatile types.RCC {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.RCC) u32 {
+        pub inline fn addr(self: *volatile types.RCC) u32 {
             return @intFromPtr(self);
         }
 
@@ -766,11 +793,11 @@ pub const types = struct {
 
     /// extension configuration
     pub const EXTEND = extern struct {
-        pub fn from(base: u32) *volatile types.EXTEND {
+        pub inline fn from(base: u32) *volatile types.EXTEND {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.EXTEND) u32 {
+        pub inline fn addr(self: *volatile types.EXTEND) u32 {
             return @intFromPtr(self);
         }
 
@@ -813,11 +840,16 @@ pub const types = struct {
     /// General purpose I/O
     /// Type for: GPIOA GPIOB GPIOC GPIOD 
     pub const GPIO = extern struct {
-        pub fn from(base: u32) *volatile types.GPIO {
+        pub const GPIOA = types.GPIO.from(0x40010800);
+        pub const GPIOB = types.GPIO.from(0x40010c00);
+        pub const GPIOC = types.GPIO.from(0x40011000);
+        pub const GPIOD = types.GPIO.from(0x40011400);
+
+        pub inline fn from(base: u32) *volatile types.GPIO {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.GPIO) u32 {
+        pub inline fn addr(self: *volatile types.GPIO) u32 {
             return @intFromPtr(self);
         }
 
@@ -1247,11 +1279,11 @@ pub const types = struct {
 
     /// Alternate function I/O
     pub const AFIO = extern struct {
-        pub fn from(base: u32) *volatile types.AFIO {
+        pub inline fn from(base: u32) *volatile types.AFIO {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.AFIO) u32 {
+        pub inline fn addr(self: *volatile types.AFIO) u32 {
             return @intFromPtr(self);
         }
 
@@ -1388,11 +1420,11 @@ pub const types = struct {
 
     /// EXTI
     pub const EXTI = extern struct {
-        pub fn from(base: u32) *volatile types.EXTI {
+        pub inline fn from(base: u32) *volatile types.EXTI {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.EXTI) u32 {
+        pub inline fn addr(self: *volatile types.EXTI) u32 {
             return @intFromPtr(self);
         }
 
@@ -1777,11 +1809,11 @@ pub const types = struct {
 
     /// DMA controller
     pub const DMA = extern struct {
-        pub fn from(base: u32) *volatile types.DMA {
+        pub inline fn from(base: u32) *volatile types.DMA {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.DMA) u32 {
+        pub inline fn addr(self: *volatile types.DMA) u32 {
             return @intFromPtr(self);
         }
 
@@ -2441,11 +2473,11 @@ pub const types = struct {
 
     /// Real time clock
     pub const RTC = extern struct {
-        pub fn from(base: u32) *volatile types.RTC {
+        pub inline fn from(base: u32) *volatile types.RTC {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.RTC) u32 {
+        pub inline fn addr(self: *volatile types.RTC) u32 {
             return @intFromPtr(self);
         }
 
@@ -2574,11 +2606,11 @@ pub const types = struct {
 
     /// Backup registers
     pub const BKP = extern struct {
-        pub fn from(base: u32) *volatile types.BKP {
+        pub inline fn from(base: u32) *volatile types.BKP {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.BKP) u32 {
+        pub inline fn addr(self: *volatile types.BKP) u32 {
             return @intFromPtr(self);
         }
 
@@ -2747,11 +2779,11 @@ pub const types = struct {
 
     /// Independent watchdog
     pub const IWDG = extern struct {
-        pub fn from(base: u32) *volatile types.IWDG {
+        pub inline fn from(base: u32) *volatile types.IWDG {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.IWDG) u32 {
+        pub inline fn addr(self: *volatile types.IWDG) u32 {
             return @intFromPtr(self);
         }
 
@@ -2804,11 +2836,11 @@ pub const types = struct {
 
     /// Window watchdog
     pub const WWDG = extern struct {
-        pub fn from(base: u32) *volatile types.WWDG {
+        pub inline fn from(base: u32) *volatile types.WWDG {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.WWDG) u32 {
+        pub inline fn addr(self: *volatile types.WWDG) u32 {
             return @intFromPtr(self);
         }
 
@@ -2858,11 +2890,13 @@ pub const types = struct {
     /// Advanced timer
     /// Type for: TIM1 
     pub const AdvancedTimer = extern struct {
-        pub fn from(base: u32) *volatile types.AdvancedTimer {
+        pub const TIM1 = types.AdvancedTimer.from(0x40012c00);
+
+        pub inline fn from(base: u32) *volatile types.AdvancedTimer {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.AdvancedTimer) u32 {
+        pub inline fn addr(self: *volatile types.AdvancedTimer) u32 {
             return @intFromPtr(self);
         }
 
@@ -3373,11 +3407,15 @@ pub const types = struct {
     /// General purpose timer
     /// Type for: TIM2 TIM3 TIM4 
     pub const GeneralPurposeTimer = extern struct {
-        pub fn from(base: u32) *volatile types.GeneralPurposeTimer {
+        pub const TIM2 = types.GeneralPurposeTimer.from(0x40000000);
+        pub const TIM3 = types.GeneralPurposeTimer.from(0x40000400);
+        pub const TIM4 = types.GeneralPurposeTimer.from(0x40000800);
+
+        pub inline fn from(base: u32) *volatile types.GeneralPurposeTimer {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.GeneralPurposeTimer) u32 {
+        pub inline fn addr(self: *volatile types.GeneralPurposeTimer) u32 {
             return @intFromPtr(self);
         }
 
@@ -3809,11 +3847,14 @@ pub const types = struct {
     /// Inter integrated circuit
     /// Type for: I2C1 I2C2 
     pub const I2C = extern struct {
-        pub fn from(base: u32) *volatile types.I2C {
+        pub const I2C1 = types.I2C.from(0x40005400);
+        pub const I2C2 = types.I2C.from(0x40005800);
+
+        pub inline fn from(base: u32) *volatile types.I2C {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.I2C) u32 {
+        pub inline fn addr(self: *volatile types.I2C) u32 {
             return @intFromPtr(self);
         }
 
@@ -4064,11 +4105,14 @@ pub const types = struct {
     /// Serial peripheral interface
     /// Type for: SPI1 SPI2 
     pub const SPI = extern struct {
-        pub fn from(base: u32) *volatile types.SPI {
+        pub const SPI1 = types.SPI.from(0x40013000);
+        pub const SPI2 = types.SPI.from(0x40003800);
+
+        pub inline fn from(base: u32) *volatile types.SPI {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.SPI) u32 {
+        pub inline fn addr(self: *volatile types.SPI) u32 {
             return @intFromPtr(self);
         }
 
@@ -4232,11 +4276,15 @@ pub const types = struct {
     /// Universal synchronous asynchronous receiver transmitter
     /// Type for: USART1 USART2 USART3 
     pub const USART = extern struct {
-        pub fn from(base: u32) *volatile types.USART {
+        pub const USART1 = types.USART.from(0x40013800);
+        pub const USART2 = types.USART.from(0x40004400);
+        pub const USART3 = types.USART.from(0x40004800);
+
+        pub inline fn from(base: u32) *volatile types.USART {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.USART) u32 {
+        pub inline fn addr(self: *volatile types.USART) u32 {
             return @intFromPtr(self);
         }
 
@@ -4436,11 +4484,11 @@ pub const types = struct {
 
     /// Analog to digital converter
     pub const ADC = extern struct {
-        pub fn from(base: u32) *volatile types.ADC {
+        pub inline fn from(base: u32) *volatile types.ADC {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.ADC) u32 {
+        pub inline fn addr(self: *volatile types.ADC) u32 {
             return @intFromPtr(self);
         }
 
@@ -4842,11 +4890,11 @@ pub const types = struct {
 
     /// Digital to analog converter
     pub const DAC1 = extern struct {
-        pub fn from(base: u32) *volatile types.DAC1 {
+        pub inline fn from(base: u32) *volatile types.DAC1 {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.DAC1) u32 {
+        pub inline fn addr(self: *volatile types.DAC1) u32 {
             return @intFromPtr(self);
         }
 
@@ -4979,11 +5027,11 @@ pub const types = struct {
 
     /// Debug support
     pub const DBG = extern struct {
-        pub fn from(base: u32) *volatile types.DBG {
+        pub inline fn from(base: u32) *volatile types.DBG {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.DBG) u32 {
+        pub inline fn addr(self: *volatile types.DBG) u32 {
             return @intFromPtr(self);
         }
 
@@ -5035,11 +5083,11 @@ pub const types = struct {
 
     /// USB register
     pub const USBFS = extern struct {
-        pub fn from(base: u32) *volatile types.USBFS {
+        pub inline fn from(base: u32) *volatile types.USBFS {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.USBFS) u32 {
+        pub inline fn addr(self: *volatile types.USBFS) u32 {
             return @intFromPtr(self);
         }
 
@@ -5497,11 +5545,11 @@ pub const types = struct {
 
     /// CRC calculation unit
     pub const CRC = extern struct {
-        pub fn from(base: u32) *volatile types.CRC {
+        pub inline fn from(base: u32) *volatile types.CRC {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.CRC) u32 {
+        pub inline fn addr(self: *volatile types.CRC) u32 {
             return @intFromPtr(self);
         }
 
@@ -5534,11 +5582,11 @@ pub const types = struct {
 
     /// FLASH
     pub const FLASH = extern struct {
-        pub fn from(base: u32) *volatile types.FLASH {
+        pub inline fn from(base: u32) *volatile types.FLASH {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.FLASH) u32 {
+        pub inline fn addr(self: *volatile types.FLASH) u32 {
             return @intFromPtr(self);
         }
 
@@ -5711,11 +5759,11 @@ pub const types = struct {
 
     /// Programmable Fast Interrupt Controller
     pub const PFIC = extern struct {
-        pub fn from(base: u32) *volatile types.PFIC {
+        pub inline fn from(base: u32) *volatile types.PFIC {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.PFIC) u32 {
+        pub inline fn addr(self: *volatile types.PFIC) u32 {
             return @intFromPtr(self);
         }
 
@@ -6046,11 +6094,11 @@ pub const types = struct {
 
     /// Universal serial bus full-speed device interface
     pub const USBD = extern struct {
-        pub fn from(base: u32) *volatile types.USBD {
+        pub inline fn from(base: u32) *volatile types.USBD {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.USBD) u32 {
+        pub inline fn addr(self: *volatile types.USBD) u32 {
             return @intFromPtr(self);
         }
 
@@ -6486,11 +6534,11 @@ pub const types = struct {
 
     /// Device electronic signature
     pub const ESIG = extern struct {
-        pub fn from(base: u32) *volatile types.ESIG {
+        pub inline fn from(base: u32) *volatile types.ESIG {
             return @ptrFromInt(base);
         }
 
-        pub fn addr(self: *volatile types.ESIG) u32 {
+        pub inline fn addr(self: *volatile types.ESIG) u32 {
             return @intFromPtr(self);
         }
 
