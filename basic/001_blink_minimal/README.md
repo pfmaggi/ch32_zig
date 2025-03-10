@@ -9,9 +9,9 @@ or manually:
 ```shell
 # build ELF
 zig build-exe -fstrip -fsingle-threaded \
--OReleaseSafe \
+-OReleaseSmall \
 -target riscv32-freestanding-eabi \
--mcpu=generic+32bit+e+c \
+-mcpu=generic+32bit+e+c+xwchc \
 -femit-asm --name ch32v003_blink.elf \
 src/main.zig
 # convert to BIN
