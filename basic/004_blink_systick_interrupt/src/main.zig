@@ -26,7 +26,7 @@ const STK_CMPLR: *volatile u32 = @ptrFromInt(0xE000F010);
 const cpu_freq: u32 = 8_000_000;
 const systick_one_second = cpu_freq;
 
-pub fn main() noreturn {
+pub fn main() void {
     RCC_APB2PCENR.* |= @as(u32, 1) << io_port_bit; // Enable Port clock.
     GPIOC_CFGLR.* &= ~(@as(u32, 0b1111) << led_pin_num * 4); // Clear all bits for pin.
     GPIOC_CFGLR.* |= @as(u32, 0b0011) << led_pin_num * 4; // Set push-pull output for pin.
@@ -142,4 +142,11 @@ export fn resetHandler() callconv(.c) noreturn {
         ::: "a0", "memory");
 
     main();
+
+    // If main() returns, disable interrupts and enter to sleep mode.
+    asm volatile ("csrci mstatus, 0b1000");
+    while (true) {
+        // wfi - Wait For Interrupt, but we disable interrupts above.
+        asm volatile ("wfi");
+    }
 }

@@ -15,7 +15,7 @@ const led_pin_num = 0;
 var step: u32 = 1;
 
 // Now we can use the main(or any other) function for the program logic.
-pub fn main() noreturn {
+pub fn main() void {
     RCC_APB2PCENR.* |= @as(u32, 1) << io_port_bit; // Enable Port clock.
     GPIOC_CFGLR.* &= ~(@as(u32, 0b1111) << led_pin_num * 4); // Clear all bits for pin.
     GPIOC_CFGLR.* |= @as(u32, 0b0011) << led_pin_num * 4; // Set push-pull output for pin.
@@ -83,4 +83,10 @@ export fn resetHandler() callconv(.c) noreturn {
     for (0..data_len / 4) |i| data_start[i] = data_src[i];
 
     main();
+
+    // If main() returns, enter to sleep mode.
+    while (true) {
+        // wfi - Wait For Interrupt, but we not enable any interrupt.
+        asm volatile ("wfi");
+    }
 }
