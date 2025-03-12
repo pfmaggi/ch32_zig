@@ -55,6 +55,7 @@
         "flake-utils": "flake-utils",
         "nixpkgs": "nixpkgs",
         "treefmt": "treefmt",
+        "wch-openocd": "wch-openocd",
         "zig": "zig",
         "zigscient-src": "zigscient-src"
       }
@@ -91,6 +92,22 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
+        "type": "github"
+      }
+    },
+    "wch-openocd": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1732695161,
+        "narHash": "sha256-C06PZ/c8XrRc5qxoJRTN4VVcFRV2UJObwQB6l/W3SY8=",
+        "owner": "cjacker",
+        "repo": "wch-openocd",
+        "rev": "2b6802dde74a9560bdfb6eeecb6aff8a13cf8139",
+        "type": "github"
+      },
+      "original": {
+        "owner": "cjacker",
+        "repo": "wch-openocd",
         "type": "github"
       }
     },

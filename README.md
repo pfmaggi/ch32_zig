@@ -8,7 +8,7 @@ compiled using `zig build` as well.
 
 > \[!NOTE\]
 > If you are using `nix`, you can simply run `nix develop` in the root of the project, and it will automatically install
-> `zig`, `zigscient`, and `minichlink` in your environment.
+> `zig`, `zigscient`, `minichlink` and `wch-openocd` in your environment.
 > And you can skip to the [Build and upload the example](#build-and-upload-the-example) section.
 
 ### Install Zig
@@ -50,17 +50,44 @@ minichlink -w zig-out/firmware/ch32v003_blink.bin flash -b
 
 ### Debugging
 
+#### Using minichlink + GDB or CLion
+
 ```shell
 # Run GDB server.
 minichlink -G
 # Reboot into halt and run GDB server 
 # (firmware will be halted until GDB is connected).
 minichlink -a -G
+# Connect to GDB server.
+riscv-none-elf-gdb <path_to_elf>
+> target remote 0:3333
 ```
 
-In `CLion`: add a new `Remote Debug` configuration.
+Or in `CLion`: add a new `Remote Debug` configuration.
 
 ![clion_debug_configuration.png](.assets/clion_debug_configuration.png)
+
+#### Using OpenOCD in CLion
+
+> \[!NOTE\]
+> If you are using `nix`, you can run `nix develop .\#idea` in the root of the project, and it will automatically
+> configure `CLion` with the `WCH OpenOCD` path.
+
+1. Configure OpenOCD in CLion: Settings -> Build, Execution, Deployment -> Embedded Development -> OpenOCD Location.
+2. In `Run/Debug Configurations`, add a new `OpenOCD Download & Run` configuration.
+3. Create a `Target` (if not created yet) by clicking on the gear icon
+   and [add an empty target](.assets/clion_target_configuration.png) (or configure it properly), then select it in the
+   configuration.
+4. Set the `Executable binary` to the path of the `elf` file (e.g.,
+   `zig-out/firmware/template_CH32V003F4P6_no_strip.elf`).
+5. Set the `Debugger` to `Bundled GDB (multiarch)`.
+6. Set the `Board config` to `target/wch-riscv.cfg` (the full path to the `wch-riscv.cfg` file is
+   `<openocd install dir>/share/openocd/scripts/target/wch-riscv.cfg`).
+7. Done.
+
+My configuration looks like this:
+
+![clion_openocd_configuration.png](.assets/clion_openocd_configuration.png)
 
 ### Show firmware info
 
