@@ -31,16 +31,34 @@ pub fn main() !void {
 
     _ = try USART1.writeBlocking("Hello, World!\r\n", hal.deadline.simple(100_000));
 
+    core.debug.setupPrint();
+
     var count: u32 = 0;
-    var buffer: [10]u8 = undefined;
+    var buffer: [32]u8 = undefined;
     while (true) {
-        _ = try USART1.writeBlocking(intToStr(&buffer, count), null);
-        _ = try USART1.writeBlocking("\r\n", null);
         count += 1;
 
         // led.toggle();
         const on = led.read();
         led.write(!on);
+
+        // Print counter to UART.
+        _ = try USART1.writeBlocking("Counter: ", null);
+        _ = try USART1.writeBlocking(intToStr(&buffer, count), null);
+        _ = try USART1.writeBlocking("\r\n", null);
+
+        // Print and read from debug print.
+        // Use `minichlink -T` for open terminal.
+        var recvBuf: [32]u8 = undefined;
+        var len = core.debug.transfer("Hello Debug Print: ", &recvBuf);
+        len += core.debug.transfer(intToStr(&buffer, count), recvBuf[len..]);
+        len += core.debug.transfer("\r\n", recvBuf[len..]);
+        if (len > 0) {
+            // Print received data to UART.
+            _ = try USART1.writeBlocking("Debug recv: ", null);
+            _ = try USART1.writeBlocking(recvBuf[0..len], null);
+            _ = try USART1.writeBlocking("\r\n", null);
+        }
 
         var i: u32 = 0;
         while (i < 1_000_000) : (i += 1) {
