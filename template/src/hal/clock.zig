@@ -4,9 +4,9 @@ const svd = @import("svd");
 
 pub const Clocks = struct {
     sys: u32,
-    hb: u32,
+    peripheral: u32,
 
-    pub const default: Clocks = .{ .sys = hsi_frequency, .hb = hsi_frequency / 3 };
+    pub const default: Clocks = .{ .sys = hsi_frequency, .peripheral = hsi_frequency / 3 };
 };
 
 pub const hsi_frequency: u32 = 24_000_000;
@@ -111,7 +111,6 @@ pub fn set(comptime cfg: Config) !Clocks {
                 break;
             }
         }
-
         if (RCC.CTLR.read().HSERDY == 0) {
             return error.WaitHseTimeout;
         }
@@ -203,7 +202,7 @@ pub fn set(comptime cfg: Config) !Clocks {
 
     return .{
         .sys = sys_clk_freq,
-        .hb = hbclk_freq,
+        .peripheral = hbclk_freq,
     };
 }
 
@@ -236,7 +235,7 @@ pub fn get() !Clocks {
     const hbclk_freq: u32 = sys_clk_freq / hpre;
     return .{
         .sys = sys_clk_freq,
-        .hb = hbclk_freq,
+        .peripheral = hbclk_freq,
     };
 }
 

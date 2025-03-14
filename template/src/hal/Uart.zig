@@ -6,11 +6,11 @@ const port = @import("port.zig");
 
 pub const DeadlineFn = fn () bool;
 
-pub const BrrConfig = struct {
+pub const BaudRate = struct {
     cpu_frequency: u32,
     baud_rate: u32,
 
-    fn calculate(self: BrrConfig) u32 {
+    fn calculate(self: BaudRate) u32 {
         if (self.cpu_frequency == 0 or self.baud_rate == 0) {
             return 0;
         }
@@ -20,7 +20,7 @@ pub const BrrConfig = struct {
 };
 
 pub const Config = struct {
-    brr: ?BrrConfig = null,
+    brr: ?BaudRate = null,
     mode: Mode = .tx_rx,
     word_bits: WordBits = .eight,
     stop_bits: StopBits = .one,
@@ -96,7 +96,7 @@ pub fn configure(self: UART, comptime cfg: Config) void {
     self.enable();
     self.configurePins(cfg);
     if (cfg.brr) |brr| {
-        self.configureBrr(brr);
+        self.configureBaudRate(brr);
     }
     self.configureCtrl(cfg);
 }
@@ -122,7 +122,7 @@ fn configurePins(self: UART, comptime cfg: Config) void {
     }
 }
 
-pub fn configureBrr(self: UART, cfg: BrrConfig) void {
+pub fn configureBaudRate(self: UART, cfg: BaudRate) void {
     self.uart.BRR.raw = cfg.calculate();
 }
 

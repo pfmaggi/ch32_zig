@@ -17,12 +17,15 @@ pub const panic = core.panic.silent;
 pub const interrups: core.Interrups = .{};
 
 pub fn main() !void {
+    const clock = hal.clock.setOrGet(.hse_48mhz);
+
     hal.port.enable(.GPIOC);
     // hal.port.disable(.GPIOC);
 
     const USART1 = hal.Uart.from(.USART1);
-    USART1.configure(.{
-        .cpu_frequency = 8_000_000,
+    USART1.configure(.{});
+    USART1.configureBaudRate(.{
+        .cpu_frequency = clock.peripheral,
         .baud_rate = 115_200,
     });
 
