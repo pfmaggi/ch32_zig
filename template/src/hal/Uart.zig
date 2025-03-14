@@ -6,10 +6,22 @@ const port = @import("port.zig");
 
 pub const DeadlineFn = fn () bool;
 
-pub const Config = struct {
+pub const BrrConfig = struct {
     cpu_frequency: u32,
     baud_rate: u32,
-    mode: Mode = .TX_RX,
+
+    fn calculate(self: BrrConfig) u32 {
+        if (self.cpu_frequency == 0 or self.baud_rate == 0) {
+            return 0;
+        }
+
+        return (self.cpu_frequency + self.baud_rate / 2) / self.baud_rate;
+    }
+};
+
+pub const Config = struct {
+    brr: ?BrrConfig = null,
+    mode: Mode = .tx_rx,
     word_bits: WordBits = .eight,
     stop_bits: StopBits = .one,
     parity: Parity = .none,
@@ -18,9 +30,9 @@ pub const Config = struct {
 };
 
 pub const Mode = enum {
-    TX,
-    RX,
-    TX_RX,
+    tx,
+    rx,
+    tx_rx,
 };
 
 pub const WordBits = enum {
@@ -43,9 +55,9 @@ pub const Parity = enum {
 
 pub const FlowControl = enum {
     none,
-    CTS,
-    RTS,
-    CTS_RTS,
+    cts,
+    rts,
+    cts_rts,
 };
 
 pub const Pins = switch (config.chip_series) {
@@ -83,7 +95,9 @@ pub fn from(uart: svd.peripherals.USART) UART {
 pub fn configure(self: UART, comptime cfg: Config) void {
     self.enable();
     self.configurePins(cfg);
-    self.configureBrr(cfg);
+    if (cfg.brr) |brr| {
+        self.configureBrr(brr);
+    }
     self.configureCtrl(cfg);
 }
 
@@ -97,20 +111,19 @@ fn configurePins(self: UART, comptime cfg: Config) void {
         svd.peripherals.AFIO.PCFR1.modify(pins.remap.afio_pcfr1);
     }
 
-    if (cfg.mode == .TX or cfg.mode == .TX_RX) {
+    if (cfg.mode == .tx or cfg.mode == .tx_rx) {
         port.enable(pins.tx.port);
         pins.tx.asOutput(.{ .speed = .max_10mhz, .mode = .alt_push_pull });
     }
 
-    if (cfg.mode == .RX or cfg.mode == .TX_RX) {
+    if (cfg.mode == .rx or cfg.mode == .tx_rx) {
         port.enable(pins.rx.port);
         pins.rx.asInput(.floating);
     }
 }
 
-fn configureBrr(self: UART, comptime cfg: Config) void {
-    const brr = (cfg.cpu_frequency + cfg.baud_rate / 2) / cfg.baud_rate;
-    self.uart.BRR.raw = brr;
+pub fn configureBrr(self: UART, cfg: BrrConfig) void {
+    self.uart.BRR.raw = cfg.calculate();
 }
 
 fn configureCtrl(self: UART, comptime cfg: Config) void {
@@ -136,9 +149,9 @@ fn configureCtrl(self: UART, comptime cfg: Config) void {
     var cts_bit: u1 = 0;
     switch (cfg.flow_control) {
         .none => {},
-        .CTS => cts_bit = 1,
-        .RTS => rts_bit = 1,
-        .CTS_RTS => {
+        .cts => cts_bit = 1,
+        .rts => rts_bit = 1,
+        .cts_rts => {
             cts_bit = 1;
             rts_bit = 1;
         },
