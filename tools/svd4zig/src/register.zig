@@ -21,7 +21,17 @@ pub fn RegisterRW(comptime Register: type) type {
             var old_value = self.read();
             const info = @typeInfo(@TypeOf(new_value));
             inline for (info.@"struct".fields) |field| {
-                @field(old_value, field.name) = @field(new_value, field.name);
+                const new_field_value = @field(new_value, field.name);
+
+                // Allow set boolean values.
+                const old_field_value_type_info = @typeInfo(@TypeOf(@field(old_value, field.name)));
+                const new_field_value_type_info = @typeInfo(@TypeOf(new_field_value));
+                if (old_field_value_type_info.int.signedness == .unsigned and old_field_value_type_info.int.bits == 1 and new_field_value_type_info == .bool) {
+                    @field(old_value, field.name) = if (new_field_value) 1 else 0;
+                    continue;
+                }
+
+                @field(old_value, field.name) = new_field_value;
             }
             self.write(old_value);
         }
@@ -141,6 +151,52 @@ test RegisterRW {
     }, value.read());
 
     value.setBit(11, 1);
+    try std.testing.expectEqual(TestPeriferal{
+        .field0 = 0b1,
+        .field1 = 0b1,
+        .field2 = 0b1,
+        .field3 = 0b1,
+        .field4 = 0b11010,
+    }, value.read());
+
+    // Modify with int.
+    value.modify(.{
+        .field0 = 0,
+    });
+    try std.testing.expectEqual(TestPeriferal{
+        .field0 = 0b0,
+        .field1 = 0b1,
+        .field2 = 0b1,
+        .field3 = 0b1,
+        .field4 = 0b11010,
+    }, value.read());
+
+    value.modify(.{
+        .field0 = 1,
+    });
+    try std.testing.expectEqual(TestPeriferal{
+        .field0 = 0b1,
+        .field1 = 0b1,
+        .field2 = 0b1,
+        .field3 = 0b1,
+        .field4 = 0b11010,
+    }, value.read());
+
+    // Modify with boolean.
+    value.modify(.{
+        .field0 = false,
+    });
+    try std.testing.expectEqual(TestPeriferal{
+        .field0 = 0b0,
+        .field1 = 0b1,
+        .field2 = 0b1,
+        .field3 = 0b1,
+        .field4 = 0b11010,
+    }, value.read());
+
+    value.modify(.{
+        .field0 = true,
+    });
     try std.testing.expectEqual(TestPeriferal{
         .field0 = 0b1,
         .field1 = 0b1,
