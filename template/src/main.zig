@@ -34,7 +34,7 @@ pub fn main() !void {
 
     _ = try USART1.writeBlocking("Hello, World!\r\n", hal.deadline.simple(100_000));
 
-    core.debug.setupPrint();
+    hal.debug.sdi_print.enable();
 
     var count: u32 = 0;
     var buffer: [32]u8 = undefined;
@@ -53,9 +53,9 @@ pub fn main() !void {
         // Print and read from debug print.
         // Use `minichlink -T` for open terminal.
         var recvBuf: [32]u8 = undefined;
-        var len = core.debug.transfer("Hello Debug Print: ", &recvBuf);
-        len += core.debug.transfer(intToStr(&buffer, count), recvBuf[len..]);
-        len += core.debug.transfer("\r\n", recvBuf[len..]);
+        var len = hal.debug.sdi_print.transfer("Hello Debug Print: ", &recvBuf);
+        len += hal.debug.sdi_print.transfer(intToStr(&buffer, count), recvBuf[len..]);
+        len += hal.debug.sdi_print.transfer("\r\n", recvBuf[len..]);
         if (len > 0) {
             // Print received data to UART.
             _ = try USART1.writeBlocking("Debug recv: ", null);
