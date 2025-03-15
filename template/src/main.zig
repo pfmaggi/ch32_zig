@@ -25,8 +25,18 @@ pub fn main() !void {
     const USART1 = hal.Uart.from(.USART1);
     USART1.configure(.{});
     USART1.configureBaudRate(.{
-        .cpu_frequency = clock.peripheral,
+        .peripheral_clock = clock.peripheral,
         .baud_rate = 115_200,
+    });
+
+    const SPI1 = try hal.Spi.init(.SPI1, .{
+        // .pins = hal.Spi.Pins.spi1.softwareNss(.init(.GPIOC, 1)),
+    });
+    SPI1.configureBaudRate(.{
+        .calc = .{
+            .peripheral_clock = clock.peripheral,
+            .baud_rate = 1_000_000,
+        },
     });
 
     const led = hal.Pin.init(.GPIOC, 0);
@@ -40,6 +50,9 @@ pub fn main() !void {
     var buffer: [32]u8 = undefined;
     while (true) {
         count += 1;
+
+        var b: [8]u8 = undefined;
+        _ = try SPI1.transferBlocking(u8, "Hello", &b, null);
 
         // led.toggle();
         const on = led.read();
