@@ -2,10 +2,15 @@ const std = @import("std");
 const config = @import("config");
 const svd = @import("svd");
 
-pub const InputConfig = enum(u4) {
-    analog = 0b00_00,
-    floating = 0b01_00,
-    pull_up_down = 0b10_00,
+pub const InputConfig = union(enum) {
+    analog: void,
+    floating: void,
+    pull: InputPull,
+};
+
+pub const InputPull = enum {
+    up,
+    down,
 };
 
 pub const OutputConfig = packed struct(u4) {
@@ -36,8 +41,16 @@ pub fn init(port: svd.peripherals.GPIO, num: u4) Pin {
 }
 
 pub fn asInput(self: Pin, cfg: InputConfig) void {
-    const data: u4 = @intFromEnum(cfg);
+    const data: u4 = switch (cfg) {
+        .analog => 0b00_00,
+        .floating => 0b01_00,
+        .pull => 0b10_00,
+    };
     self.writeCfgr(data);
+
+    if (cfg == .pull) {
+        self.write(cfg.pull == .up);
+    }
 }
 
 pub fn asOutput(self: Pin, cfg: OutputConfig) void {
