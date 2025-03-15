@@ -77,7 +77,8 @@ pub const RccBits = struct {
     apb2: ?u5,
     apb1: ?u5,
 
-    pub const usart1 = RccBits{ .apb2 = 14, .apb1 = null };
+    const usart1_offset = @bitOffsetOf(@TypeOf(svd.peripherals.RCC.APB2PCENR.default()), "USART1EN");
+    pub const usart1 = RccBits{ .apb2 = usart1_offset, .apb1 = null };
 
     pub inline fn get(uart: *volatile svd.types.USART) RccBits {
         switch (uart.addr()) {

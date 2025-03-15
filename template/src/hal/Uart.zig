@@ -7,15 +7,15 @@ const port = @import("port.zig");
 pub const DeadlineFn = fn () bool;
 
 pub const BaudRate = struct {
-    cpu_frequency: u32,
+    peripheral_clock: u32,
     baud_rate: u32,
 
     fn calculate(self: BaudRate) u32 {
-        if (self.cpu_frequency == 0 or self.baud_rate == 0) {
+        if (self.peripheral_clock == 0 or self.baud_rate == 0) {
             return 0;
         }
 
-        return (self.cpu_frequency + self.baud_rate / 2) / self.baud_rate;
+        return (self.peripheral_clock + self.baud_rate / 2) / self.baud_rate;
     }
 };
 
@@ -252,8 +252,7 @@ pub noinline fn writeBlocking(self: UART, payload: []const u8, deadlineFn: ?Dead
 }
 
 pub fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
-    var count: u32 = 0;
-    for (buffer) |*byte| {
+    for (buffer, 0..) |*byte, count| {
         self.wait(isReadable, deadlineFn) catch |err| {
             if (count > 0) {
                 return count;
@@ -262,10 +261,9 @@ pub fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) Timeout!u
         };
 
         byte.* = @truncate(self.uart.DATAR.raw & 0xFF);
-        count += 1;
     }
 
-    return count;
+    return buffer.len;
 }
 
 pub fn getErrors(self: UART) ErrorStates {
