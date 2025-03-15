@@ -6,6 +6,16 @@ const port = @import("port.zig");
 
 pub const DeadlineFn = fn () bool;
 
+pub const Config = struct {
+    brr: ?BaudRate = null,
+    mode: Mode = .tx_rx,
+    word_bits: WordBits = .eight,
+    stop_bits: StopBits = .one,
+    parity: Parity = .none,
+    flow_control: FlowControl = .none,
+    pins: ?Pins = null,
+};
+
 pub const BaudRate = struct {
     peripheral_clock: u32,
     baud_rate: u32,
@@ -17,16 +27,6 @@ pub const BaudRate = struct {
 
         return (self.peripheral_clock + self.baud_rate / 2) / self.baud_rate;
     }
-};
-
-pub const Config = struct {
-    brr: ?BaudRate = null,
-    mode: Mode = .tx_rx,
-    word_bits: WordBits = .eight,
-    stop_bits: StopBits = .one,
-    parity: Parity = .none,
-    flow_control: FlowControl = .none,
-    pins: ?Pins = null,
 };
 
 pub const Mode = enum {
@@ -88,17 +88,26 @@ const UART = @This();
 
 uart: *volatile svd.types.USART,
 
-pub fn from(uart: svd.peripherals.USART) UART {
-    return .{ .uart = uart.get() };
-}
+pub fn init(uart: svd.peripherals.USART, comptime cfg: Config) UART {
+    const self = UART{ .uart = uart.get() };
 
-pub fn configure(self: UART, comptime cfg: Config) void {
+    self.reset();
     self.enable();
     self.configurePins(cfg);
     if (cfg.brr) |brr| {
         self.configureBaudRate(brr);
     }
     self.configureCtrl(cfg);
+
+    return self;
+}
+
+/// Deinitializes the UART peripheral.
+/// Disables and resets registers.
+/// Note: GPIO pins will not be deinitialized when this function is called.
+pub fn deinit(self: UART) void {
+    self.disable();
+    self.reset();
 }
 
 fn configurePins(self: UART, comptime cfg: Config) void {
@@ -122,6 +131,7 @@ fn configurePins(self: UART, comptime cfg: Config) void {
     }
 }
 
+/// Runtime baud rate configuration.
 pub fn configureBaudRate(self: UART, cfg: BaudRate) void {
     self.uart.BRR.raw = cfg.calculate();
 }
@@ -215,6 +225,19 @@ pub fn disable(self: UART) void {
     }
     if (bits.apb1) |pos| {
         RCC.APB1PCENR.setBit(pos, 0);
+    }
+}
+
+fn reset(self: UART) void {
+    const RCC = svd.peripherals.RCC;
+    const bits = RccBits.get(self.uart);
+    if (bits.apb2) |pos| {
+        RCC.APB2PRSTR.setBit(pos, 1);
+        RCC.APB2PRSTR.setBit(pos, 0);
+    }
+    if (bits.apb1) |pos| {
+        RCC.APB2PRSTR.setBit(pos, 1);
+        RCC.APB2PRSTR.setBit(pos, 0);
     }
 }
 

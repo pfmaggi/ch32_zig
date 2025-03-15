@@ -18,7 +18,7 @@ pub const Config = struct {
     cpha: CPHA = .first_edge,
     /// Baud Rate prescaler value which will be
     /// used to configure the transmit and receive SCK clock.
-    baud_rate: BaudRate = .{ .prescaller = .div64 },
+    baud_rate: BaudRate = .default,
     /// Whether data transfers start from MSB bit.
     /// NOTE: LSB is only supported by SPI as host.
     first_bit: FirstBit = .msb,
@@ -63,16 +63,17 @@ pub const CPHA = enum(u1) {
     second_edge = 1,
 };
 
-pub const BaudRate = union(enum) {
-    calc: BaudRateCalc,
-    prescaller: BaudRatePrescaler,
-};
-
-pub const BaudRateCalc = struct {
+pub const BaudRate = struct {
     peripheral_clock: u32,
     baud_rate: u32,
 
-    fn calculate(self: BaudRateCalc) BaudRatePrescaler {
+    pub const default = BaudRate{ .peripheral_clock = 0, .baud_rate = 0 };
+
+    fn calculate(self: BaudRate) BaudRatePrescaler {
+        if (self.peripheral_clock == 0 or self.baud_rate == 0) {
+            return .div64;
+        }
+
         const div = self.peripheral_clock / self.baud_rate;
         if (div <= 2) return .div2;
         if (div <= 4) return .div4;
@@ -141,17 +142,23 @@ pub fn init(uart: svd.peripherals.SPI, comptime cfg: Config) ConfigureError!SPI 
     } else null;
 
     const self = SPI{ .spi = uart.get(), .sw_nss = sw_nss };
-    try self.configure(cfg);
 
-    return self;
-}
-
-fn configure(self: SPI, comptime cfg: Config) ConfigureError!void {
+    self.reset();
     self.enable();
     self.configurePins(cfg);
     self.configureCtrl(cfg);
     self.configureBaudRate(cfg.baud_rate);
     try self.configureCheck();
+
+    return self;
+}
+
+/// Deinitializes the SPI peripheral.
+/// Disables and resets registers.
+/// Note: GPIO pins will not be deinitialized when this function is called.
+pub fn deinit(self: SPI) void {
+    self.disable();
+    self.reset();
 }
 
 fn configurePins(self: SPI, comptime cfg: Config) void {
@@ -239,12 +246,7 @@ fn configureCtrl(self: SPI, comptime cfg: Config) void {
 
 /// Runtime baud rate configuration.
 pub fn configureBaudRate(self: SPI, baud_rate: BaudRate) void {
-    self.spi.CTLR1.modify(.{
-        .BR = @intFromEnum(switch (baud_rate) {
-            .prescaller => |pre| pre,
-            .calc => |c| c.calculate(),
-        }),
-    });
+    self.spi.CTLR1.modify(.{ .BR = @intFromEnum(baud_rate.calculate()) });
 }
 
 fn configureCheck(self: SPI) ConfigureError!void {
@@ -256,11 +258,6 @@ fn configureCheck(self: SPI) ConfigureError!void {
 /// Selects the data transfer direction in bi-directional mode.
 pub fn setBiDirectionalMode(self: SPI, dir: BiDirectionalMode) void {
     self.spi.CTLR1.modify(.{ .BIDIOE = @intFromEnum(dir) });
-}
-
-/// Sets the data size for SPI communication.
-pub fn setDataSize(self: SPI, size: DataSize) void {
-    self.spi.CTLR1.modify(.{ .DFF = @intFromEnum(size) });
 }
 
 pub fn enable(self: SPI) void {
@@ -282,6 +279,19 @@ pub fn disable(self: SPI) void {
     }
     if (bits.apb1) |pos| {
         RCC.APB1PCENR.setBit(pos, 0);
+    }
+}
+
+fn reset(self: SPI) void {
+    const RCC = svd.peripherals.RCC;
+    const bits = RccBits.get(self.spi);
+    if (bits.apb2) |pos| {
+        RCC.APB2PRSTR.setBit(pos, 1);
+        RCC.APB2PRSTR.setBit(pos, 0);
+    }
+    if (bits.apb1) |pos| {
+        RCC.APB2PRSTR.setBit(pos, 1);
+        RCC.APB2PRSTR.setBit(pos, 0);
     }
 }
 
@@ -330,6 +340,12 @@ pub noinline fn transferBlocking(self: SPI, comptime u8_or_u16: type, send: ?[]c
     return len;
 }
 
+inline fn swNssWrite(self: SPI, v: bool) void {
+    if (self.sw_nss) |nss| {
+        nss.write(v);
+    }
+}
+
 fn isReadable(self: SPI) bool {
     return self.spi.STATR.read().RXNE == 1;
 }
@@ -338,10 +354,8 @@ fn isWriteable(self: SPI) bool {
     return self.spi.STATR.read().TXE == 1;
 }
 
-inline fn swNssWrite(self: SPI, v: bool) void {
-    if (self.sw_nss) |nss| {
-        nss.write(v);
-    }
+fn setDataSize(self: SPI, size: DataSize) void {
+    self.spi.CTLR1.modify(.{ .DFF = @intFromEnum(size) });
 }
 
 fn transferWordBlocking(self: SPI, word: u16, deadlineFn: ?DeadlineFn) Timeout!u16 {
