@@ -227,6 +227,16 @@
               ''
             ];
           };
+
+          dsview = pkgs.mkShell {
+            shellHook = pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
+              open ${pkgs.dsview}/Applications/DSView.app
+            '' + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
+              ${pkgs.dsview}/bin/dsview
+            '' + ''
+              exit 0
+            '';
+          };
         };
 
         # run: `nix fmt`
