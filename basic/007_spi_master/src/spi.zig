@@ -84,7 +84,7 @@ pub const SPI = packed struct(u32) {
         SPI_CTLR1.* = 0;
         SPI_CTLR2.* = 0;
 
-        // BR: Baund rate control.
+        // BR: Baud rate control.
         // BR[2:0] = 011: fPCLK/16
         SPI_CTLR1.* |= @as(u32, 0b011) << 3;
 
@@ -119,12 +119,6 @@ pub const SPI = packed struct(u32) {
         return (SPI_STATR.* & TXE) != 0;
     }
 
-    pub inline fn isBusy(self: SPI) bool {
-        const SPI_STATR: *volatile u32 = self.ptr(STATR_offset);
-        const BSY = @as(u32, 1) << 7;
-        return (SPI_STATR.* & BSY) != 0;
-    }
-
     pub noinline fn writeBlocking(self: SPI, payload: []const u8) usize {
         const SPI_DATAR: *volatile u32 = self.ptr(DATAR_offset);
 
@@ -136,10 +130,6 @@ pub const SPI = packed struct(u32) {
 
             SPI_DATAR.* = (SPI_DATAR.* & ~@as(u32, 0xFF)) | payload[offset];
             offset += 1;
-
-            while (self.isBusy()) {
-                asm volatile ("" ::: "memory");
-            }
         }
 
         return offset;
