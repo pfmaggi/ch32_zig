@@ -17,34 +17,41 @@ pub const panic = core.panic.silent;
 pub const interrups: core.Interrups = .{};
 
 pub fn main() !void {
-    const clock = hal.clock.setOrGet(.hse_48mhz);
-
-    hal.port.enable(.GPIOC);
-    // hal.port.disable(.GPIOC);
+    // const clock = hal.clock.setOrGet(.hsi_max);
+    // const peripheral_clock = clock.peripheral;
+    const peripheral_clock = 8_000_000;
 
     const USART1 = hal.Uart.init(.USART1, .{});
     USART1.configureBaudRate(.{
-        .peripheral_clock = clock.peripheral,
+        .peripheral_clock = peripheral_clock,
         .baud_rate = 115_200,
     });
     // USART1.deinit();
 
     const SPI1 = try hal.Spi.init(.SPI1, .{});
     SPI1.configureBaudRate(.{
-        .peripheral_clock = clock.peripheral,
+        .peripheral_clock = peripheral_clock,
         .baud_rate = 1_000_000,
     });
     // SPI1.deinit();
 
-    const led = hal.Pin.init(.GPIOC, 0);
+    const led = switch (config.chip_series) {
+        .ch32v003 => hal.Pin.init(.GPIOC, 0),
+        .ch32v30x => hal.Pin.init(.GPIOA, 3),
+        else => @compileError("Unsupported chip series"),
+    };
+    hal.port.enable(led.port);
+    // hal.port.disable(led.port);
     led.asOutput(.{ .speed = .max_50mhz, .mode = .push_pull });
 
     _ = try USART1.writeBlocking("Hello, World!\r\n", hal.deadline.simple(100_000));
 
+    var buffer: [32]u8 = undefined;
+    _ = try USART1.writeVecBlocking(&.{ "Peripheral clock: ", intToStr(&buffer, peripheral_clock), "\r\n" }, null);
+
     hal.debug.sdi_print.enable();
 
     var count: u32 = 0;
-    var buffer: [32]u8 = undefined;
     while (true) {
         count += 1;
 
@@ -56,9 +63,7 @@ pub fn main() !void {
         led.write(!on);
 
         // Print counter to UART.
-        _ = try USART1.writeBlocking("Counter: ", null);
-        _ = try USART1.writeBlocking(intToStr(&buffer, count), null);
-        _ = try USART1.writeBlocking("\r\n", null);
+        _ = try USART1.writeVecBlocking(&.{ "Counter: ", intToStr(&buffer, count), "\r\n" }, null);
 
         // Print and read from debug print.
         // Use `minichlink -T` for open terminal.
@@ -68,9 +73,7 @@ pub fn main() !void {
         len += hal.debug.sdi_print.transfer("\r\n", recvBuf[len..]);
         if (len > 0) {
             // Print received data to UART.
-            _ = try USART1.writeBlocking("Debug recv: ", null);
-            _ = try USART1.writeBlocking(recvBuf[0..len], null);
-            _ = try USART1.writeBlocking("\r\n", null);
+            _ = try USART1.writeVecBlocking(&.{ "Debug recv: ", recvBuf[0..len], "\r\n" }, null);
         }
 
         var i: u32 = 0;
