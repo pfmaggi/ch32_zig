@@ -86,6 +86,18 @@ inline fn mask(pin: Pin) u16 {
 }
 
 inline fn writeCfgr(self: Pin, data: u4) void {
-    const bit_offset = @as(u5, self.num) * 4; // or use `<< 2`?
-    self.port.get().CFGLR.setBits(bit_offset, 4, data);
+    switch (self.num) {
+        0...7 => {
+            const bit_offset = @as(u5, self.num) * 4; // or use `<< 2`?
+            self.port.get().CFGLR.setBits(bit_offset, 4, data);
+        },
+        8...15 => {
+            if (config.chip_series == .ch32v003) {
+                return;
+            }
+
+            const bit_offset = @as(u5, self.num - 8) * 4;
+            self.port.get().CFGHR.setBits(bit_offset, 4, data);
+        },
+    }
 }
