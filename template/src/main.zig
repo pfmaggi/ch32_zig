@@ -76,11 +76,15 @@ pub fn main() !void {
             _ = try USART1.writeVecBlocking(&.{ "Debug recv: ", recvBuf[0..len], "\r\n" }, null);
         }
 
-        var i: u32 = 0;
-        while (i < 1_000_000) : (i += 1) {
-            // ZIG please don't optimize this loop away.
-            asm volatile ("" ::: "memory");
-        }
+        // Read from uart.
+        const recvLen = USART1.readBlocking(&buffer, hal.deadline.simple(1_000_000)) catch 0;
+        _ = try USART1.writeVecBlocking(&.{ "UART recv: ", buffer[0..recvLen], "\r\n" }, null);
+
+        // var i: u32 = 0;
+        // while (i < 1_000_000) : (i += 1) {
+        //     // ZIG please don't optimize this loop away.
+        //     asm volatile ("" ::: "memory");
+        // }
     }
 }
 
