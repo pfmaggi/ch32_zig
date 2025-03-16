@@ -3,6 +3,9 @@ const builtin = @import("builtin");
 const root = @import("root");
 const panic = @import("panic.zig");
 
+const config = @import("config");
+const svd = @import("svd");
+
 comptime {
     if (!builtin.is_test) {
         asm (
@@ -86,7 +89,48 @@ fn _start() callconv(.c) noreturn {
         \\csrw mtvec, a0
     );
 
+    systemInit();
     callMain();
+}
+
+// CH32V30x_D8C: CH32V305RB-CH32V305FB, CH32V307VC-CH32V307WC-CH32V307RC
+fn isCH32V30x_D8C() bool {
+    return config.chip_model == .ch32v305rbt6 or
+        config.chip_model == .ch32v305fbp6 or
+        config.chip_model == .ch32v307vct6 or
+        config.chip_model == .ch32v307wcu6 or
+        config.chip_model == .ch32v307rct6;
+}
+
+inline fn systemInit() void {
+    const RCC = svd.peripherals.RCC;
+    RCC.CTLR.modify(.{ .HSION = 1 });
+
+    if (config.chip_series == .ch32v30x and !isCH32V30x_D8C()) {
+        RCC.CFGR0.raw &= 0xF0FF0000;
+    } else {
+        RCC.CFGR0.raw &= 0xF8FF0000;
+    }
+
+    RCC.CTLR.modify(.{ .HSEON = 0, .CSSON = 0 });
+    RCC.CTLR.modify(.{ .HSEBYP = 0 });
+
+    switch (config.chip_series) {
+        .ch32v30x => {
+            RCC.CFGR0.raw &= 0xFF80FFFF;
+        },
+        else => {
+            RCC.CFGR0.raw &= 0xFFFEFFFF;
+        },
+    }
+
+    if (isCH32V30x_D8C()) {
+        RCC.CTLR.raw &= 0xEBFFFFFF;
+        RCC.INTR.raw = 0x00FF0000;
+        // RCC.CFGR2.raw = 0x00000000; // FIXME register not exist for v003
+    } else {
+        RCC.INTR.raw = 0x009F0000;
+    }
 }
 
 inline fn callMain() noreturn {
