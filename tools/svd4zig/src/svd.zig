@@ -121,6 +121,23 @@ pub const Device = struct {
             try peripheral.write_type(padded_out_stream, &dedupl);
         }
 
+        try out_stream.writeAll(
+            \\};
+            \\
+            \\pub const nullable_types = struct {
+        );
+
+        dedupl.clearAndFree();
+
+        for (self.peripherals.items) |peripheral| {
+            // Skip generate for derived peripherals.
+            if (peripheral.derived_from.items.len > 0) {
+                continue;
+            }
+
+            try peripheral.write_nullable_type(padded_out_stream, &dedupl);
+        }
+
         try out_stream.writeAll("};\n");
 
         // now print interrupt table
@@ -512,14 +529,77 @@ pub const Peripheral = struct {
                 try writeOffsetRegister(i, last_uncovered_offset, address_offset, padded_out_stream);
             }
 
-            try padded_out_stream.print("{}\n", .{register});
+            try register.write_type(padded_out_stream);
+            _ = try padded_out_stream.write("\n");
             last_uncovered_offset = address_offset + register.size / 8;
         }
 
         // and close the peripheral
         try out_stream.writeAll("};\n");
+    }
 
-        return;
+    pub fn write_nullable_type(self: Self, out_stream: anytype, dedupl: *DeduplMap) !void {
+        try out_stream.writeAll("\n");
+        if (!self.isValid()) {
+            try out_stream.writeAll("// Not enough info to print peripheral value\n");
+            return;
+        }
+
+        const name = self.name.items;
+        const common_name, const has_common_name = try self.generateCommonName(dedupl);
+
+        const description = if (self.description.items.len == 0) "No description" else self.description.items;
+        try out_stream.print(
+            \\/// {s}
+            \\
+        , .{description});
+
+        var periph_name = ArrayList(u8).init(self.allocator);
+        defer periph_name.deinit();
+        if (has_common_name) {
+            try periph_name.replaceRange(0, periph_name.items.len, common_name);
+        } else {
+            try periph_name.replaceRange(0, periph_name.items.len, name);
+        }
+
+        if (has_common_name) {
+            try out_stream.writeAll("/// Type for: ");
+
+            try out_stream.print("{s}", .{name});
+            for (self.derived_peripherals.items) |peripheral| {
+                try out_stream.print(" {s}", .{peripheral.name.items});
+            }
+
+            try out_stream.writeAll("\n");
+        }
+
+        try out_stream.print(
+            \\pub const {s} = struct {{
+        , .{periph_name.items});
+
+        // Sort registers by address offset for next step
+        std.sort.heap(Register, self.registers.items, {}, registersSortCompare);
+
+        var padded_writer = PaddedWriter.init("    ", out_stream);
+        var padded_out_stream = padded_writer.writer();
+
+        for (self.registers.items) |register| {
+            if (register.alternate_register.items.len > 0) {
+                // FIXME: use union?
+                continue;
+            }
+
+            if (register.address_offset == null) {
+                try padded_out_stream.writeAll("// Not enough info to print register\n");
+                return;
+            }
+
+            try register.write_nullable_type(padded_out_stream);
+            _ = try padded_out_stream.write("\n");
+        }
+
+        // and close the peripheral
+        try out_stream.writeAll("};\n");
     }
 };
 
@@ -729,7 +809,7 @@ pub const Register = struct {
         try out_stream.print("_padding: u{} = {},", .{ chunk_width, unused_value });
     }
 
-    pub fn format(self: Self, comptime _: []const u8, _: std.fmt.FormatOptions, out_stream: anytype) !void {
+    pub fn write_type(self: Self, out_stream: anytype) !void {
         try out_stream.writeAll("\n");
         if (!self.isValid()) {
             try out_stream.writeAll("// Not enough info to print register value\n");
@@ -763,7 +843,7 @@ pub const Register = struct {
                 try writeUnusedField(last_uncovered_bit, bit_offset, self.reset_value, padded_out_stream);
             }
 
-            try padded_out_stream.print("{}", .{field});
+            try field.write(padded_out_stream);
             last_uncovered_bit = bit_offset + bit_width;
         }
 
@@ -777,8 +857,43 @@ pub const Register = struct {
             \\
             \\}}),
         , .{});
+    }
 
-        return;
+    pub fn write_nullable_type(self: Self, out_stream: anytype) !void {
+        try out_stream.writeAll("\n");
+        if (!self.isValid()) {
+            try out_stream.writeAll("// Not enough info to print register value\n");
+            return;
+        }
+        const name = self.name.items;
+        // const periph = self.periph_containing.items;
+        const description = if (self.description.items.len == 0) "No description" else self.description.items;
+        // print packed struct containing fields
+        try out_stream.print(
+            \\/// {s}
+            \\{s}: struct {{
+        , .{ description, name });
+
+        // Sort fields from LSB to MSB for next step
+        std.sort.heap(Field, self.fields.items, {}, fieldsSortCompare);
+
+        var padded_writer = PaddedWriter.init("    ", out_stream);
+        var padded_out_stream = padded_writer.writer();
+
+        for (self.fields.items) |field| {
+            if ((field.bit_offset == null) or (field.bit_width == null)) {
+                try padded_out_stream.writeAll("// Not enough info to print register\n");
+                return;
+            }
+
+            try field.write_nullable(padded_out_stream);
+        }
+
+        // close the struct and init the register
+        try out_stream.print(
+            \\
+            \\}},
+        , .{});
     }
 };
 
@@ -852,7 +967,7 @@ pub const Field = struct {
         return shifted_reset_value & reset_value_mask;
     }
 
-    pub fn format(self: Self, comptime _: []const u8, _: std.fmt.FormatOptions, out_stream: anytype) !void {
+    pub fn write(self: Self, out_stream: anytype) !void {
         try out_stream.writeAll("\n");
         if (self.name.items.len == 0) {
             try out_stream.writeAll("// No name to print field value\n");
@@ -884,7 +999,37 @@ pub const Field = struct {
             bit_width,
             reset_value,
         });
-        return;
+    }
+
+    pub fn write_nullable(self: Self, out_stream: anytype) !void {
+        try out_stream.writeAll("\n");
+        if (self.name.items.len == 0) {
+            try out_stream.writeAll("// No name to print field value\n");
+            return;
+        }
+        if ((self.bit_offset == null) or (self.bit_width == null)) {
+            try out_stream.writeAll("// Not enough info to print field\n");
+            return;
+        }
+        const name = self.name.items;
+        const description = if (self.description.items.len == 0) "No description" else self.description.items;
+        const start_bit = self.bit_offset.?;
+        const end_bit = (start_bit + self.bit_width.? - 1);
+        const bit_width = self.bit_width.?;
+        try out_stream.print(
+            \\/// {s} [{}:{}]
+            \\/// {s}
+            \\{s}: ?u{} = null,
+        , .{
+            name,
+            start_bit,
+            end_bit,
+            // description
+            description,
+            // val
+            name,
+            bit_width,
+        });
     }
 };
 
@@ -946,19 +1091,18 @@ const PaddedWriter = struct {
     }
 };
 
-test "Field print" {
+test "Field write" {
     const allocator = std.testing.allocator;
     const fieldDesiredPrint =
         \\
         \\/// RNGEN [2:2]
         \\/// RNGEN comment
         \\RNGEN: u1 = 1,
-        \\
     ;
 
     var output_buffer = ArrayList(u8).init(allocator);
     defer output_buffer.deinit();
-    var buf_stream = output_buffer.writer();
+    const buf_stream = output_buffer.writer().any();
 
     var field = try Field.init(allocator, "PERIPH", "RND", 0b101);
     defer field.deinit();
@@ -968,11 +1112,36 @@ test "Field print" {
     field.bit_offset = 2;
     field.bit_width = 1;
 
-    try buf_stream.print("{}\n", .{field});
+    try field.write(buf_stream);
     try std.testing.expectEqualStrings(fieldDesiredPrint, output_buffer.items);
 }
 
-test "Register Print" {
+test "Field write nullable" {
+    const allocator = std.testing.allocator;
+    const fieldDesiredPrint =
+        \\
+        \\/// RNGEN [2:2]
+        \\/// RNGEN comment
+        \\RNGEN: ?u1 = null,
+    ;
+
+    var output_buffer = ArrayList(u8).init(allocator);
+    defer output_buffer.deinit();
+    const buf_stream = output_buffer.writer().any();
+
+    var field = try Field.init(allocator, "PERIPH", "RND", 0b101);
+    defer field.deinit();
+
+    try field.name.appendSlice("RNGEN");
+    try field.description.appendSlice("RNGEN comment");
+    field.bit_offset = 2;
+    field.bit_width = 1;
+
+    try field.write_nullable(buf_stream);
+    try std.testing.expectEqualStrings(fieldDesiredPrint, output_buffer.items);
+}
+
+test "Register write" {
     const allocator = std.testing.allocator;
     const registerDesiredPrint =
         \\
@@ -992,12 +1161,11 @@ test "Register Print" {
         \\    /// padding [13:31]
         \\    _padding: u19 = 0,
         \\}),
-        \\
     ;
 
     var output_buffer = ArrayList(u8).init(allocator);
     defer output_buffer.deinit();
-    var buf_stream = output_buffer.writer();
+    const buf_stream = output_buffer.writer().any();
 
     var register = try Register.init(allocator, "PERIPH", 0b101, 0x20);
     defer register.deinit();
@@ -1027,11 +1195,11 @@ test "Register Print" {
     try register.fields.append(field);
     try register.fields.append(field2);
 
-    try buf_stream.print("{}\n", .{register});
+    try register.write_type(buf_stream);
     try std.testing.expectEqualStrings(registerDesiredPrint, output_buffer.items);
 }
 
-test "Peripheral Print" {
+test "Peripheral write" {
     var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
     defer arena.deinit();
     const allocator = arena.allocator();
