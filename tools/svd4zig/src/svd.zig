@@ -773,49 +773,19 @@ pub const Register = struct {
         }
 
         // close the struct and init the register
-        try out_stream.print(
+        try out_stream.writeAll(
             \\
-            \\    }},
-            \\    struct {{
-        , .{});
+            \\    },
+            \\    struct {
+        );
 
-        for (self.fields.items) |field| {
-            if ((field.bit_offset == null) or (field.bit_width == null)) {
-                try padded_out_stream.writeAll("// Not enough info to print register\n");
-                return;
-            }
-
-            try field.write_nullable(padded_out_stream);
-        }
-
-        // close the struct and init the register
-        try out_stream.print(
-            \\
-            \\    }},
-            \\),
-        , .{});
-    }
-
-    pub fn write_nullable_type(self: Self, out_stream: anytype) !void {
-        try out_stream.writeAll("\n");
-        if (!self.isValid()) {
-            try out_stream.writeAll("// Not enough info to print register value\n");
+        if (self.fields.items.len == 0) {
+            try out_stream.writeAll(
+                \\},
+                \\),
+            );
             return;
         }
-        const name = self.name.items;
-        // const periph = self.periph_containing.items;
-        const description = if (self.description.items.len == 0) "No description" else self.description.items;
-        // print packed struct containing fields
-        try out_stream.print(
-            \\/// {s}
-            \\{s}: struct {{
-        , .{ description, name });
-
-        // Sort fields from LSB to MSB for next step
-        std.sort.heap(Field, self.fields.items, {}, fieldsSortCompare);
-
-        var padded_writer = PaddedWriter.init("    ", out_stream);
-        var padded_out_stream = padded_writer.writer();
 
         for (self.fields.items) |field| {
             if ((field.bit_offset == null) or (field.bit_width == null)) {
@@ -827,10 +797,11 @@ pub const Register = struct {
         }
 
         // close the struct and init the register
-        try out_stream.print(
+        try out_stream.writeAll(
             \\
-            \\}},
-        , .{});
+            \\    },
+            \\),
+        );
     }
 };
 
@@ -1141,6 +1112,35 @@ test "Register write" {
 
     try register.fields.append(field);
     try register.fields.append(field2);
+
+    try register.write_type(buf_stream);
+    try std.testing.expectEqualStrings(registerDesiredPrint, output_buffer.items);
+}
+
+test "Register empty write" {
+    const allocator = std.testing.allocator;
+    const registerDesiredPrint =
+        \\
+        \\/// EMPTY comment
+        \\EMPTY: RegisterRW(
+        \\    packed struct(u32) {
+        \\        /// padding [0:31]
+        \\        _padding: u32 = 0,
+        \\    },
+        \\    struct {},
+        \\),
+    ;
+
+    var output_buffer = ArrayList(u8).init(allocator);
+    defer output_buffer.deinit();
+    const buf_stream = output_buffer.writer().any();
+
+    var register = try Register.init(allocator, "PERIPH", 0, 0x20);
+    defer register.deinit();
+    try register.name.appendSlice("EMPTY");
+    try register.description.appendSlice("EMPTY comment");
+    register.address_offset = 0x100;
+    register.size = 0x20;
 
     try register.write_type(buf_stream);
     try std.testing.expectEqualStrings(registerDesiredPrint, output_buffer.items);
