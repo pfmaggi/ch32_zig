@@ -11,17 +11,14 @@ pub const Pins = struct {
     remap: Remap,
 
     const Remap = struct {
-        afio_pcfr1: struct {
-            /// USART1_RM [2:2]
-            /// USART1 remapping
-            USART1_RM: u1 = 0,
-            /// USART1REMAP1 [21:21]
-            /// USART1 remapping
-            USART1REMAP1: u1 = 0,
-        },
+        afio_pcfr1: svd.nullable_types.AFIO.PCFR1,
 
         pub fn has(self: Remap) bool {
-            return self.afio_pcfr1.USART1_RM != 0 or self.afio_pcfr1.USART1REMAP1 != 0;
+            return isSet(self.afio_pcfr1.USART1_RM) or isSet(self.afio_pcfr1.USART1REMAP1);
+        }
+
+        inline fn isSet(value: anytype) bool {
+            return value != null and value.? != 0;
         }
     };
 
@@ -73,16 +70,31 @@ pub const Pins = struct {
     }
 };
 
-pub const RccBits = struct {
-    apb2: ?u5,
-    apb1: ?u5,
+pub const Rcc = struct {
+    pub inline fn enable(reg: *volatile svd.types.USART) void {
+        set(reg, true);
+    }
 
-    const usart1_offset = @bitOffsetOf(@TypeOf(svd.peripherals.RCC.APB2PCENR.default()), "USART1EN");
-    pub const usart1 = RccBits{ .apb2 = usart1_offset, .apb1 = null };
+    pub inline fn disable(reg: *volatile svd.types.USART) void {
+        set(reg, false);
+    }
 
-    pub inline fn get(uart: *volatile svd.types.USART) RccBits {
-        switch (uart.addr()) {
-            svd.types.USART.USART1.addr() => return RccBits.usart1,
+    pub inline fn reset(reg: *volatile svd.types.USART) void {
+        switch (reg.addr()) {
+            svd.types.USART.USART1.addr() => {
+                svd.peripherals.RCC.APB2PRSTR.modify(.{ .USART1RST = 1 });
+                svd.peripherals.RCC.APB2PRSTR.modify(.{ .USART1RST = 0 });
+            },
+            else => unreachable,
+        }
+    }
+
+    inline fn set(reg: *volatile svd.types.USART, en: bool) void {
+        const en_value = if (en) 1 else 0;
+        switch (reg.addr()) {
+            svd.types.USART.USART1.addr() => {
+                svd.peripherals.RCC.APB2PCENR.modify(.{ .USART1EN = en_value });
+            },
             else => unreachable,
         }
     }

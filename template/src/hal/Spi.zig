@@ -116,8 +116,8 @@ pub const Pins = switch (config.chip_series) {
     else => @compileError("Unsupported chip series"),
 };
 
-const RccBits = switch (config.chip_series) {
-    .ch32v003 => @import("spi/ch32v003.zig").RccBits,
+const Rcc = switch (config.chip_series) {
+    .ch32v003 => @import("spi/ch32v003.zig").Rcc,
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
@@ -132,7 +132,7 @@ pub const ConfigureError = error{
 
 const SPI = @This();
 
-spi: *volatile svd.types.SPI,
+reg: *volatile svd.types.SPI,
 sw_nss: ?Pin,
 
 pub fn init(uart: svd.peripherals.SPI, comptime cfg: Config) ConfigureError!SPI {
@@ -141,7 +141,7 @@ pub fn init(uart: svd.peripherals.SPI, comptime cfg: Config) ConfigureError!SPI 
         break :blk null;
     } else null;
 
-    const self = SPI{ .spi = uart.get(), .sw_nss = sw_nss };
+    const self = SPI{ .reg = uart.get(), .sw_nss = sw_nss };
 
     self.reset();
     self.enable();
@@ -162,7 +162,7 @@ pub fn deinit(self: SPI) void {
 }
 
 fn configurePins(self: SPI, comptime cfg: Config) void {
-    const pins = cfg.pins orelse Pins.get_default(self.spi);
+    const pins = cfg.pins orelse Pins.get_default(self.reg);
 
     if (pins.remap.has()) {
         // Alternate function I/O clock enable
@@ -206,7 +206,7 @@ fn configurePins(self: SPI, comptime cfg: Config) void {
 }
 
 fn configureCtrl(self: SPI, comptime cfg: Config) void {
-    self.spi.CTLR1.write(.{
+    self.reg.CTLR1.write(.{
         // Clock phase.
         .CPHA = @intFromEnum(cfg.cpha),
         // Clock polarity.
@@ -236,63 +236,40 @@ fn configureCtrl(self: SPI, comptime cfg: Config) void {
         // Bidirectional data mode enable
         .BIDIMODE = boolToU1(cfg.direction == .one_line_rx or cfg.direction == .one_line_tx),
     });
-    self.spi.CTLR2.write(.{
+    self.reg.CTLR2.write(.{
         .SSOE = boolToU1(cfg.mode == .master and cfg.isHardwareNss()),
     });
 
     // SPI enable.
-    self.spi.CTLR1.modify(.{ .SPE = 1 });
+    self.reg.CTLR1.modify(.{ .SPE = 1 });
 }
 
 /// Runtime baud rate configuration.
 pub fn configureBaudRate(self: SPI, baud_rate: BaudRate) void {
-    self.spi.CTLR1.modify(.{ .BR = @intFromEnum(baud_rate.calculate()) });
+    self.reg.CTLR1.modify(.{ .BR = @intFromEnum(baud_rate.calculate()) });
 }
 
 fn configureCheck(self: SPI) ConfigureError!void {
-    if (self.spi.STATR.read().MODF == 1) {
+    if (self.reg.STATR.read().MODF == 1) {
         return ConfigureError.ModeFault;
     }
 }
 
 /// Selects the data transfer direction in bi-directional mode.
 pub fn setBiDirectionalMode(self: SPI, dir: BiDirectionalMode) void {
-    self.spi.CTLR1.modify(.{ .BIDIOE = @intFromEnum(dir) });
+    self.reg.CTLR1.modify(.{ .BIDIOE = @intFromEnum(dir) });
 }
 
 pub fn enable(self: SPI) void {
-    const RCC = svd.peripherals.RCC;
-    const bits = RccBits.get(self.spi);
-    if (bits.apb2) |pos| {
-        RCC.APB2PCENR.setBit(pos, 1);
-    }
-    if (bits.apb1) |pos| {
-        RCC.APB1PCENR.setBit(pos, 1);
-    }
+    Rcc.enable(self.reg);
 }
 
 pub fn disable(self: SPI) void {
-    const RCC = svd.peripherals.RCC;
-    const bits = RccBits.get(self.spi);
-    if (bits.apb2) |pos| {
-        RCC.APB2PCENR.setBit(pos, 0);
-    }
-    if (bits.apb1) |pos| {
-        RCC.APB1PCENR.setBit(pos, 0);
-    }
+    Rcc.disable(self.reg);
 }
 
 fn reset(self: SPI) void {
-    const RCC = svd.peripherals.RCC;
-    const bits = RccBits.get(self.spi);
-    if (bits.apb2) |pos| {
-        RCC.APB2PRSTR.setBit(pos, 1);
-        RCC.APB2PRSTR.setBit(pos, 0);
-    }
-    if (bits.apb1) |pos| {
-        RCC.APB2PRSTR.setBit(pos, 1);
-        RCC.APB2PRSTR.setBit(pos, 0);
-    }
+    Rcc.reset(self.reg);
 }
 
 /// Blocking bidirectional data transfer.
@@ -347,25 +324,25 @@ inline fn swNssWrite(self: SPI, v: bool) void {
 }
 
 fn isReadable(self: SPI) bool {
-    return self.spi.STATR.read().RXNE == 1;
+    return self.reg.STATR.read().RXNE == 1;
 }
 
 fn isWriteable(self: SPI) bool {
-    return self.spi.STATR.read().TXE == 1;
+    return self.reg.STATR.read().TXE == 1;
 }
 
 fn setDataSize(self: SPI, size: DataSize) void {
-    self.spi.CTLR1.modify(.{ .DFF = @intFromEnum(size) });
+    self.reg.CTLR1.modify(.{ .DFF = @intFromEnum(size) });
 }
 
 fn transferWordBlocking(self: SPI, word: u16, deadlineFn: ?DeadlineFn) Timeout!u16 {
     try self.wait(isWriteable, deadlineFn);
 
-    self.spi.DATAR.write(.{ .DATAR = word });
+    self.reg.DATAR.write(.{ .DATAR = word });
 
     try self.wait(isReadable, deadlineFn);
 
-    return self.spi.DATAR.read().DATAR;
+    return self.reg.DATAR.read().DATAR;
 }
 
 // Wait for a condition to be true.

@@ -100,8 +100,8 @@ pub fn set(comptime cfg: Config) !Clocks {
             // Enable HSE.
             .HSEON = 1,
             // HSE bypass.
-            .HSEBYP = cfg.source.hse.bypass,
-            .CSSON = cfg.source.hse.clock_security_system,
+            .HSEBYP = boolToU1(cfg.source.hse.bypass),
+            .CSSON = boolToU1(cfg.source.hse.clock_security_system),
         });
 
         // Wait for HSE to be ready or timeout.
@@ -167,7 +167,7 @@ pub fn set(comptime cfg: Config) !Clocks {
 
     if (cfg.sys_clk == .pll) {
         // Configure PLL source.
-        RCC.CFGR0.modify(.{ .PLLSRC = cfg.source == .hse });
+        RCC.CFGR0.modify(.{ .PLLSRC = boolToU1(cfg.source == .hse) });
         // Enable PLL.
         RCC.CTLR.modify(.{ .PLLON = 1 });
         // Wait for PLL to be ready or timeout.
@@ -244,4 +244,8 @@ pub fn get() !Clocks {
 pub fn adjustHsiCalibrationValue(value: u5) void {
     const RCC = svd.peripherals.RCC;
     RCC.CTLR.modify(.{ .HSITRIM = value });
+}
+
+inline fn boolToU1(b: bool) u1 {
+    return if (b) 1 else 0;
 }

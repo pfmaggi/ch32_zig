@@ -66,8 +66,8 @@ pub const Pins = switch (config.chip_series) {
     else => @compileError("Unsupported chip series"),
 };
 
-const RccBits = switch (config.chip_series) {
-    .ch32v003 => @import("uart/ch32v003.zig").RccBits,
+const Rcc = switch (config.chip_series) {
+    .ch32v003 => @import("uart/ch32v003.zig").Rcc,
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
@@ -86,10 +86,10 @@ pub const ErrorStates = packed struct(u4) {
 
 const UART = @This();
 
-uart: *volatile svd.types.USART,
+reg: *volatile svd.types.USART,
 
 pub fn init(uart: svd.peripherals.USART, comptime cfg: Config) UART {
-    const self = UART{ .uart = uart.get() };
+    const self = UART{ .reg = uart.get() };
 
     self.reset();
     self.enable();
@@ -111,7 +111,7 @@ pub fn deinit(self: UART) void {
 }
 
 fn configurePins(self: UART, comptime cfg: Config) void {
-    const pins = cfg.pins orelse Pins.get_default(self.uart);
+    const pins = cfg.pins orelse Pins.get_default(self.reg);
 
     if (pins.remap.has()) {
         // Alternate function I/O clock enable
@@ -133,7 +133,7 @@ fn configurePins(self: UART, comptime cfg: Config) void {
 
 /// Runtime baud rate configuration.
 pub fn configureBaudRate(self: UART, cfg: BaudRate) void {
-    self.uart.BRR.raw = cfg.calculate();
+    self.reg.BRR.raw = cfg.calculate();
 }
 
 fn configureCtrl(self: UART, comptime cfg: Config) void {
@@ -167,7 +167,7 @@ fn configureCtrl(self: UART, comptime cfg: Config) void {
         },
     }
 
-    self.uart.CTLR1.write(.{
+    self.reg.CTLR1.write(.{
         // Receiver enable
         .RE = 1,
         // Transmitter enable
@@ -180,12 +180,12 @@ fn configureCtrl(self: UART, comptime cfg: Config) void {
         .M = wordLongBit,
     });
 
-    self.uart.CTLR2.write(.{
+    self.reg.CTLR2.write(.{
         // Stop bits.
         .STOP = stopBits,
     });
 
-    self.uart.CTLR3.write(.{
+    self.reg.CTLR3.write(.{
         // RTS enable.
         .RTSE = rts_bit,
         // CTS enable.
@@ -193,7 +193,7 @@ fn configureCtrl(self: UART, comptime cfg: Config) void {
     });
 
     // // Enable the interrupt for RX
-    // self.uart.CTLR1.modify(.{
+    // self.reg.CTLR1.modify(.{
     //     // RXNE interrupt enable.
     //     .RXNEIE = 1,
     // });
@@ -201,56 +201,33 @@ fn configureCtrl(self: UART, comptime cfg: Config) void {
     // svd.peripherals.PFIC.IENR2.raw = 1;
 
     // UART enable bit.
-    self.uart.CTLR1.modify(.{
+    self.reg.CTLR1.modify(.{
         .UE = 1,
     });
 }
 
 pub fn enable(self: UART) void {
-    const RCC = svd.peripherals.RCC;
-    const bits = RccBits.get(self.uart);
-    if (bits.apb2) |pos| {
-        RCC.APB2PCENR.setBit(pos, 1);
-    }
-    if (bits.apb1) |pos| {
-        RCC.APB1PCENR.setBit(pos, 1);
-    }
+    Rcc.enable(self.reg);
 }
 
 pub fn disable(self: UART) void {
-    const RCC = svd.peripherals.RCC;
-    const bits = RccBits.get(self.uart);
-    if (bits.apb2) |pos| {
-        RCC.APB2PCENR.setBit(pos, 0);
-    }
-    if (bits.apb1) |pos| {
-        RCC.APB1PCENR.setBit(pos, 0);
-    }
+    Rcc.disable(self.reg);
 }
 
 fn reset(self: UART) void {
-    const RCC = svd.peripherals.RCC;
-    const bits = RccBits.get(self.uart);
-    if (bits.apb2) |pos| {
-        RCC.APB2PRSTR.setBit(pos, 1);
-        RCC.APB2PRSTR.setBit(pos, 0);
-    }
-    if (bits.apb1) |pos| {
-        RCC.APB2PRSTR.setBit(pos, 1);
-        RCC.APB2PRSTR.setBit(pos, 0);
-    }
+    Rcc.reset(self.reg);
 }
 
 pub fn isReadable(self: UART) bool {
-    return self.uart.STATR.read().RXNE == 1;
+    return self.reg.STATR.read().RXNE == 1;
 }
 
 pub fn isWriteable(self: UART) bool {
-    return self.uart.STATR.read().TXE == 1;
+    return self.reg.STATR.read().TXE == 1;
 }
 
 pub fn isWriteComplete(self: UART) bool {
-    return self.uart.STATR.read().TC == 1;
+    return self.reg.STATR.read().TC == 1;
 }
 
 pub noinline fn writeBlocking(self: UART, payload: []const u8, deadlineFn: ?DeadlineFn) Timeout!usize {
@@ -263,7 +240,7 @@ pub noinline fn writeBlocking(self: UART, payload: []const u8, deadlineFn: ?Dead
             return err;
         };
 
-        self.uart.DATAR.raw = payload[offset];
+        self.reg.DATAR.raw = payload[offset];
         offset += 1;
 
         self.wait(isWriteComplete, deadlineFn) catch {
@@ -283,14 +260,14 @@ pub fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) Timeout!u
             return err;
         };
 
-        byte.* = @truncate(self.uart.DATAR.raw & 0xFF);
+        byte.* = @truncate(self.reg.DATAR.raw & 0xFF);
     }
 
     return buffer.len;
 }
 
 pub fn getErrors(self: UART) ErrorStates {
-    const statr = self.uart.STATR.read();
+    const statr = self.reg.STATR.read();
     return .{
         .overrun_error = statr.ORE,
         .break_error = statr.LBD,
@@ -301,7 +278,7 @@ pub fn getErrors(self: UART) ErrorStates {
 }
 
 pub fn clearErrors(self: UART) void {
-    self.uart.STATR.modify(.{
+    self.reg.STATR.modify(.{
         .ORE = 0,
         .LBD = 0,
         .PE = 0,
