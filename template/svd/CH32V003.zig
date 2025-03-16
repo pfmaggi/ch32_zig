@@ -7914,8 +7914,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -7924,8 +7923,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -7934,8 +7932,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -7944,8 +7941,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -7954,8 +7950,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -7964,8 +7959,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -7974,8 +7968,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -7984,8 +7977,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -7994,8 +7986,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8004,8 +7995,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8014,8 +8004,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8024,8 +8013,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8034,8 +8022,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8044,8 +8031,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8054,8 +8040,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8064,8 +8049,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8074,8 +8058,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8084,8 +8067,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8094,8 +8076,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8104,8 +8085,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8114,8 +8094,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8124,8 +8103,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8134,8 +8112,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8144,8 +8121,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8154,8 +8130,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8164,8 +8139,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8174,8 +8148,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8184,8 +8157,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8194,8 +8166,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8204,8 +8175,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8214,8 +8184,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8224,8 +8193,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8234,8 +8202,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8244,8 +8211,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8254,8 +8220,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8264,8 +8229,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8274,8 +8238,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8284,8 +8247,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8294,8 +8256,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8304,8 +8265,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8314,8 +8274,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8324,8 +8283,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8334,8 +8292,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8344,8 +8301,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8354,8 +8310,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8364,8 +8319,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8374,8 +8328,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8384,8 +8337,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8394,8 +8346,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8404,8 +8355,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8414,8 +8364,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8424,8 +8373,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8434,8 +8382,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8444,8 +8391,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8454,8 +8400,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8464,8 +8409,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8474,8 +8418,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8484,8 +8427,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8494,8 +8436,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8504,8 +8445,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8514,8 +8454,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8524,8 +8463,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8534,8 +8472,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// Interrupt Priority Register
@@ -8544,8 +8481,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// offset 0x8d0

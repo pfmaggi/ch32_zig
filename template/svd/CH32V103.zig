@@ -9357,8 +9357,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// offset 0x3
@@ -9463,8 +9462,7 @@ pub const types = struct {
                 /// padding [0:15]
                 _padding: u16 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// offset 0x2
@@ -9476,8 +9474,7 @@ pub const types = struct {
                 /// padding [0:15]
                 _padding: u16 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// offset 0x2
@@ -9489,8 +9486,7 @@ pub const types = struct {
                 /// padding [0:15]
                 _padding: u16 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// offset 0x2
@@ -9502,8 +9498,7 @@ pub const types = struct {
                 /// padding [0:15]
                 _padding: u16 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// offset 0x2
@@ -9515,8 +9510,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// offset 0x1
@@ -9571,8 +9565,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// offset 0x1
@@ -9693,8 +9686,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// offset 0x1
@@ -9749,8 +9741,7 @@ pub const types = struct {
                 /// padding [0:7]
                 _padding: u8 = 0,
             },
-            struct {
-            },
+            struct {},
         ),
 
         /// offset 0x1
