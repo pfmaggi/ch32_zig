@@ -112,12 +112,14 @@ pub const FirstBit = enum(u1) {
 
 pub const Pins = switch (config.chip_series) {
     .ch32v003 => @import("spi/ch32v003.zig").Pins,
+    .ch32v30x => @import("spi/ch32v30x.zig").Pins,
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
 
 const Rcc = switch (config.chip_series) {
     .ch32v003 => @import("spi/ch32v003.zig").Rcc,
+    .ch32v30x => @import("spi/ch32v30x.zig").Rcc,
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
@@ -338,11 +340,11 @@ fn setDataSize(self: SPI, size: DataSize) void {
 fn transferWordBlocking(self: SPI, word: u16, deadlineFn: ?DeadlineFn) Timeout!u16 {
     try self.wait(isWriteable, deadlineFn);
 
-    self.reg.DATAR.write(.{ .DATAR = word });
+    self.reg.DATAR.raw = word;
 
     try self.wait(isReadable, deadlineFn);
 
-    return self.reg.DATAR.read().DATAR;
+    return @truncate(self.reg.DATAR.raw);
 }
 
 // Wait for a condition to be true.
