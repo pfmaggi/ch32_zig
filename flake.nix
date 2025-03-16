@@ -18,8 +18,9 @@
       };
     };
 
+    # https://github.com/llogick/zigscient
     zigscient-src = {
-      url = "github:llogick/zigscient/0.14.x";
+      url = "github:llogick/zigscient";
       flake = false;
     };
 
@@ -43,7 +44,7 @@
             zig = inputs.zig.packages.${system}."0.14.0";
             zls = stdenvNoCC.mkDerivation {
               pname = "zigscient";
-              version = "0.14.x";
+              version = "${inputs.zigscient-src.shortRev}-${inputs.zigscient-src.lastModifiedDate}";
               src = "${inputs.zigscient-src}";
               nativeBuildInputs = [ zig ];
               phases = [
