@@ -21,17 +21,39 @@ pub fn RegisterRW(comptime Register: type) type {
             var old_value = self.read();
             const info = @typeInfo(@TypeOf(new_value));
             inline for (info.@"struct".fields) |field| {
-                const new_field_value = @field(new_value, field.name);
+                const old_field_value = @field(old_value, field.name);
+                const old_field_value_type_info = @typeInfo(@TypeOf(old_field_value));
 
-                // Allow set boolean values.
-                const old_field_value_type_info = @typeInfo(@TypeOf(@field(old_value, field.name)));
+                const new_field_value = @field(new_value, field.name);
                 const new_field_value_type_info = @typeInfo(@TypeOf(new_field_value));
-                if (old_field_value_type_info.int.signedness == .unsigned and old_field_value_type_info.int.bits == 1 and new_field_value_type_info == .bool) {
-                    @field(old_value, field.name) = if (new_field_value) 1 else 0;
+
+                const new_field_value_unwrapped_type_info = if (new_field_value_type_info == .optional)
+                    @typeInfo(new_field_value_type_info.optional.child)
+                else
+                    new_field_value_type_info;
+
+                // Null fields don't modify the value.
+                if (new_field_value_unwrapped_type_info == .null) {
                     continue;
                 }
 
-                @field(old_value, field.name) = new_field_value;
+                const new_field_value_unwrapped: @Type(new_field_value_unwrapped_type_info) = if (new_field_value_type_info == .optional)
+                    // Null values don't modify the field.
+                    if (new_field_value == null)
+                        old_field_value
+                    else
+                        new_field_value.?
+                else
+                    new_field_value;
+
+                // Allow set boolean values.
+                const is_u1_type = old_field_value_type_info.int.signedness == .unsigned and old_field_value_type_info.int.bits == 1;
+                if (is_u1_type and new_field_value_unwrapped_type_info == .bool) {
+                    @field(old_value, field.name) = if (new_field_value_unwrapped) 1 else 0;
+                    continue;
+                }
+
+                @field(old_value, field.name) = new_field_value_unwrapped;
             }
             self.write(old_value);
         }
@@ -78,6 +100,15 @@ test RegisterRW {
         padding: u17 = 0,
     };
     const TestPeriferalRegister = RegisterRW(TestPeriferal);
+
+    const TestPeriferalNullables = struct {
+        field0: ?u1 = null,
+        field1: ?u2 = null,
+        field2: ?u3 = null,
+        field3: ?u4 = null,
+        field4: ?u5 = null,
+        padding: ?u17 = null,
+    };
 
     var value: TestPeriferalRegister = @bitCast(@as(u32, 0b0_10101_0101_010_10_1));
 
@@ -203,5 +234,52 @@ test RegisterRW {
         .field2 = 0b1,
         .field3 = 0b1,
         .field4 = 0b11010,
+    }, value.read());
+
+    // Null fields don't modify the value.
+    value.modify(.{
+        .field0 = null,
+        .field1 = null,
+        .field2 = null,
+        .field3 = null,
+        .field4 = null,
+    });
+    try std.testing.expectEqual(TestPeriferal{
+        .field0 = 0b1,
+        .field1 = 0b1,
+        .field2 = 0b1,
+        .field3 = 0b1,
+        .field4 = 0b11010,
+    }, value.read());
+
+    value.modify(.{
+        .field0 = null,
+        .field1 = 0,
+        .field2 = null,
+        .field3 = 0b1010,
+        .field4 = 1,
+    });
+    try std.testing.expectEqual(TestPeriferal{
+        .field0 = 0b1,
+        .field1 = 0b0,
+        .field2 = 0b1,
+        .field3 = 0b1010,
+        .field4 = 0b00001,
+    }, value.read());
+
+    // And with nullables struct.
+    value.modify(TestPeriferalNullables{
+        .field0 = null,
+        .field1 = 0,
+        .field2 = null,
+        .field3 = 0b0101,
+        // .field4 = null, // Use default value.
+    });
+    try std.testing.expectEqual(TestPeriferal{
+        .field0 = 0b1,
+        .field1 = 0b0,
+        .field2 = 0b1,
+        .field3 = 0b0101,
+        .field4 = 0b00001,
     }, value.read());
 }
