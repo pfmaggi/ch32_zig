@@ -231,39 +231,55 @@ pub fn isWriteComplete(self: UART) bool {
 }
 
 pub noinline fn writeBlocking(self: UART, payload: []const u8, deadlineFn: ?DeadlineFn) Timeout!usize {
-    var offset: usize = 0;
-    while (offset < payload.len) {
-        self.wait(isWriteable, deadlineFn) catch |err| {
-            if (offset > 0) {
-                return offset;
-            }
-            return err;
-        };
-
-        self.reg.DATAR.raw = payload[offset];
-        offset += 1;
-
-        self.wait(isWriteComplete, deadlineFn) catch {
-            return offset;
-        };
-    }
-
-    return offset;
+    return self.writeVecBlocking(&.{payload}, deadlineFn);
 }
 
-pub fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
-    for (buffer, 0..) |*byte, count| {
-        self.wait(isReadable, deadlineFn) catch |err| {
-            if (count > 0) {
-                return count;
-            }
-            return err;
-        };
+pub noinline fn writeVecBlocking(self: UART, payloads: []const []const u8, deadlineFn: ?DeadlineFn) Timeout!usize {
+    var total: usize = 0;
 
-        byte.* = @truncate(self.reg.DATAR.raw & 0xFF);
+    for (payloads) |payload| {
+        for (payload) |b| {
+            self.wait(isWriteable, deadlineFn) catch |err| {
+                if (total > 0) {
+                    return total;
+                }
+                return err;
+            };
+
+            self.reg.DATAR.raw = b;
+            total += 1;
+
+            self.wait(isWriteComplete, deadlineFn) catch {
+                return total;
+            };
+        }
     }
 
-    return buffer.len;
+    return total;
+}
+
+pub noinline fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
+    return self.readVecBlocking(&.{buffer}, deadlineFn);
+}
+
+pub noinline fn readVecBlocking(self: UART, buffers: []const []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
+    var total: usize = 0;
+
+    for (buffers) |buffer| {
+        for (buffer) |*byte| {
+            self.wait(isReadable, deadlineFn) catch |err| {
+                if (total > 0) {
+                    return total;
+                }
+                return err;
+            };
+
+            byte.* = @truncate(self.reg.DATAR.raw & 0xFF);
+            total += 1;
+        }
+    }
+
+    return total;
 }
 
 pub fn getErrors(self: UART) ErrorStates {
