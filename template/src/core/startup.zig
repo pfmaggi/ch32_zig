@@ -75,18 +75,36 @@ fn _start() callconv(.c) noreturn {
     // 3.2 Interrupt-related CSR Registers
     // INTSYSCR: enable EABI, nesting and HPE.
     asm volatile ("csrsi 0x804, 0b111");
-    // Enable interrupts.
-    // MPIE and MIE.
-    asm volatile (
-        \\li a0, 0b10001000
-        \\csrw mstatus, a0
-    );
+
+    // 8.2 RISC-V Standard CSR Registers.
+    if (config.chip_series == .ch32v30x) {
+        // Enable floating point and interrupt.
+        // Set MPIE, MIE and floating point status to Dirty.
+        asm volatile (
+            \\li t0, 0x6088
+            \\csrw mstatus, t0
+        );
+
+        // Microprocessor Configuration Registers (corecfgr)
+        asm volatile (
+            \\li t0, 0x1f
+            \\csrw 0xbc0, t0
+        );
+    } else {
+        // Enable interrupts.
+        // Set MPIE and MIE.
+        asm volatile (
+            \\li t0, 0x88
+            \\csrw mstatus, t0
+        );
+    }
+
     // mtvec: set the base address of the interrupt vector table
     // and set the mode0 and mode1.
     asm volatile (
-        \\la a0, _start
-        \\ori a0, a0, 0b11
-        \\csrw mtvec, a0
+        \\la t0, _start
+        \\ori t0, t0, 0b11
+        \\csrw mtvec, t0
     );
 
     systemInit();
