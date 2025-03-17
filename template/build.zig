@@ -101,6 +101,7 @@ fn buildConfigOptions(b: *std.Build, name: []const u8, c: chip.Chip) *std.Build.
     config_options.addOption([]const u8, "name", name);
     config_options.addOption(chip.Model, "chip_model", c.as_model());
     config_options.addOption(chip.Series, "chip_series", c.as_series());
+    config_options.addOption(chip.Class, "chip_class", c.as_class());
     return config_options;
 }
 

@@ -4,21 +4,23 @@ const svd = @import("svd");
 
 pub const Clocks = struct {
     sys: u32,
-    peripheral: u32,
+    hb: u32,
 
-    pub const default: Clocks = .{ .sys = hsi_frequency, .peripheral = hsi_frequency / 3 };
+    pub const default: Clocks = .{ .sys = hsi_frequency, .hb = hsi_frequency / 3 };
 };
 
 pub const hsi_frequency: u32 = 24_000_000;
-const default_hse_24mhz_frequency: u32 = 24_000_000;
+pub const default_hse_frequency: u32 = 24_000_000;
+
+const HseSource = struct {
+    frequency: u32 = default_hse_frequency,
+    bypass: bool = false,
+    clock_security_system: bool = false,
+};
 
 const Source = union(enum) {
     hsi: void,
-    hse: struct {
-        frequency: u32 = default_hse_24mhz_frequency,
-        bypass: bool = false,
-        clock_security_system: bool = false,
-    },
+    hse: HseSource,
 };
 
 const SysClk = enum {
@@ -27,21 +29,62 @@ const SysClk = enum {
     pll,
 };
 
-const HbPrescaler = enum {
-    div1,
-    div2,
-    div3,
-    div4,
-    div5,
-    div6,
-    div7,
-    div8,
-    div16,
+const HbPrescaler = enum(u32) {
+    div1 = 1,
+    div2 = 2,
+    div3 = 3,
+    div4 = 4,
+    div5 = 5,
+    div6 = 6,
+    div7 = 7,
+    div8 = 8,
+    div16 = 16,
     // Disabled to prevent bricking, as flashing is not possible at low frequency.
-    // div32,
-    // div64,
-    // div128,
-    // div256,
+    div32 = 32,
+    div64 = 64,
+    div128 = 128,
+    div256 = 256,
+
+    fn num(self: HbPrescaler) u32 {
+        return @intFromEnum(self);
+    }
+
+    fn bits(self: HbPrescaler) u4 {
+        return switch (self) {
+            .div1 => 0b0000,
+            .div2 => 0b0001,
+            .div3 => 0b0010,
+            .div4 => 0b0011,
+            .div5 => 0b0100,
+            .div6 => 0b0101,
+            .div7 => 0b0110,
+            .div8 => 0b0111,
+            .div16 => 0b1011,
+            .div32 => 0b1100,
+            .div64 => 0b1101,
+            .div128 => 0b1110,
+            .div256 => 0b1111,
+        };
+    }
+
+    fn fromBits(b: u4) ?HbPrescaler {
+        return switch (b) {
+            0b0000 => .div1,
+            0b0001 => .div2,
+            0b0010 => .div3,
+            0b0011 => .div4,
+            0b0100 => .div5,
+            0b0101 => .div6,
+            0b0110 => .div7,
+            0b0111 => .div8,
+            0b1011 => .div16,
+            0b1100 => .div32,
+            0b1101 => .div64,
+            0b1110 => .div128,
+            0b1111 => .div256,
+            else => null,
+        };
+    }
 };
 
 pub const Config = struct {
@@ -50,6 +93,9 @@ pub const Config = struct {
     hb_pre: HbPrescaler,
 
     pub const default = hsi_8mhz;
+    pub const hsi_max = hsi_48mhz;
+    pub const hse_max = hse_48mhz;
+
     pub const hsi_8mhz: Config = .{
         .source = .hsi,
         .sys_clk = .hsi,
@@ -83,7 +129,11 @@ pub const Config = struct {
 };
 
 pub fn setOrGet(comptime cfg: Config) Clocks {
-    return set(cfg) catch get() catch .default;
+    const hse_frequency = switch (cfg.source) {
+        .hse => |hse| hse.frequency,
+        else => default_hse_frequency,
+    };
+    return set(cfg) catch get(hse_frequency) orelse .default;
 }
 
 pub fn set(comptime cfg: Config) !Clocks {
@@ -91,8 +141,12 @@ pub fn set(comptime cfg: Config) !Clocks {
     const AFIO = svd.peripherals.AFIO;
     const FLASH = svd.peripherals.FLASH;
 
+    if (cfg.sys_clk == .hse and cfg.source != .hse) {
+        @compileError("Source must be HSE when system clock is HSE");
+    }
+
     // Configure HSE.
-    if (cfg.source == .hse or cfg.sys_clk == .hse) {
+    if (cfg.source == .hse) {
         // PA0-PA1 are used for HSE.
         RCC.APB2PCENR.modify(.{ .AFIOEN = 1 });
         AFIO.PCFR1.modify(.{ .PA12_RM = 1 });
@@ -126,21 +180,7 @@ pub fn set(comptime cfg: Config) !Clocks {
         },
     };
 
-    const hbclk_freq: u32 = sys_clk_freq / switch (cfg.hb_pre) {
-        .div1 => 1,
-        .div2 => 2,
-        .div3 => 3,
-        .div4 => 4,
-        .div5 => 5,
-        .div6 => 6,
-        .div7 => 7,
-        .div8 => 8,
-        .div16 => 16,
-        // .div32 => 32,
-        // .div64 => 64,
-        // .div128 => 128,
-        // .div256 => 256,
-    };
+    const hbclk_freq: u32 = sys_clk_freq / cfg.hb_pre.num();
 
     // Flash wait states.
     // If freq <= 24MHz, set 0 wait state.
@@ -148,22 +188,7 @@ pub fn set(comptime cfg: Config) !Clocks {
     FLASH.ACTLR.modify(.{ .LATENCY = if (hbclk_freq > 24_000_000) 1 else 0 });
 
     // Set HB prescaler.
-    const hpre: u4 = switch (cfg.hb_pre) {
-        .div1 => 0b0000,
-        .div2 => 0b0001,
-        .div3 => 0b0010,
-        .div4 => 0b0011,
-        .div5 => 0b0100,
-        .div6 => 0b0101,
-        .div7 => 0b0110,
-        .div8 => 0b0111,
-        .div16 => 0b1011,
-        // .div32 => 0b1100,
-        // .div64 => 0b1101,
-        // .div128 => 0b1110,
-        // .div256 => 0b1111,
-    };
-    RCC.CFGR0.modify(.{ .HPRE = hpre });
+    RCC.CFGR0.modify(.{ .HPRE = cfg.hb_pre.bits() });
 
     if (cfg.sys_clk == .pll) {
         // Configure PLL source.
@@ -202,40 +227,25 @@ pub fn set(comptime cfg: Config) !Clocks {
 
     return .{
         .sys = sys_clk_freq,
-        .peripheral = hbclk_freq,
+        .hb = hbclk_freq,
     };
 }
 
-pub fn get() !Clocks {
+pub fn get(hse_frequency: u32) ?Clocks {
     const RCC = svd.peripherals.RCC;
     const CFGR0 = RCC.CFGR0.read();
     const sys_clk_freq: u32 = switch (CFGR0.SWS) {
         0b00 => hsi_frequency,
-        0b01 => default_hse_24mhz_frequency,
+        0b01 => hse_frequency,
         0b10 => hsi_frequency * 2,
-        else => return error.UnknownSysClk,
+        else => return null,
     };
 
-    const hpre: u32 = switch (CFGR0.HPRE) {
-        0b0000 => 1,
-        0b0001 => 2,
-        0b0010 => 3,
-        0b0011 => 4,
-        0b0100 => 5,
-        0b0101 => 6,
-        0b0110 => 7,
-        0b0111 => 8,
-        0b1011 => 16,
-        0b1100 => 32,
-        0b1101 => 64,
-        0b1110 => 128,
-        0b1111 => 256,
-        else => return error.UnknownHbPre,
-    };
-    const hbclk_freq: u32 = sys_clk_freq / hpre;
+    const hpre = HbPrescaler.fromBits(CFGR0.HPRE) orelse return null;
+    const hbclk_freq: u32 = sys_clk_freq / hpre.num();
     return .{
         .sys = sys_clk_freq,
-        .peripheral = hbclk_freq,
+        .hb = hbclk_freq,
     };
 }
 

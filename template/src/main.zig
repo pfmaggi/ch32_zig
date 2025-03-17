@@ -17,20 +17,24 @@ pub const panic = core.panic.silent;
 pub const interrups: core.Interrups = .{};
 
 pub fn main() !void {
-    // const clock = hal.clock.setOrGet(.hsi_max);
-    // const peripheral_clock = clock.peripheral;
-    const peripheral_clock = 8_000_000;
+    const clock = hal.clock.setOrGet(.hse_max);
 
     const USART1 = hal.Uart.init(.USART1, .{});
     USART1.configureBaudRate(.{
-        .peripheral_clock = peripheral_clock,
+        .peripheral_clock = switch (config.chip_series) {
+            .ch32v003 => clock.hb,
+            else => clock.pb2,
+        },
         .baud_rate = 115_200,
     });
     // USART1.deinit();
 
     const SPI1 = try hal.Spi.init(.SPI1, .{});
     SPI1.configureBaudRate(.{
-        .peripheral_clock = peripheral_clock,
+        .peripheral_clock = switch (config.chip_series) {
+            .ch32v003 => clock.hb,
+            else => clock.pb2,
+        },
         .baud_rate = 1_000_000,
     });
     // SPI1.deinit();
@@ -47,7 +51,7 @@ pub fn main() !void {
     _ = try USART1.writeBlocking("Hello, World!\r\n", hal.deadline.simple(100_000));
 
     var buffer: [32]u8 = undefined;
-    _ = try USART1.writeVecBlocking(&.{ "Peripheral clock: ", intToStr(&buffer, peripheral_clock), "\r\n" }, null);
+    _ = try USART1.writeVecBlocking(&.{ "HB clock: ", intToStr(&buffer, clock.hb), "\r\n" }, null);
 
     hal.debug.sdi_print.enable();
 
