@@ -1,6 +1,7 @@
 const std = @import("std");
 pub const Series = @import("series.zig").Series;
 pub const Model = @import("model.zig").Model;
+pub const Class = @import("model.zig").Class;
 
 pub const Chip = union(enum) {
     series: Series,
@@ -39,5 +40,9 @@ pub const Chip = union(enum) {
             .model => |v| v,
             .series => |v| v.minimalModel(),
         };
+    }
+
+    pub fn as_class(chip: Chip) Class {
+        return as_model(chip).class();
     }
 };
