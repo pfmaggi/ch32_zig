@@ -259,7 +259,13 @@ pub const Config = struct {
     pub const hsi_max = hsi_144mhz;
     pub const hse_max = hse_144mhz;
 
-    pub const hsi_8mhz = Config{ .source = .hsi };
+    pub const hsi_8mhz = Config{
+        .source = .hsi,
+        .sys_clk = .hsi,
+        .hb_pre = .div1,
+        .pb1_pre = .div1,
+        .pb2_pre = .div1,
+    };
     pub const hsi_48mhz = Config{
         .source = .hsi,
         .sys_clk = .{ .pll = .{ .mul = .mul6 } },
