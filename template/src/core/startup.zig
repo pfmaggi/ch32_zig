@@ -17,7 +17,7 @@ comptime {
     }
 }
 
-fn _start() callconv(.c) noreturn {
+fn _start() callconv(.c) void {
     // Set global pointer.
     asm volatile (
         \\.option push
@@ -107,11 +107,18 @@ fn _start() callconv(.c) noreturn {
         \\csrw mtvec, t0
     );
 
-    systemInit();
-    callMain();
+    // Call functions from asm because the code does not run after power off.
+    @export(&systemInit, .{ .name = "systemInit" });
+    @export(&callMain, .{ .name = "callMain" });
+    asm volatile (
+        \\jal systemInit
+        \\la t0, callMain
+        \\csrw mepc, t0
+        \\mret
+    );
 }
 
-inline fn systemInit() void {
+fn systemInit() callconv(.c) void {
     const RCC = svd.peripherals.RCC;
     RCC.CTLR.modify(.{ .HSION = 1 });
 
@@ -142,7 +149,7 @@ inline fn systemInit() void {
     }
 }
 
-inline fn callMain() noreturn {
+fn callMain() callconv(.c) noreturn {
     const main_invalid_msg = "main must be either \"pub fn main() void\" or \"pub fn main() !void\".";
 
     const main_type = @typeInfo(@TypeOf(root.main));
