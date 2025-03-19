@@ -191,7 +191,7 @@ fn configurePins(self: SPI, comptime cfg: Config, pins: Pins) void {
         .slave => {
             if (pins.nss) |nss| {
                 port.enable(nss.pin.port);
-                nss.pin.asInput(.{ .pull = .down });
+                nss.pin.asInput(.{ .pull = .up });
             }
             port.enable(pins.sck.port);
             pins.sck.asInput(.floating);
