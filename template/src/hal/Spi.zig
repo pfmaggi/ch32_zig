@@ -22,23 +22,15 @@ pub const Config = struct {
     /// Whether data transfers start from MSB bit.
     /// NOTE: LSB is only supported by SPI as host.
     first_bit: FirstBit = .msb,
+    /// SPI data size.
+    data_size: DataSize = .eight_bits,
     /// SPI pins. If not provided, default pins will be used.
     pins: ?Pins = null,
-
-    fn isHardwareNss(self: Config) bool {
-        if (self.pins) |pins| {
-            if (pins.nss) |nss| {
-                return nss.is_hardware;
-            }
-        }
-
-        return false;
-    }
 };
 
 pub const Mode = enum(u1) {
-    slave = 0,
-    master = 1,
+    master,
+    slave,
 };
 
 pub const DataSize = enum(u1) {
@@ -136,18 +128,25 @@ const SPI = @This();
 
 reg: *volatile svd.types.SPI,
 sw_nss: ?Pin,
+has_hardware_nss: bool,
 
 pub fn init(uart: svd.peripherals.SPI, comptime cfg: Config) ConfigureError!SPI {
-    const sw_nss: ?Pin = if (cfg.mode == .master and !cfg.isHardwareNss()) blk: {
-        if (cfg.pins) |pins| if (pins.nss) |nss| if (!nss.is_hardware) break :blk nss.pin;
-        break :blk null;
+    const pins = cfg.pins orelse Pins.get_default(uart.get());
+
+    // Software NSS pin allowed only in master mode.
+    const sw_nss: ?Pin = if (cfg.mode == .master and !pins.isHardwareNss()) blk: {
+        break :blk if (pins.nss) |nss| nss.pin else null;
     } else null;
 
-    const self = SPI{ .reg = uart.get(), .sw_nss = sw_nss };
+    const self = SPI{
+        .reg = uart.get(),
+        .sw_nss = sw_nss,
+        .has_hardware_nss = pins.isHardwareNss(),
+    };
 
     self.reset();
     self.enable();
-    self.configurePins(cfg);
+    self.configurePins(cfg, pins);
     self.configureCtrl(cfg);
     self.configureBaudRate(cfg.baud_rate);
     try self.configureCheck();
@@ -163,9 +162,8 @@ pub fn deinit(self: SPI) void {
     self.reset();
 }
 
-fn configurePins(self: SPI, comptime cfg: Config) void {
-    const pins = cfg.pins orelse Pins.get_default(self.reg);
-
+fn configurePins(self: SPI, comptime cfg: Config, pins: Pins) void {
+    _ = self;
     if (pins.remap.has()) {
         // Alternate function I/O clock enable
         svd.peripherals.RCC.APB2PCENR.modify(.{ .AFIOEN = 1 });
@@ -185,7 +183,7 @@ fn configurePins(self: SPI, comptime cfg: Config) void {
             pins.sck.asOutput(.{ .speed = .max_50mhz, .mode = .alt_push_pull });
 
             port.enable(pins.miso.port);
-            pins.miso.asInput(.floating);
+            pins.miso.asInput(.{ .pull = .up });
 
             port.enable(pins.mosi.port);
             pins.mosi.asOutput(.{ .speed = .max_50mhz, .mode = .alt_push_pull });
@@ -202,7 +200,7 @@ fn configurePins(self: SPI, comptime cfg: Config) void {
             pins.miso.asOutput(.{ .speed = .max_50mhz, .mode = .alt_push_pull });
 
             port.enable(pins.mosi.port);
-            pins.mosi.asInput(.floating);
+            pins.mosi.asInput(.{ .pull = .up });
         },
     }
 }
@@ -214,21 +212,21 @@ fn configureCtrl(self: SPI, comptime cfg: Config) void {
         // Clock polarity.
         .CPOL = @intFromEnum(cfg.cpol),
         // Master selection.
-        .MSTR = @intFromEnum(cfg.mode),
+        .MSTR = boolToU1(cfg.mode == .master),
         // BR: Baud rate control.
         .BR = 0,
         // SPI enable.
         .SPE = 0,
         // Frame format.
-        .LSBFIRST = if (cfg.mode == .master) @intFromEnum(cfg.first_bit) else 0,
+        .LSBFIRST = @intFromEnum(cfg.first_bit),
         // Internal slave select. Required for master mode.
         .SSI = boolToU1(cfg.mode == .master),
         // SSM: Software slave management.
-        .SSM = boolToU1(!cfg.isHardwareNss()),
+        .SSM = boolToU1(!self.has_hardware_nss),
         // Receive only.
         .RXONLY = boolToU1(cfg.direction == .two_lines_rx_only),
         // Data frame format.
-        .DFF = 0,
+        .DFF = @intFromEnum(cfg.data_size),
         // CRC transfer next.
         .CRCNEXT = 0,
         // CRC enable.
@@ -239,7 +237,7 @@ fn configureCtrl(self: SPI, comptime cfg: Config) void {
         .BIDIMODE = boolToU1(cfg.direction == .one_line_rx or cfg.direction == .one_line_tx),
     });
     self.reg.CTLR2.write(.{
-        .SSOE = boolToU1(cfg.mode == .master and cfg.isHardwareNss()),
+        .SSOE = boolToU1(cfg.mode == .master and self.has_hardware_nss),
     });
 
     // SPI enable.
@@ -288,8 +286,6 @@ pub noinline fn transferBlocking(self: SPI, comptime u8_or_u16: type, send: ?[]c
         @compileError("Unsupported type, only u8 and u16 are supported");
     }
 
-    self.setDataSize(if (type_info.bits == 8) .eight_bits else .sixteen_bits);
-
     self.swNssWrite(false);
     defer self.swNssWrite(true);
 
@@ -316,6 +312,8 @@ pub noinline fn transferBlocking(self: SPI, comptime u8_or_u16: type, send: ?[]c
         }
     }
 
+    try self.wait(isNotBusy, deadlineFn);
+
     return len;
 }
 
@@ -333,8 +331,8 @@ fn isWriteable(self: SPI) bool {
     return self.reg.STATR.read().TXE == 1;
 }
 
-fn setDataSize(self: SPI, size: DataSize) void {
-    self.reg.CTLR1.modify(.{ .DFF = @intFromEnum(size) });
+fn isNotBusy(self: SPI) bool {
+    return self.reg.STATR.read().BSY == 0;
 }
 
 fn transferWordBlocking(self: SPI, word: u16, deadlineFn: ?DeadlineFn) Timeout!u16 {

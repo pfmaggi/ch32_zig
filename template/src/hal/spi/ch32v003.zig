@@ -63,6 +63,14 @@ pub const Pins = struct {
             else => unreachable,
         }
     }
+
+    pub fn isHardwareNss(self: Pins) bool {
+        if (self.nss) |nss| {
+            return nss.is_hardware;
+        }
+
+        return false;
+    }
 };
 
 pub const Rcc = struct {

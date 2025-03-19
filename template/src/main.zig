@@ -29,13 +29,18 @@ pub fn main() !void {
     });
     // USART1.deinit();
 
-    const SPI1 = try hal.Spi.init(.SPI1, .{});
+    const SPI1 = try hal.Spi.init(.SPI1, .{
+        .mode = if (config.chip_series == .ch32v003) .slave else .master,
+        // .pins = hal.Spi.Pins.softwareNss(hal.Spi.Pins.spi1.default, hal.Spi.Pins.spi1.default.nss.?.pin),
+        .cpol = .high,
+        .cpha = .second_edge,
+    });
     SPI1.configureBaudRate(.{
         .peripheral_clock = switch (config.chip_series) {
             .ch32v003 => clock.hb,
             else => clock.pb2,
         },
-        .baud_rate = 1_000_000,
+        .baud_rate = 750_000,
     });
     // SPI1.deinit();
 
