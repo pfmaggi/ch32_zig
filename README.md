@@ -21,7 +21,7 @@ https://ziglang.org/download/
 
 ```shell
 cd tools/minichlink
-zig build --release=safe
+zig build
 
 # Add the `minichlink` to your `PATH`:
 export PATH=$PATH:$(pwd)/zig-out/bin
