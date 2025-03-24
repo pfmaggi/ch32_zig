@@ -34,29 +34,21 @@ pub const Parity = enum {
 
 pub const FlowControl = enum {
     none,
-    CTS,
-    RTS,
-    CTS_RTS,
-};
-
-pub const ErrorStates = packed struct(u4) {
-    overrun_error: bool = false,
-    break_error: bool = false,
-    parity_error: bool = false,
-    framing_error: bool = false,
-    noise_error: bool = false,
+    cts,
+    rts,
+    cts_rts,
 };
 
 pub const UART = packed struct(u32) {
     addr: u32,
 
     // Table 12-2 USART-related registers list (CH32V003 Reference Manual).
-    const STATR_offset: u32 = 0x00;
-    const DATAR_offset: u32 = 0x04;
-    const BRR_offset: u32 = 0x08;
-    const CTLR1_offset: u32 = 0x0C;
-    const CTLR2_offset: u32 = 0x10;
-    const CTLR3_offset: u32 = 0x14;
+    const STATR_OFFSET: u32 = 0x00;
+    const DATAR_OFFSET: u32 = 0x04;
+    const BRR_OFFSET: u32 = 0x08;
+    const CTLR1_OFFSET: u32 = 0x0C;
+    const CTLR2_OFFSET: u32 = 0x10;
+    const CTLR3_OFFSET: u32 = 0x14;
 
     fn ptr(self: UART, offset: u32) *volatile u32 {
         return @ptrFromInt(self.addr + offset);
@@ -96,26 +88,26 @@ pub const UART = packed struct(u32) {
     }
 
     fn setupBrr(self: UART, comptime cfg: Config) void {
-        const USART_BRR: *volatile u32 = self.ptr(BRR_offset);
+        const USART_BRR: *volatile u32 = self.ptr(BRR_OFFSET);
 
         const brr = (cfg.cpu_frequency + cfg.baud_rate / 2) / cfg.baud_rate;
         USART_BRR.* = brr;
     }
 
     fn setupCtrl(self: UART, comptime cfg: Config) void {
-        const parityBit = switch (cfg.parity) {
+        const parity_bit = switch (cfg.parity) {
             .none => @as(u1, 0),
             .even, .odd => @as(u1, 1),
         };
-        const paritySelectionBit = switch (cfg.parity) {
+        const parity_selection_bit = switch (cfg.parity) {
             .even => @as(u1, 1),
             .odd, .none => @as(u1, 0),
         };
-        const wordLongBit = switch (cfg.word_bits) {
+        const word_long_bit = switch (cfg.word_bits) {
             .eight => @as(u1, 0),
             .nine => @as(u1, 1),
         };
-        const stopBits = switch (cfg.stop_bits) {
+        const stop_bits = switch (cfg.stop_bits) {
             .one => @as(u2, 0b00),
             .half => @as(u2, 0b01),
             .two => @as(u2, 0b10),
@@ -125,17 +117,17 @@ pub const UART = packed struct(u32) {
         var cts_bit: u1 = 0;
         switch (cfg.flow_control) {
             .none => {},
-            .CTS => cts_bit = 1,
-            .RTS => rts_bit = 1,
-            .CTS_RTS => {
+            .cts => cts_bit = 1,
+            .rts => rts_bit = 1,
+            .cts_rts => {
                 cts_bit = 1;
                 rts_bit = 1;
             },
         }
 
-        const USART_CTLR1: *volatile u32 = self.ptr(CTLR1_offset);
-        const USART_CTLR2: *volatile u32 = self.ptr(CTLR2_offset);
-        const USART_CTLR3: *volatile u32 = self.ptr(CTLR3_offset);
+        const USART_CTLR1: *volatile u32 = self.ptr(CTLR1_OFFSET);
+        const USART_CTLR2: *volatile u32 = self.ptr(CTLR2_OFFSET);
+        const USART_CTLR3: *volatile u32 = self.ptr(CTLR3_OFFSET);
 
         // Reset.
         USART_CTLR1.* = 0;
@@ -144,16 +136,16 @@ pub const UART = packed struct(u32) {
         // TE: Transmitter enable.
         USART_CTLR1.* |= @as(u32, 1) << 3;
         // PEIE: Parity check interrupt enable bit.
-        USART_CTLR1.* |= @as(u32, parityBit) << 8;
+        USART_CTLR1.* |= @as(u32, parity_bit) << 8;
         // PS: Parity selection bit.
-        USART_CTLR1.* |= @as(u32, paritySelectionBit) << 9;
+        USART_CTLR1.* |= @as(u32, parity_selection_bit) << 9;
         // M: Word long bit.
-        USART_CTLR1.* |= @as(u32, wordLongBit) << 12;
+        USART_CTLR1.* |= @as(u32, word_long_bit) << 12;
 
         // Reset.
         USART_CTLR2.* = 0;
         // STOP: Stop bits.
-        USART_CTLR2.* |= @as(u32, stopBits) << 12;
+        USART_CTLR2.* |= @as(u32, stop_bits) << 12;
 
         // Reset.
         USART_CTLR3.* = 0;
@@ -167,25 +159,25 @@ pub const UART = packed struct(u32) {
     }
 
     pub inline fn isReadable(self: UART) bool {
-        const USART_STATR: *volatile u32 = self.ptr(STATR_offset);
+        const USART_STATR: *volatile u32 = self.ptr(STATR_OFFSET);
         const RXNE = @as(u32, 1) << 5;
         return (USART_STATR.* & RXNE) != 0;
     }
 
     pub inline fn isWriteable(self: UART) bool {
-        const USART_STATR: *volatile u32 = self.ptr(STATR_offset);
+        const USART_STATR: *volatile u32 = self.ptr(STATR_OFFSET);
         const TXE = @as(u32, 1) << 7;
         return (USART_STATR.* & TXE) != 0;
     }
 
     pub inline fn isWriteComplete(self: UART) bool {
-        const USART_STATR: *volatile u32 = self.ptr(STATR_offset);
+        const USART_STATR: *volatile u32 = self.ptr(STATR_OFFSET);
         const TC = @as(u32, 1) << 6;
         return (USART_STATR.* & TC) != 0;
     }
 
     pub noinline fn writeBlocking(self: UART, payload: []const u8) usize {
-        const USART_DATAR: *volatile u32 = self.ptr(DATAR_offset);
+        const USART_DATAR: *volatile u32 = self.ptr(DATAR_OFFSET);
 
         var offset: usize = 0;
         while (offset < payload.len) {
@@ -205,7 +197,7 @@ pub const UART = packed struct(u32) {
     }
 
     pub fn readBlocking(self: UART, buffer: []u8) usize {
-        const USART_DATAR: *volatile u32 = self.ptr(DATAR_offset);
+        const USART_DATAR: *volatile u32 = self.ptr(DATAR_OFFSET);
 
         var count: u32 = 0;
         for (buffer) |*byte| {
@@ -218,27 +210,5 @@ pub const UART = packed struct(u32) {
         }
 
         return count;
-    }
-
-    pub fn getErrors(uart: UART) ErrorStates {
-        const read_val = uart.get_regs().STATR.read();
-        return .{
-            .overrun_error = read_val.ORE == 1,
-            .break_error = read_val.LBD == 1,
-            .parity_error = read_val.PE == 1,
-            .framing_error = read_val.FE == 1,
-            .noise_error = read_val.NE == 1,
-        };
-    }
-
-    pub fn clearErrors(uart: UART) void {
-        const uart_regs = uart.get_regs();
-        uart_regs.STATR.modify(.{
-            .ORE = 0,
-            .LBD = 0,
-            .PE = 0,
-            .FE = 0,
-            .NE = 0,
-        });
     }
 };

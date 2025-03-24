@@ -74,7 +74,7 @@ fn _start() callconv(.c) noreturn {
     hang();
 }
 
-pub fn panic_log(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+pub fn panicLog(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
     std.log.err("Panic: {s}", .{message});
 
     hang();

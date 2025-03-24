@@ -1,12 +1,18 @@
 // Registers adresses are taken from CH32V003 reference manual.
 const RCC_BASE: u32 = 0x40021000;
+// const GPIOA_BASE: u32 = 0x40010800;
 const GPIOC_BASE: u32 = 0x40011000;
-const RCC_APB2PCENR: *volatile u32 = @ptrFromInt(RCC_BASE + 0x18);
-const GPIOC_CFGLR: *volatile u32 = @ptrFromInt(GPIOC_BASE + 0x00);
-const GPIOC_OUTDR: *volatile u32 = @ptrFromInt(GPIOC_BASE + 0x0C);
+// cosnt GPIOD_BASE: u32 = 0x40011400;
+const GPIO_BASE = GPIOC_BASE;
 
-// Port bit offset for Port C.
+const RCC_APB2PCENR: *volatile u32 = @ptrFromInt(RCC_BASE + 0x18);
+const GPIO_CFGLR: *volatile u32 = @ptrFromInt(GPIO_BASE + 0x00);
+const GPIO_OUTDR: *volatile u32 = @ptrFromInt(GPIO_BASE + 0x0C);
+
+// Port bit offset: A - 2, B - 3, C - 4, D - 5.
+// NOTE: If you use another port, you also need to change the value of GPIO_BASE.
 const io_port_bit = 4;
+// Led pin number 0-7.
 const led_pin_num = 0;
 
 // Global variable in memory.
@@ -17,11 +23,11 @@ var step: u32 = 1;
 // Now we can use the main(or any other) function for the program logic.
 pub fn main() void {
     RCC_APB2PCENR.* |= @as(u32, 1) << io_port_bit; // Enable Port clock.
-    GPIOC_CFGLR.* &= ~(@as(u32, 0b1111) << led_pin_num * 4); // Clear all bits for pin.
-    GPIOC_CFGLR.* |= @as(u32, 0b0011) << led_pin_num * 4; // Set push-pull output for pin.
+    GPIO_CFGLR.* &= ~(@as(u32, 0b1111) << led_pin_num * 4); // Clear all bits for pin.
+    GPIO_CFGLR.* |= @as(u32, 0b0011) << led_pin_num * 4; // Set push-pull output for pin.
 
     while (true) {
-        GPIOC_OUTDR.* ^= @as(u16, 1 << led_pin_num); // Toggle pin.
+        GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num); // Toggle pin.
 
         var i: u32 = 0;
         while (i < 1_000_000) : (i += step) {
@@ -74,7 +80,7 @@ export fn resetHandler() callconv(.c) noreturn {
     // Divide by 4 because we are working with u32(4 bytes).
     for (0..bss_len / 4) |i| bss_start[i] = 0;
 
-    // Copy .data from Flash to RAM.
+    // Copy .data from FLASH to RAM.
     const data_start: [*]align(4) u32 = @ptrCast(&__data_start);
     const data_end: [*]align(4) const u32 = @ptrCast(&__data_end);
     const data_len = @intFromPtr(data_end) - @intFromPtr(data_start);

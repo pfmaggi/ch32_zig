@@ -38,7 +38,7 @@ fn _start() callconv(.c) noreturn {
         \\clear_bss_done:
     );
 
-    // Copy .data from flash to RAM.
+    // Copy .data from FLASH to RAM.
     asm volatile (
         \\    la a0, __data_load_start
         \\    la a1, __data_start
@@ -74,7 +74,7 @@ fn _start() callconv(.c) noreturn {
     hang();
 }
 
-pub fn panic_hang(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+pub fn panicHang(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
     hang();
 }
 

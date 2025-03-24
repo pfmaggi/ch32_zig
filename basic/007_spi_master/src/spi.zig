@@ -18,10 +18,10 @@ pub const Config = struct {
 pub const SPI = packed struct(u32) {
     addr: u32,
 
-    const CTLR1_offset = 0x00;
-    const CTLR2_offset = 0x04;
-    const STATR_offset = 0x08;
-    const DATAR_offset = 0x0C;
+    const CTLR1_OFFSET = 0x00;
+    const CTLR2_OFFSET = 0x04;
+    const STATR_OFFSET = 0x08;
+    const DATAR_OFFSET = 0x0C;
 
     fn ptr(self: SPI, offset: u32) *volatile u32 {
         return @ptrFromInt(self.addr + offset);
@@ -77,8 +77,8 @@ pub const SPI = packed struct(u32) {
     fn configureCtrl(comptime self: SPI, comptime cfg: Config) void {
         _ = cfg;
 
-        const SPI_CTLR1: *volatile u32 = self.ptr(CTLR1_offset);
-        const SPI_CTLR2: *volatile u32 = self.ptr(CTLR2_offset);
+        const SPI_CTLR1: *volatile u32 = self.ptr(CTLR1_OFFSET);
+        const SPI_CTLR2: *volatile u32 = self.ptr(CTLR2_OFFSET);
 
         // Reset.
         SPI_CTLR1.* = 0;
@@ -114,13 +114,13 @@ pub const SPI = packed struct(u32) {
     }
 
     pub inline fn isWriteable(self: SPI) bool {
-        const SPI_STATR: *volatile u32 = self.ptr(STATR_offset);
+        const SPI_STATR: *volatile u32 = self.ptr(STATR_OFFSET);
         const TXE = @as(u32, 1) << 1;
         return (SPI_STATR.* & TXE) != 0;
     }
 
     pub noinline fn writeBlocking(self: SPI, payload: []const u8) usize {
-        const SPI_DATAR: *volatile u32 = self.ptr(DATAR_offset);
+        const SPI_DATAR: *volatile u32 = self.ptr(DATAR_OFFSET);
 
         var offset: usize = 0;
         while (offset < payload.len) {
