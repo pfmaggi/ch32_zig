@@ -147,14 +147,14 @@ fn setupBMI160(I2C1: hal.I2c) !void {
     const BMI160_ACC_RANGE = 0x41;
     const BMI160_ACC_CONF = 0x40;
 
-    var i2cBuf = [_]u8{0x00};
-    var uartBuf: [64]u8 = undefined;
+    var i2c_buf = [_]u8{0x00};
+    var uart_buf: [64]u8 = undefined;
 
     // Request CHIP_ID
-    _ = try I2C1.masterTransferBlocking(.from7(BMI160_I2C_ADDR), &.{BMI160_CHIP_ID}, &i2cBuf, null);
-    _ = try USART1.writeVecBlocking(&.{ "I2C recv: ", intToStr(&uartBuf, i2cBuf[0]), "\r\n" }, null);
+    _ = try I2C1.masterTransferBlocking(.from7(BMI160_I2C_ADDR), &.{BMI160_CHIP_ID}, &i2c_buf, null);
+    _ = try USART1.writeVecBlocking(&.{ "I2C recv: ", intToStr(&uart_buf, i2c_buf[0]), "\r\n" }, null);
 
-    if (i2cBuf[0] != BMI160_CHIP_ID_DEFAULT_VALUE) {
+    if (i2c_buf[0] != BMI160_CHIP_ID_DEFAULT_VALUE) {
         _ = try USART1.writeBlocking("BMI160 not found!\r\n", null);
         return error.BMI160NotFound;
     }
@@ -204,8 +204,8 @@ fn updateBMI160(I2C1: hal.I2c) !void {
     // Read directly to the structure, thanks `std.mem.asBytes`.
     _ = try I2C1.masterTransferBlocking(.from7(BMI160_I2C_ADDR), &.{BMI160_GYR_X_L}, std.mem.asBytes(&imu_data), null);
 
-    var uartBuf: [256]u8 = undefined;
-    _ = try USART1.writeBlocking(try std.fmt.bufPrint(&uartBuf, "{any}\r\n", .{imu_data}), null);
+    var uart_buf: [256]u8 = undefined;
+    _ = try USART1.writeBlocking(try std.fmt.bufPrint(&uart_buf, "{any}\r\n", .{imu_data}), null);
 }
 
 fn dummyLoop(cnt: u32) void {

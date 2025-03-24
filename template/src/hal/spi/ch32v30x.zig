@@ -107,7 +107,7 @@ pub const Pins = struct {
     }
 };
 
-pub const Rcc = struct {
+pub const rcc = struct {
     pub inline fn enable(reg: *volatile svd.types.SPI) void {
         set(reg, true);
     }

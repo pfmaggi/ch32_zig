@@ -13,11 +13,11 @@ comptime {
             \\j _start
         );
 
-        @export(&_start, .{ .name = "_start" });
+        @export(&start, .{ .name = "_start" });
     }
 }
 
-fn _start() callconv(.c) void {
+fn start() callconv(.c) void {
     // Set global pointer.
     asm volatile (
         \\.option push

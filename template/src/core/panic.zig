@@ -42,8 +42,8 @@ pub fn silent(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
 pub fn hang() noreturn {
     interrups.disable();
 
-    const hasLed = true;
-    if (!hasLed) {
+    const has_led = true;
+    if (!has_led) {
         while (true) {
             zasm.wfi();
         }
@@ -60,14 +60,11 @@ pub fn hang() noreturn {
 
     const short_delay: u32 = 500_000;
     const long_delay: u32 = 1_500_000;
+    const blinks: u32 = 3;
 
     while (true) {
         // Short blinks.
-        for (0..3) |_| {
-            GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
-            for (0..short_delay) |_| {
-                asm volatile ("" ::: "memory");
-            }
+        for (0..blinks * 2) |_| {
             GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
             for (0..short_delay) |_| {
                 asm volatile ("" ::: "memory");
@@ -75,11 +72,7 @@ pub fn hang() noreturn {
         }
 
         // Long blinks.
-        for (0..3) |_| {
-            GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
-            for (0..long_delay) |_| {
-                asm volatile ("" ::: "memory");
-            }
+        for (0..blinks * 2) |_| {
             GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
             for (0..long_delay) |_| {
                 asm volatile ("" ::: "memory");

@@ -67,9 +67,9 @@ pub const Pins = switch (config.chip_series) {
     else => @compileError("Unsupported chip series"),
 };
 
-const Rcc = switch (config.chip_series) {
-    .ch32v003 => @import("uart/ch32v003.zig").Rcc,
-    .ch32v30x => @import("uart/ch32v30x.zig").Rcc,
+const rcc = switch (config.chip_series) {
+    .ch32v003 => @import("uart/ch32v003.zig").rcc,
+    .ch32v30x => @import("uart/ch32v30x.zig").rcc,
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
@@ -142,19 +142,19 @@ pub fn configureBaudRate(self: UART, cfg: BaudRate) void {
 }
 
 fn configureCtrl(self: UART, comptime cfg: Config) void {
-    const parityBit = switch (cfg.parity) {
+    const parity_bit = switch (cfg.parity) {
         .none => @as(u1, 0),
         .even, .odd => @as(u1, 1),
     };
-    const paritySelectionBit = switch (cfg.parity) {
+    const parity_selection_bit = switch (cfg.parity) {
         .even => @as(u1, 1),
         .odd, .none => @as(u1, 0),
     };
-    const wordLongBit = switch (cfg.word_bits) {
+    const word_long_bit = switch (cfg.word_bits) {
         .eight => @as(u1, 0),
         .nine => @as(u1, 1),
     };
-    const stopBits = switch (cfg.stop_bits) {
+    const stop_bits = switch (cfg.stop_bits) {
         .one => @as(u2, 0b00),
         .half => @as(u2, 0b01),
         .two => @as(u2, 0b10),
@@ -178,16 +178,16 @@ fn configureCtrl(self: UART, comptime cfg: Config) void {
         // Transmitter enable
         .TE = 1,
         // Parity check interrupt enable bit
-        .PEIE = parityBit,
+        .PEIE = parity_bit,
         // Parity selection bit
-        .PS = paritySelectionBit,
+        .PS = parity_selection_bit,
         // Word long bit
-        .M = wordLongBit,
+        .M = word_long_bit,
     });
 
     self.reg.CTLR2.write(.{
         // Stop bits.
-        .STOP = stopBits,
+        .STOP = stop_bits,
     });
 
     self.reg.CTLR3.write(.{
@@ -212,15 +212,15 @@ fn configureCtrl(self: UART, comptime cfg: Config) void {
 }
 
 pub fn enable(self: UART) void {
-    Rcc.enable(self.reg);
+    rcc.enable(self.reg);
 }
 
 pub fn disable(self: UART) void {
-    Rcc.disable(self.reg);
+    rcc.disable(self.reg);
 }
 
 fn reset(self: UART) void {
-    Rcc.reset(self.reg);
+    rcc.reset(self.reg);
 }
 
 pub fn isReadable(self: UART) bool {

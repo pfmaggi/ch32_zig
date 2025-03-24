@@ -109,9 +109,9 @@ pub const Pins = switch (config.chip_series) {
     else => @compileError("Unsupported chip series"),
 };
 
-const Rcc = switch (config.chip_series) {
-    .ch32v003 => @import("spi/ch32v003.zig").Rcc,
-    .ch32v30x => @import("spi/ch32v30x.zig").Rcc,
+const rcc = switch (config.chip_series) {
+    .ch32v003 => @import("spi/ch32v003.zig").rcc,
+    .ch32v30x => @import("spi/ch32v30x.zig").rcc,
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
@@ -261,15 +261,15 @@ pub fn setBiDirectionalMode(self: SPI, dir: BiDirectionalMode) void {
 }
 
 pub fn enable(self: SPI) void {
-    Rcc.enable(self.reg);
+    rcc.enable(self.reg);
 }
 
 pub fn disable(self: SPI) void {
-    Rcc.disable(self.reg);
+    rcc.disable(self.reg);
 }
 
 fn reset(self: SPI) void {
-    Rcc.reset(self.reg);
+    rcc.reset(self.reg);
 }
 
 /// Blocking bidirectional data transfer.

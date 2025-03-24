@@ -48,9 +48,9 @@ pub const Pins = switch (config.chip_series) {
     else => @compileError("Unsupported chip series"),
 };
 
-const Rcc = switch (config.chip_series) {
-    .ch32v003 => @import("i2c/ch32v003.zig").Rcc,
-    // .ch32v30x => @import("i2c/ch32v30x.zig").Rcc,
+const rcc = switch (config.chip_series) {
+    .ch32v003 => @import("i2c/ch32v003.zig").rcc,
+    // .ch32v30x => @import("i2c/ch32v30x.zig").rcc,
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
@@ -170,15 +170,15 @@ fn configureCtrl(self: I2C, comptime cfg: Config) void {
 }
 
 pub fn enable(self: I2C) void {
-    Rcc.enable(self.reg);
+    rcc.enable(self.reg);
 }
 
 pub fn disable(self: I2C) void {
-    Rcc.disable(self.reg);
+    rcc.disable(self.reg);
 }
 
 fn reset(self: I2C) void {
-    Rcc.reset(self.reg);
+    rcc.reset(self.reg);
 }
 
 fn isNotBusy(self: I2C) bool {
@@ -253,30 +253,30 @@ fn checkEvent(self: I2C, event: Event) bool {
 }
 
 fn checkErrors(self: I2C) Error!void {
-    const STAR1_reg = self.reg.STAR1.read();
+    const star1 = self.reg.STAR1.read();
 
     // TODO: for 30x check s1_reg.TIMEOUT
     // if (STAR1_reg.TIMEOUT == 1) {
     //    STAR1.modify(.{ .TIMEOUT = 0 });
     //    return error.Timeout;
     // }
-    if (STAR1_reg.PECERR == 1) {
+    if (star1.PECERR == 1) {
         self.reg.STAR1.modify(.{ .PECERR = 0 });
         return error.PacketCheck;
     }
-    if (STAR1_reg.OVR == 1) {
+    if (star1.OVR == 1) {
         self.reg.STAR1.modify(.{ .OVR = 0 });
         return error.Overrun;
     }
-    if (STAR1_reg.ARLO == 1) {
+    if (star1.ARLO == 1) {
         self.reg.STAR1.modify(.{ .ARLO = 0 });
         return error.ArbitrationLost;
     }
-    if (STAR1_reg.AF == 1) {
+    if (star1.AF == 1) {
         self.reg.STAR1.modify(.{ .AF = 0 });
         return error.AckFailure;
     }
-    if (STAR1_reg.BERR == 1) {
+    if (star1.BERR == 1) {
         self.reg.STAR1.modify(.{ .BERR = 0 });
         return error.Bus;
     }
@@ -334,8 +334,8 @@ fn sendAddressAndWaitModeSelectedEvent(self: I2C, address: Address, direction: D
 }
 
 pub fn masterTransferBlocking(self: I2C, address: Address, send: []const u8, recv: ?[]u8, deadlineFn: ?DeadlineFn) Error!void {
-    const recvVec: ?[]const []u8 = if (recv) |r| &.{r} else null;
-    return self.masterTransferVecBlocking(address, &.{send}, recvVec, deadlineFn);
+    const recv_vec: ?[]const []u8 = if (recv) |r| &.{r} else null;
+    return self.masterTransferVecBlocking(address, &.{send}, recv_vec, deadlineFn);
 }
 
 pub fn masterTransferVecBlocking(self: I2C, address: Address, send: []const []const u8, recv: ?[]const []u8, deadlineFn: ?DeadlineFn) Error!void {
