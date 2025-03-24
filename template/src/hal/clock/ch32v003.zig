@@ -6,7 +6,8 @@ pub const Clocks = struct {
     sys: u32,
     hb: u32,
 
-    pub const default: Clocks = .{ .sys = hsi_frequency, .hb = hsi_frequency / 3 };
+    // Default clock configuration after systemInit() routine.
+    pub const default: Clocks = .{ .sys = hsi_frequency, .hb = hsi_frequency };
 };
 
 pub const hsi_frequency: u32 = 24_000_000;
