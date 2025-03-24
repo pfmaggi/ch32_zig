@@ -35,6 +35,10 @@ zig build
 minichlink -w zig-out/firmware/ch32v003_blink.bin flash -b
 ```
 
+## Basic Examples
+
+See [basic](basic) directory for more information.
+
 ## Useful Notes
 
 ### Size benchmark

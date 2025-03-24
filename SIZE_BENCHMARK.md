@@ -68,9 +68,9 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 411 | 0 | 0 | 411 | 
-| ReleaseFast | 530 | 0 | 0 | 530 | 
-| ReleaseSafe | 530 | 0 | 0 | 530 | 
+| ReleaseSmall | 401 | 0 | 0 | 401 | 
+| ReleaseFast | 478 | 0 | 0 | 478 | 
+| ReleaseSafe | 478 | 0 | 0 | 478 | 
 | Debug | - | - | - | Failed | 
 
 
