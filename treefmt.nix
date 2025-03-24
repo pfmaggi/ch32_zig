@@ -25,12 +25,14 @@
       };
     };
     global.excludes = [
+      "*.BMP"
       "*.[Pp][Dd][Ff]" # "*.pdf", case insensitive
       "*.ld"
+      "*.md"
       "*.png"
       "*.svd"
-      "LICENSE"
-      "gitignore"
+      "*/.gitignore"
+      "*/LICENSE"
       "template/chip/*.json"
     ];
   };

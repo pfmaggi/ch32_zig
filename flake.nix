@@ -32,9 +32,10 @@
   };
 
   outputs =
-    inputs@{ nixpkgs
-    , flake-utils
-    , ...
+    inputs@{
+      nixpkgs,
+      flake-utils,
+      ...
     }:
     let
       zlsBinName = "zigscient";
@@ -88,8 +89,21 @@
               version = "2024.11.26";
               src = inputs.wch-openocd;
 
-              nativeBuildInputs = [ autoconf automake pkg-config libtool texinfo which git ];
-              buildInputs = [ hidapi libusb1 tcl jimtcl ];
+              nativeBuildInputs = [
+                autoconf
+                automake
+                pkg-config
+                libtool
+                texinfo
+                which
+                git
+              ];
+              buildInputs = [
+                hidapi
+                libusb1
+                tcl
+                jimtcl
+              ];
 
               patchPhase = ''
                 rm -rf jimtcl src/jtag/drivers/libjaylink
@@ -120,17 +134,19 @@
                 "-Wno-error=strict-prototypes"
               ];
 
-              postInstall = ''
-                cp $out/share/openocd/scripts/target/wch-riscv.cfg $out/share/openocd/scripts/board/wch-riscv.cfg
-              '' + lib.optionalString stdenv.isLinux ''
-                mkdir -p "$out/etc/udev/rules.d"
-                rules="$out/share/openocd/contrib/60-openocd.rules"
-                if [ ! -f "$rules" ]; then
-                    echo "$rules is missing, must update the Nix file."
-                    exit 1
-                fi
-                ln -s "$rules" "$out/etc/udev/rules.d/"
-              '';
+              postInstall =
+                ''
+                  cp $out/share/openocd/scripts/target/wch-riscv.cfg $out/share/openocd/scripts/board/wch-riscv.cfg
+                ''
+                + lib.optionalString stdenv.isLinux ''
+                  mkdir -p "$out/etc/udev/rules.d"
+                  rules="$out/share/openocd/contrib/60-openocd.rules"
+                  if [ ! -f "$rules" ]; then
+                      echo "$rules is missing, must update the Nix file."
+                      exit 1
+                  fi
+                  ln -s "$rules" "$out/etc/udev/rules.d/"
+                '';
             };
           }
         )
@@ -230,13 +246,16 @@
           };
 
           dsview = pkgs.mkShell {
-            shellHook = pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
-              open ${pkgs.dsview}/Applications/DSView.app
-            '' + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
-              ${pkgs.dsview}/bin/dsview
-            '' + ''
-              exit 0
-            '';
+            shellHook =
+              pkgs.lib.optionalString pkgs.stdenv.isDarwin ''
+                open ${pkgs.dsview}/Applications/DSView.app
+              ''
+              + pkgs.lib.optionalString pkgs.stdenv.isLinux ''
+                ${pkgs.dsview}/bin/dsview
+              ''
+              + ''
+                exit 0
+              '';
           };
         };
 
