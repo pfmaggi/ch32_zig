@@ -28,21 +28,21 @@ pub const Chip = union(enum) {
         };
     }
 
-    pub fn as_series(chip: Chip) Series {
+    pub fn asSeries(chip: Chip) Series {
         return switch (chip) {
             .model => |v| v.series(),
             .series => |v| v,
         };
     }
 
-    pub fn as_model(chip: Chip) Model {
+    pub fn asModel(chip: Chip) Model {
         return switch (chip) {
             .model => |v| v,
             .series => |v| v.minimalModel(),
         };
     }
 
-    pub fn as_class(chip: Chip) Class {
-        return as_model(chip).class();
+    pub fn asClass(chip: Chip) Class {
+        return asModel(chip).class();
     }
 };

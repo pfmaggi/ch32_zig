@@ -77,7 +77,7 @@ pub const Series = enum {
         return @tagName(self);
     }
 
-    pub fn svd_name(self: Series) []const u8 {
+    pub fn svdName(self: Series) []const u8 {
         return switch (self) {
             .ch32v003 => "CH32V003",
             .ch32v103 => "CH32V103",

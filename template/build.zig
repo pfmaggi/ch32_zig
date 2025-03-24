@@ -38,7 +38,7 @@ pub fn build(b: *std.Build) void {
         });
         const config_options = buildConfigOptions(b, unit_tests.name, target.chip);
         unit_tests.root_module.addImport("config", config_options.createModule());
-        unit_tests.root_module.addImport("svd", svd_module(b, target));
+        unit_tests.root_module.addImport("svd", svdModule(b, target));
 
         const unit_tests_run = b.addRunArtifact(unit_tests);
         test_step.dependOn(&unit_tests_run.step);
@@ -99,9 +99,9 @@ fn buildAndInstallFirmware(
 fn buildConfigOptions(b: *std.Build, name: []const u8, c: chip.Chip) *std.Build.Step.Options {
     const config_options = b.addOptions();
     config_options.addOption([]const u8, "name", name);
-    config_options.addOption(chip.Model, "chip_model", c.as_model());
-    config_options.addOption(chip.Series, "chip_series", c.as_series());
-    config_options.addOption(chip.Class, "chip_class", c.as_class());
+    config_options.addOption(chip.Model, "chip_model", c.asModel());
+    config_options.addOption(chip.Series, "chip_series", c.asSeries());
+    config_options.addOption(chip.Class, "chip_class", c.asClass());
     return config_options;
 }
 
@@ -120,7 +120,7 @@ fn addFirmware(b: *std.Build, options: FirmwareOptions) *std.Build.Step.Compile 
             },
             .{
                 .name = "svd",
-                .module = svd_module(b, options.target),
+                .module = svdModule(b, options.target),
             },
         },
     });
@@ -139,8 +139,8 @@ fn addFirmware(b: *std.Build, options: FirmwareOptions) *std.Build.Step.Compile 
     return firmware;
 }
 
-fn svd_module(b: *std.Build, target: Target) *std.Build.Module {
-    const svd_path = b.path("svd").join(b.allocator, b.fmt("{s}.zig", .{target.chip.as_series().svd_name()})) catch @panic("OOM");
+fn svdModule(b: *std.Build, target: Target) *std.Build.Module {
+    const svd_path = b.path("svd").join(b.allocator, b.fmt("{s}.zig", .{target.chip.asSeries().svdName()})) catch @panic("OOM");
     const module = b.createModule(.{
         .root_source_file = svd_path,
         .target = b.resolveTargetQuery(target.chip.target()),
