@@ -58,12 +58,32 @@ pub fn hang() noreturn {
     GPIO_CFGLR.* &= ~@as(u32, 0b1111 << 0); // Clear all bits for PC0
     GPIO_CFGLR.* |= @as(u32, 0b0011 << 0); // Set push-pull output for PC0
 
-    while (true) {
-        GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num); // Toggle pin.
+    const short_delay: u32 = 500_000;
+    const long_delay: u32 = 1_500_000;
 
-        var i: u32 = 0;
-        while (i < 100_000) : (i += 1) {
-            asm volatile ("" ::: "memory");
+    while (true) {
+        // Short blinks.
+        for (0..3) |_| {
+            GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
+            for (0..short_delay) |_| {
+                asm volatile ("" ::: "memory");
+            }
+            GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
+            for (0..short_delay) |_| {
+                asm volatile ("" ::: "memory");
+            }
+        }
+
+        // Long blinks.
+        for (0..3) |_| {
+            GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
+            for (0..long_delay) |_| {
+                asm volatile ("" ::: "memory");
+            }
+            GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
+            for (0..long_delay) |_| {
+                asm volatile ("" ::: "memory");
+            }
         }
     }
 }
