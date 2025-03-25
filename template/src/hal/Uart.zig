@@ -3,6 +3,7 @@ const config = @import("config");
 const svd = @import("svd");
 
 const port = @import("port.zig");
+const deadline = @import("deadline.zig");
 
 pub const DeadlineFn = fn () bool;
 
@@ -318,4 +319,14 @@ fn wait(self: UART, conditionFn: fn (self: UART) bool, deadlineFn: ?DeadlineFn) 
         }
         asm volatile ("" ::: "memory");
     }
+}
+
+pub const Writer = std.io.GenericWriter(UART, Timeout, genericWriterFn);
+
+pub fn writer(self: UART) Writer {
+    return .{ .context = self };
+}
+
+pub fn genericWriterFn(self: UART, buffer: []const u8) Timeout!usize {
+    return self.writeBlocking(buffer, deadline.simple(100_000));
 }

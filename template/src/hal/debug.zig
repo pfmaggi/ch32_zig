@@ -123,4 +123,16 @@ pub const sdi_print = struct {
 
         return len;
     }
+
+    const Context = struct {};
+    pub const Writer = std.io.GenericWriter(Context, error{}, genericWriterFn);
+
+    pub fn writer() Writer {
+        return .{ .context = Context{} };
+    }
+
+    pub fn genericWriterFn(_: Context, buffer: []const u8) error{}!usize {
+        write(buffer);
+        return buffer.len;
+    }
 };

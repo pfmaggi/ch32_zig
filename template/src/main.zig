@@ -9,16 +9,20 @@ comptime {
 }
 
 pub const std_options: std.Options = .{
-    .logFn = core.log.nopFn,
+    .log_level = .debug,
+    .logFn = core.log.logFn,
 };
 
-pub const panic = core.panic.silent;
+pub const panic = core.panic.log;
 
 pub const interrups: core.Interrups = .{};
 
 var USART1: hal.Uart = undefined;
 
 pub fn main() !void {
+    hal.debug.sdi_print.enable();
+    // core.log.setWriter(hal.debug.sdi_print.writer().any());
+
     // Set clock to 48MHz.
     const clock = hal.clock.setOrGet(.hsi_48mhz);
 
@@ -31,6 +35,8 @@ pub fn main() !void {
         .baud_rate = 115_200,
     });
     // USART1.deinit();
+
+    core.log.setWriter(USART1.writer().any());
 
     // SPI работает, но есть проблема с чувствительностью к шумам.
     // Если одновременно идёт передача по MISO и MOSI то данные бъются и получается каша (привет cross-talk).
@@ -76,8 +82,6 @@ pub fn main() !void {
 
     var buffer: [256]u8 = undefined;
     _ = try USART1.writeVecBlocking(&.{ "HB clock: ", intToStr(&buffer, clock.hb), "\r\n" }, null);
-
-    hal.debug.sdi_print.enable();
 
     try setupBMI160(I2C1);
 
