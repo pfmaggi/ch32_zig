@@ -154,6 +154,16 @@ fn setupBMI160(I2C1: hal.I2c) !void {
     var i2c_buf = [_]u8{0x00};
     var uart_buf: [64]u8 = undefined;
 
+    // Ping device example.
+    _ = I2C1.masterTransferBlocking(.from7(BMI160_I2C_ADDR), null, null, null) catch |err| switch (err) {
+        error.AckFailure => {
+            std.log.err("Device on address 0x{X:0>2} not found", .{BMI160_I2C_ADDR});
+            return error.I2CDeviceNotFound;
+        },
+        else => return err,
+    };
+    std.log.info("Device on address 0x{X:0>2} found", .{BMI160_I2C_ADDR});
+
     // Request CHIP_ID
     _ = try I2C1.masterTransferBlocking(.from7(BMI160_I2C_ADDR), &.{BMI160_CHIP_ID}, &i2c_buf, null);
     _ = try USART1.writeVecBlocking(&.{ "I2C recv: ", intToStr(&uart_buf, i2c_buf[0]), "\r\n" }, null);
@@ -189,12 +199,23 @@ fn setupBMI160(I2C1: hal.I2c) !void {
 }
 
 const ImuData = packed struct {
-    acc_x: i16,
-    acc_y: i16,
-    acc_z: i16,
     gyr_x: i16,
     gyr_y: i16,
     gyr_z: i16,
+    acc_x: i16,
+    acc_y: i16,
+    acc_z: i16,
+
+    pub fn format(self: ImuData, comptime _: []const u8, _: std.fmt.FormatOptions, out_stream: anytype) !void {
+        _ = try out_stream.print("gyro: {d:>5} | {d:>5} | {d:>5} |     accel: {d:>5} | {d:>5} | {d:>5}", .{
+            self.gyr_x,
+            self.gyr_y,
+            self.gyr_z,
+            self.acc_x,
+            self.acc_y,
+            self.acc_z,
+        });
+    }
 };
 
 fn updateBMI160(I2C1: hal.I2c) !void {
