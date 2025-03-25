@@ -187,6 +187,77 @@ fn reset(self: I2C) void {
     rcc.reset(self.reg);
 }
 
+/// Master transfer with blocking.
+///
+/// Null send buffer allowed for scan devices.
+/// If device is present, it will ACK and no error will be returned.
+/// Otherwise, NACK will be received and AckFailure error will be returned.
+pub fn masterTransferBlocking(self: I2C, address: Address, send: ?[]const u8, recv: ?[]u8, deadlineFn: ?DeadlineFn) Error!void {
+    const send_vec: ?[]const []const u8 = if (send) |s| &.{s} else null;
+    const recv_vec: ?[]const []u8 = if (recv) |r| &.{r} else null;
+    return self.masterTransferVecBlocking(address, send_vec, recv_vec, deadlineFn);
+}
+
+/// Master transfer with blocking. See `masterTransferBlocking` for more details.
+/// This function the same as `masterTransferBlocking` but allows to send multiple payloads.
+pub fn masterTransferVecBlocking(self: I2C, address: Address, send: ?[]const []const u8, recv: ?[]const []u8, deadlineFn: ?DeadlineFn) Error!void {
+    try self.wait(isNotBusy, deadlineFn);
+
+    self.reg.CTLR1.modify(.{ .START = 1 });
+    defer self.reg.CTLR1.modify(.{ .STOP = 1 });
+
+    try self.waitEvent(.master_mode_select, deadlineFn);
+
+    try self.writeVecBlockingInternal(address, send, deadlineFn);
+
+    if (recv) |buffers| {
+        // Repeat start condition.
+        self.reg.CTLR1.modify(.{ .START = 1, .ACK = 1 });
+        try self.waitEvent(.master_mode_select, deadlineFn);
+
+        try self.readVecBlockingInternal(address, buffers, deadlineFn);
+    }
+}
+
+fn writeVecBlockingInternal(self: I2C, address: Address, send: ?[]const []const u8, deadlineFn: ?DeadlineFn) Error!void {
+    try self.sendAddressAndWaitModeSelectedEvent(address, .transmitter, deadlineFn);
+
+    const payloads = send orelse return;
+
+    var is_sent = false;
+    for (payloads) |payload| {
+        for (payload) |b| {
+            try self.wait(isWriteable, deadlineFn);
+
+            self.reg.DATAR.raw = b;
+        }
+
+        if (!is_sent and payload.len > 0) is_sent = true;
+    }
+
+    // If no data was sent, return without waiting for the event.
+    if (!is_sent) return;
+
+    try self.waitEvent(.master_byte_transmitted, deadlineFn);
+}
+
+fn readVecBlockingInternal(self: I2C, address: Address, buffers: []const []u8, deadlineFn: ?DeadlineFn) Error!void {
+    try self.sendAddressAndWaitModeSelectedEvent(address, .receiver, deadlineFn);
+
+    for (buffers) |buffer| {
+        for (buffer, 0..) |*byte, i| {
+            if (i == buffer.len - 1) {
+                // Return NACK on the last byte.
+                self.reg.CTLR1.modify(.{ .ACK = 0 });
+            }
+
+            try self.wait(isReadable, deadlineFn);
+
+            byte.* = @truncate(self.reg.DATAR.raw);
+        }
+    }
+}
+
 fn isNotBusy(self: I2C) bool {
     return self.reg.STAR2.read().BUSY == 0;
 }
@@ -289,7 +360,7 @@ fn checkErrors(self: I2C) Error!void {
     }
 }
 
-pub const Direction = enum(u1) {
+const Direction = enum(u1) {
     transmitter = 0,
     receiver = 1,
 };
@@ -337,61 +408,6 @@ fn sendAddressAndWaitModeSelectedEvent(self: I2C, address: Address, direction: D
                 try self.waitEvent(event, deadlineFn);
             }
         },
-    }
-}
-
-pub fn masterTransferBlocking(self: I2C, address: Address, send: []const u8, recv: ?[]u8, deadlineFn: ?DeadlineFn) Error!void {
-    const recv_vec: ?[]const []u8 = if (recv) |r| &.{r} else null;
-    return self.masterTransferVecBlocking(address, &.{send}, recv_vec, deadlineFn);
-}
-
-pub fn masterTransferVecBlocking(self: I2C, address: Address, send: []const []const u8, recv: ?[]const []u8, deadlineFn: ?DeadlineFn) Error!void {
-    try self.wait(isNotBusy, deadlineFn);
-
-    self.reg.CTLR1.modify(.{ .START = 1 });
-    defer self.reg.CTLR1.modify(.{ .STOP = 1 });
-
-    try self.waitEvent(.master_mode_select, deadlineFn);
-
-    try self.writeVecBlockingInternal(address, send, deadlineFn);
-
-    if (recv) |buffers| {
-        // Repeat start condition.
-        self.reg.CTLR1.modify(.{ .START = 1, .ACK = 1 });
-        try self.waitEvent(.master_mode_select, deadlineFn);
-
-        try self.readVecBlockingInternal(address, buffers, deadlineFn);
-    }
-}
-
-fn writeVecBlockingInternal(self: I2C, address: Address, payloads: []const []const u8, deadlineFn: ?DeadlineFn) Error!void {
-    try self.sendAddressAndWaitModeSelectedEvent(address, .transmitter, deadlineFn);
-
-    for (payloads) |payload| {
-        for (payload) |b| {
-            try self.wait(isWriteable, deadlineFn);
-
-            self.reg.DATAR.raw = b;
-        }
-    }
-
-    try self.waitEvent(.master_byte_transmitted, deadlineFn);
-}
-
-fn readVecBlockingInternal(self: I2C, address: Address, buffers: []const []u8, deadlineFn: ?DeadlineFn) Error!void {
-    try self.sendAddressAndWaitModeSelectedEvent(address, .receiver, deadlineFn);
-
-    for (buffers) |buffer| {
-        for (buffer, 0..) |*byte, i| {
-            if (i == buffer.len - 1) {
-                // Return NACK on the last byte.
-                self.reg.CTLR1.modify(.{ .ACK = 0 });
-            }
-
-            try self.wait(isReadable, deadlineFn);
-
-            byte.* = @truncate(self.reg.DATAR.raw);
-        }
     }
 }
 
