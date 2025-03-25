@@ -121,7 +121,8 @@ pub fn configureBaudRate(self: I2C, baud_rate: BaudRate) !void {
         return error.InvalidBaudRate;
     }
 
-    self.reg.CTLR2.modify(.{ .FREQ = @truncate(baud_rate.peripheral_clock / 1_000_000) });
+    const freq = baud_rate.peripheral_clock / 1_000_000;
+    self.reg.CTLR2.modify(.{ .FREQ = @truncate(freq) });
 
     const is_standard_mode = baud_rate.speed <= 100_000;
     const ccr = if (is_standard_mode) blk: {
@@ -135,6 +136,11 @@ pub fn configureBaudRate(self: I2C, baud_rate: BaudRate) !void {
 
         break :blk @max(result, 1);
     };
+
+    if (config.chip_series != .ch32v003) {
+        const trise = if (is_standard_mode) freq + 1 else freq * 300 / 1000 + 1;
+        self.reg.RTR.modify(.{ .TRISE = @truncate(trise) });
+    }
     self.reg.CKCFGR.write(.{
         .CCR = @truncate(ccr),
         .DUTY = if (baud_rate.duty_cycle == .@"2") 0 else 1,
@@ -255,11 +261,12 @@ fn checkEvent(self: I2C, event: Event) bool {
 fn checkErrors(self: I2C) Error!void {
     const star1 = self.reg.STAR1.read();
 
-    // TODO: for 30x check s1_reg.TIMEOUT
-    // if (STAR1_reg.TIMEOUT == 1) {
-    //    STAR1.modify(.{ .TIMEOUT = 0 });
-    //    return error.Timeout;
-    // }
+    if (config.chip_series != .ch32v003) {
+        if (star1.TIMEOUT == 1) {
+            self.reg.STAR1.modify(.{ .TIMEOUT = 0 });
+            return error.Timeout;
+        }
+    }
     if (star1.PECERR == 1) {
         self.reg.STAR1.modify(.{ .PECERR = 0 });
         return error.PacketCheck;
