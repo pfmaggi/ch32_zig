@@ -32,10 +32,9 @@
   };
 
   outputs =
-    inputs@{
-      nixpkgs,
-      flake-utils,
-      ...
+    inputs@{ nixpkgs
+    , flake-utils
+    , ...
     }:
     let
       zlsBinName = "zigscient";
@@ -194,8 +193,8 @@
               baseShellHook
               + ''
                 export HISTFILE="$FLAKE_ROOT/.nix_bash_history"
-                sed -i 's/^: [0-9]\{10\}:[0-9];//' $HISTFILE
-                sed -i '/^#/d' $HISTFILE
+                sed -i 's/^: [0-9]\{10\}:[0-9];//' $HISTFILE > /dev/null 2>&1
+                sed -i '/^#/d' $HISTFILE > /dev/null 2>&1
 
                 export PROJECT_ROOT="$FLAKE_ROOT"
               ''
