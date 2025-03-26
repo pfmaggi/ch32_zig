@@ -3,6 +3,9 @@
 # set safe shell mode
 set -euo pipefail
 
+base_dir=$(dirname "$0")
+root_dir=$(realpath "${base_dir}/..")
+
 columns=("Mode" "Text" "Data" "Bss" "Total")
 modes=("ReleaseSmall" "ReleaseFast" "ReleaseSafe" "Debug")
 
@@ -25,7 +28,7 @@ build() {
   echo "$size"
 }
 
-for dir in examples/*/; do
+for dir in "${root_dir}/examples/"*/; do
   if [ ! -f "${dir}build.zig" ]; then
     continue
   fi
