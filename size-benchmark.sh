@@ -25,7 +25,7 @@ build() {
   echo "$size"
 }
 
-for dir in basic/*/; do
+for dir in examples/*/; do
   if [ ! -f "${dir}build.zig" ]; then
     continue
   fi
