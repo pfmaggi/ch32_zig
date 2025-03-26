@@ -1,4 +1,6 @@
-# WCH CH32
+# WCH CH32 HAL in Zig
+
+HAL(Hardware Abstraction Layer) for the WCH CH32 series of microcontrollers written in Zig.
 
 ## TODO
 
