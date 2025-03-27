@@ -86,7 +86,7 @@ cat <<EOF >>"$OUTPUT_FILE"
         };
     }
 
-    pub fn linkScript(self: Model, b: *std.Build) std.Build.LazyPath {
+    pub fn linkScript(self: Model, b: *std.Build) []const u8 {
         const name = switch (self) {
 EOF
 
@@ -107,7 +107,7 @@ done
 cat <<EOF >>"$OUTPUT_FILE"
         };
 
-        return b.path(b.pathJoin(&.{ "ld", name }));
+        return b.dupe(name);
     }
 
     pub fn target(self: Model) std.Target.Query {

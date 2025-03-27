@@ -64,7 +64,7 @@ pub const Model = enum {
         };
     }
 
-    pub fn linkScript(self: Model, b: *std.Build) std.Build.LazyPath {
+    pub fn linkScript(self: Model, b: *std.Build) []const u8 {
         const name = switch (self) {
             .ch32v003a4m6, .ch32v003f4p6, .ch32v003f4u6, .ch32v003j4m6 => "ch32v_16K_2K.ld",
             .ch32v103c6t6, .ch32v203c6t6, .ch32v203f6p6, .ch32v203g6u6, .ch32v203k6t6 => "ch32v_32K_10K.ld",
@@ -74,7 +74,7 @@ pub const Model = enum {
             .ch32v303rct6, .ch32v303vct6, .ch32v307rct6, .ch32v307vct6, .ch32v307wcu6 => "ch32v_256K_64K.ld",
         };
 
-        return b.path(b.pathJoin(&.{ "ld", name }));
+        return b.dupe(name);
     }
 
     pub fn target(self: Model) std.Target.Query {

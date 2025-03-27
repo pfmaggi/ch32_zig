@@ -6,11 +6,11 @@ pub fn build(b: *std.Build) void {
 
     const name = "blink";
     const targets: []const ch32_zig.Target = &.{
-        // You can specify a specific model or series of the chip.
-        .{ .chip = .{ .model = .ch32v003f4p6 } },
-        // .{ .chip = .{ .series = .ch32v103 } },
-        // .{ .chip = .{ .series = .ch32v20x } },
-        // .{ .chip = .{ .series = .ch32v30x } },
+        // You can specify a series of the chip.
+        .{ .chip = .{ .series = .ch32v003 } },
+        .{ .chip = .{ .series = .ch32v30x } },
+        // Or a specific model.
+        // .{ .chip = .{ .model = .ch32v003f4p6 } },
     };
 
     const optimize = b.option(
@@ -20,21 +20,18 @@ pub fn build(b: *std.Build) void {
     ) orelse .ReleaseSmall;
 
     for (targets) |target| {
-        // TODO
-        // const fw = ch32_zig.createFirmware(b, .{
-        //     .name = name,
-        //     .target = target,
-        //     .optimize = null,
-        // });
-        // fw.install();
-        // fw.printSize();
-
-        const options = ch32_zig.FirmwareOptions{
+        const fw = ch32_zig.addFirmware(b, ch32_dep, .{
             .name = b.fmt("{s}_{s}", .{ name, target.chip.string() }),
+            .root_source_file = b.path("src/main.zig"),
             .target = target,
             .optimize = optimize,
-            .root_source_file = b.path("src/main.zig"),
-        };
-        ch32_zig.buildAndInstallFirmware(b, ch32_dep, options);
+        });
+
+        // Emit the bin file for flashing.
+        const fw_bin = ch32_zig.installFirmware(b, fw, .{});
+        ch32_zig.printFirmwareSize(b, fw_bin);
+
+        // Emit the elf file for debugging.
+        _ = ch32_zig.installFirmware(b, fw, .{ .format = .elf });
     }
 }

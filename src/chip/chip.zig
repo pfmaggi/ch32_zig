@@ -7,7 +7,7 @@ pub const Chip = union(enum) {
     series: Series,
     model: Model,
 
-    pub fn linkScript(chip: Chip, b: *std.Build) std.Build.LazyPath {
+    pub fn linkScript(chip: Chip, b: *std.Build) []const u8 {
         return switch (chip) {
             .model => |v| v.linkScript(b),
             .series => |v| v.minimalModel().linkScript(b),
