@@ -1,6 +1,6 @@
 const std = @import("std");
 const builtin = @import("builtin");
-const root = @import("root");
+const app = @import("app");
 const config = @import("config");
 
 comptime {
@@ -12,9 +12,9 @@ comptime {
     }
 }
 
-const interrups: Interrups = if (@hasDecl(root, "interrups")) root.interrups else .{};
+const interrups: Interrups = if (@hasDecl(app, "interrups")) app.interrups else .{};
 
-pub const Interrups = switch (config.chip_series) {
+pub const Interrups = switch (config.chip.series) {
     .ch32v003 => @import("interrups/ch32v003.zig").Interrups,
     .ch32v30x => @import("interrups/ch32v30x.zig").Interrups,
     // TODO: implement other chips

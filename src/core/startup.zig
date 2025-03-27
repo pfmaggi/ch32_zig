@@ -1,6 +1,6 @@
 const std = @import("std");
 const builtin = @import("builtin");
-const root = @import("root");
+const app = @import("app");
 const panic = @import("panic.zig");
 
 const config = @import("config");
@@ -77,7 +77,7 @@ fn start() callconv(.c) void {
     asm volatile ("csrsi 0x804, 0b111");
 
     // 8.2 RISC-V Standard CSR Registers.
-    if (config.chip_series == .ch32v30x) {
+    if (config.chip.series == .ch32v30x) {
         // Enable floating point and interrupt.
         // Set MPIE, MIE and floating point status to Dirty.
         asm volatile (
@@ -122,7 +122,7 @@ fn systemInit() callconv(.c) void {
     const RCC = svd.peripherals.RCC;
     RCC.CTLR.modify(.{ .HSION = 1 });
 
-    if (config.chip_class != .d8c) {
+    if (config.chip.class != .d8c) {
         RCC.CFGR0.raw &= 0xF0FF0000;
     } else {
         RCC.CFGR0.raw &= 0xF8FF0000;
@@ -131,7 +131,7 @@ fn systemInit() callconv(.c) void {
     RCC.CTLR.modify(.{ .HSEON = 0, .CSSON = 0 });
     RCC.CTLR.modify(.{ .HSEBYP = 0 });
 
-    switch (config.chip_series) {
+    switch (config.chip.series) {
         .ch32v30x => {
             RCC.CFGR0.raw &= 0xFF80FFFF;
         },
@@ -140,7 +140,7 @@ fn systemInit() callconv(.c) void {
         },
     }
 
-    if (config.chip_class == .d8c) {
+    if (config.chip.class == .d8c) {
         RCC.CTLR.raw &= 0xEBFFFFFF;
         RCC.INTR.raw = 0x00FF0000;
         // RCC.CFGR2.raw = 0x00000000; // FIXME register not exist for v003
@@ -152,7 +152,7 @@ fn systemInit() callconv(.c) void {
 fn callMain() callconv(.c) noreturn {
     const main_invalid_msg = "main must be either \"pub fn main() void\" or \"pub fn main() !void\".";
 
-    const main_type = @typeInfo(@TypeOf(root.main));
+    const main_type = @typeInfo(@TypeOf(app.main));
     if (main_type != .@"fn" or main_type.@"fn".params.len > 0) {
         @compileError(main_invalid_msg);
     }
@@ -163,13 +163,13 @@ fn callMain() callconv(.c) noreturn {
     }
 
     if (return_type == .error_union) {
-        root.main() catch |err| {
+        app.main() catch |err| {
             var buf: [32]u8 = undefined;
             const msg = concat(&buf, "main(): ", @errorName(err));
             @panic(msg);
         };
     } else {
-        root.main();
+        app.main();
     }
 
     panic.hang();

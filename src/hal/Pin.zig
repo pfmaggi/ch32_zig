@@ -92,7 +92,7 @@ inline fn writeCfgr(self: Pin, data: u4) void {
             self.port.get().CFGLR.setBits(bit_offset, 4, data);
         },
         8...15 => {
-            if (config.chip_series == .ch32v003) {
+            if (config.chip.series == .ch32v003) {
                 return;
             }
 
