@@ -65,6 +65,9 @@ pub fn addFirmware(app_builder: *std.Build, dep_maybe: ?*std.Build.Dependency, o
 
     firmware.linker_script = options.target.linker_script orelse ch32_builder.path("src/ld").join(ch32_builder.allocator, options.target.chip.linkScript(ch32_builder)) catch @panic("OOM");
 
+    // For emit elf with debug info.
+    firmware.root_module.strip = false;
+
     return firmware;
 }
 

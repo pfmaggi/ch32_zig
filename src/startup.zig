@@ -3,7 +3,7 @@ const root = @import("app");
 const config = @import("config");
 const svd = @import("svd");
 
-pub fn start() callconv(.c) void {
+pub fn start() callconv(.naked) void {
     // Set global pointer.
     asm volatile (
         \\.option push
@@ -93,11 +93,15 @@ pub fn start() callconv(.c) void {
         \\csrw mtvec, t0
     );
 
-    // Call functions from asm because the code does not run after power off.
+    // Call systemInit for system initialization.
     @export(&systemInit, .{ .name = "systemInit" });
-    @export(&callMain, .{ .name = "callMain" });
     asm volatile (
         \\jal systemInit
+    );
+
+    // Set the main function address in MEPC and return from the interrupt.
+    @export(&callMain, .{ .name = "callMain" });
+    asm volatile (
         \\la t0, callMain
         \\csrw mepc, t0
         \\mret
