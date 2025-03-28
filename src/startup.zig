@@ -1,23 +1,9 @@
 const std = @import("std");
-const builtin = @import("builtin");
-const app = @import("app");
-const panic = @import("panic.zig");
-
+const root = @import("app");
 const config = @import("config");
 const svd = @import("svd");
 
-comptime {
-    if (!builtin.is_test) {
-        asm (
-            \\.section .init
-            \\j _start
-        );
-
-        @export(&start, .{ .name = "_start" });
-    }
-}
-
-fn start() callconv(.c) void {
+pub fn start() callconv(.c) void {
     // Set global pointer.
     asm volatile (
         \\.option push
@@ -152,7 +138,7 @@ fn systemInit() callconv(.c) void {
 fn callMain() callconv(.c) noreturn {
     const main_invalid_msg = "main must be either \"pub fn main() void\" or \"pub fn main() !void\".";
 
-    const main_type = @typeInfo(@TypeOf(app.main));
+    const main_type = @typeInfo(@TypeOf(root.main));
     if (main_type != .@"fn" or main_type.@"fn".params.len > 0) {
         @compileError(main_invalid_msg);
     }
@@ -163,16 +149,16 @@ fn callMain() callconv(.c) noreturn {
     }
 
     if (return_type == .error_union) {
-        app.main() catch |err| {
+        root.main() catch |err| {
             var buf: [32]u8 = undefined;
             const msg = concat(&buf, "main(): ", @errorName(err));
             @panic(msg);
         };
     } else {
-        app.main();
+        root.main();
     }
 
-    panic.hang();
+    @panic("main() must not return");
 }
 
 fn concat(buf: []u8, a: []const u8, b: []const u8) []u8 {

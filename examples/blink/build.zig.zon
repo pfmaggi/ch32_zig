@@ -4,7 +4,7 @@
     .fingerprint = 0x323895dd27cf37c6,
     .minimum_zig_version = "0.14.0",
     .dependencies = .{
-        .ch32_zig = .{
+        .ch32 = .{
             // zig fetch --save=ch32_zig https://github.com/ghostiam/ch32_zig/archive/refs/heads/master.zip
             .path = "../..",
         },

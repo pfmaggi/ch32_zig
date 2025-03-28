@@ -1,7 +1,8 @@
 const std = @import("std");
+const config = @import("config");
+
 const zasm = @import("asm.zig");
 const interrups = @import("interrups.zig");
-const config = @import("config");
 
 // Prints the message and registers dump to the logger if configured.
 pub fn log(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
@@ -39,6 +40,13 @@ pub fn silent(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
     hang();
 }
 
+// Nop panic handler.
+pub fn nop(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+    while (true) {
+        asm volatile ("" ::: "memory");
+    }
+}
+
 pub fn hang() noreturn {
     interrups.disable();
 
@@ -66,17 +74,20 @@ pub fn hang() noreturn {
         // Short blinks.
         for (0..blinks * 2) |_| {
             GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
-            for (0..short_delay) |_| {
-                asm volatile ("" ::: "memory");
-            }
+            dummyLoop(short_delay);
         }
 
         // Long blinks.
         for (0..blinks * 2) |_| {
             GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
-            for (0..long_delay) |_| {
-                asm volatile ("" ::: "memory");
-            }
+            dummyLoop(long_delay);
         }
+    }
+}
+
+inline fn dummyLoop(count: u32) void {
+    var i: u32 = 0;
+    while (i < count) : (i += 1) {
+        asm volatile ("" ::: "memory");
     }
 }

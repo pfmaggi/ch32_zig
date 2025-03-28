@@ -1,18 +1,5 @@
 const std = @import("std");
-const builtin = @import("builtin");
-const app = @import("app");
 const config = @import("config");
-
-comptime {
-    if (!builtin.is_test) {
-        @export(&interrups, .{
-            .name = "interrups",
-            .section = ".init",
-        });
-    }
-}
-
-const interrups: Interrups = if (@hasDecl(app, "interrups")) app.interrups else .{};
 
 pub const Interrups = switch (config.chip.series) {
     .ch32v003 => @import("interrups/ch32v003.zig").Interrups,

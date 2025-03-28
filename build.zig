@@ -14,10 +14,8 @@ pub const FirmwareOptions = struct {
     optimize: std.builtin.OptimizeMode = .ReleaseSmall,
 };
 
-pub fn addFirmware(app_builder: *std.Build, dep: *std.Build.Dependency, options: FirmwareOptions) *std.Build.Step.Compile {
-    _ = app_builder;
-
-    const ch32_builder = dep.builder;
+pub fn addFirmware(app_builder: *std.Build, dep_maybe: ?*std.Build.Dependency, options: FirmwareOptions) *std.Build.Step.Compile {
+    const ch32_builder = if (dep_maybe) |dep| dep.builder else app_builder;
 
     const target = ch32_builder.resolveTargetQuery(options.target.chip.target());
 
@@ -42,14 +40,15 @@ pub fn addFirmware(app_builder: *std.Build, dep: *std.Build.Dependency, options:
         },
     });
 
-    const core_mod = ch32_builder.createModule(.{
-        .root_source_file = ch32_builder.path("src/core.zig"),
+    const root_mod = ch32_builder.createModule(.{
+        .root_source_file = ch32_builder.path("src/ch32.zig"),
         .target = target,
         .optimize = options.optimize,
         .single_threaded = true,
         .imports = &.{
             .{ .name = "config", .module = config_mod },
             .{ .name = "svd", .module = svd_mod },
+            .{ .name = "hal", .module = hal_mod },
             .{ .name = "app", .module = app_mod },
         },
     });
@@ -57,7 +56,7 @@ pub fn addFirmware(app_builder: *std.Build, dep: *std.Build.Dependency, options:
     const firmware = ch32_builder.addExecutable(.{
         .name = options.name,
         .linkage = .static,
-        .root_module = core_mod,
+        .root_module = root_mod,
     });
     firmware.bundle_compiler_rt = true;
     firmware.link_gc_sections = true;
@@ -101,7 +100,7 @@ fn svdModule(b: *std.Build, target: std.Build.ResolvedTarget, svd_name: []const 
 
 fn halModule(b: *std.Build, target: std.Build.ResolvedTarget) *std.Build.Module {
     const module = b.createModule(.{
-        .root_source_file = b.path("src/hal.zig"),
+        .root_source_file = b.path("src/hal/hal.zig"),
         .target = target,
         .single_threaded = true,
     });
@@ -192,5 +191,12 @@ fn makeFirmwareSize(step: *std.Build.Step, options: std.Build.Step.MakeOptions) 
 }
 
 pub fn build(b: *std.Build) void {
-    _ = b;
+    const options = FirmwareOptions{
+        .name = "build",
+        .target = .{ .chip = .{ .series = .ch32v30x } },
+        .root_source_file = b.path("src/main.zig"),
+    };
+
+    const fw = addFirmware(b, null, options);
+    _ = installFirmware(b, fw, .{});
 }

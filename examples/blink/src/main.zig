@@ -1,5 +1,14 @@
+const std = @import("std");
 const config = @import("config");
 const hal = @import("hal");
+
+// pub const panic = hal.panic.silent;
+pub const panic = hal.panic.log;
+
+pub const std_options: std.Options = .{
+    .log_level = .debug,
+    .logFn = hal.log.logFn,
+};
 
 pub fn main() !void {
     // Select LED pin based on chip series.
@@ -22,11 +31,11 @@ pub fn main() !void {
         const on = led.read();
         led.write(!on);
 
-        dummyLoop(1_000_000);
+        dummyLoop(8_000_000);
     }
 }
 
-fn dummyLoop(count: u32) void {
+inline fn dummyLoop(count: u32) void {
     var i: u32 = 0;
     while (i < count) : (i += 1) {
         // ZIG please don't optimize this loop away.
