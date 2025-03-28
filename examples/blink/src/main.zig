@@ -12,7 +12,6 @@ pub fn main() !void {
         else => @compileError("Unsupported chip series"),
     };
     hal.port.enable(led.port);
-    // led.enablePort(); // TODO
     // hal.port.disable(led.port);
 
     led.asOutput(.{ .speed = .max_50mhz, .mode = .push_pull });
