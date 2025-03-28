@@ -23,23 +23,18 @@ build() {
   rm -rf "${dir}/zig-out"
 
   (cd "${dir}" && zig build -Doptimize="$optimize" || true)
-
-  local size=$(size "${dir}/zig-out/firmware/ch32v003_blink.elf" | tail -n1 | awk '{print $1 " | " $2 " | " $3 " | " ($1 + $2 + $3)}' || echo "- | - | - | Failed")
-  echo "$size"
 }
 
-for dir in "${root_dir}/examples/"*/; do
+cd "$root_dir" || exit 1
+
+for dir in "examples/"*/; do
   if [ ! -f "${dir}build.zig" ]; then
     continue
   fi
 
   dir=$(sed 's/\/$//' <<<"$dir")
 
-  if [ "$dir" == "template" ]; then
-    continue
-  fi
-
-  echo "## ${dir}" >>SIZE_BENCHMARK.md
+  echo "## [${dir}](${dir})" >>SIZE_BENCHMARK.md
   echo "" >>SIZE_BENCHMARK.md
 
   for column in "${columns[@]}"; do
@@ -53,7 +48,11 @@ for dir in "${root_dir}/examples/"*/; do
   printf "|\n" >>SIZE_BENCHMARK.md
 
   for mode in "${modes[@]}"; do
-    size=$(build "$mode" "$dir")
+    rm -rf "$dir/zig-out"
+    build "$mode" "$dir"
+
+    size=$(size "${dir}/zig-out/firmware/blink_ch32v003.elf" | tail -n1 | awk '{print $1 " | " $2 " | " $3 " | " ($1 + $2 + $3)}' || echo "- | - | - | Failed")
+
     echo "| $mode | $size | " >>SIZE_BENCHMARK.md
   done
   printf "\n\n" >>SIZE_BENCHMARK.md

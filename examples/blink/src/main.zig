@@ -2,14 +2,6 @@ const std = @import("std");
 const config = @import("config");
 const hal = @import("hal");
 
-// pub const panic = hal.panic.silent;
-pub const panic = hal.panic.log;
-
-pub const std_options: std.Options = .{
-    .log_level = .debug,
-    .logFn = hal.log.logFn,
-};
-
 pub fn main() !void {
     // Select LED pin based on chip series.
     const led = switch (config.chip.series) {
