@@ -61,14 +61,14 @@ pub const FlowControl = enum {
     cts_rts,
 };
 
-pub const Pins = switch (config.chip_series) {
+pub const Pins = switch (config.chip.series) {
     .ch32v003 => @import("uart/ch32v003.zig").Pins,
     .ch32v30x => @import("uart/ch32v30x.zig").Pins,
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
 
-const rcc = switch (config.chip_series) {
+const rcc = switch (config.chip.series) {
     .ch32v003 => @import("uart/ch32v003.zig").rcc,
     .ch32v30x => @import("uart/ch32v30x.zig").rcc,
     // TODO: implement other chips
@@ -121,7 +121,7 @@ fn configurePins(self: UART, comptime cfg: Config) void {
         svd.peripherals.RCC.APB2PCENR.modify(.{ .AFIOEN = 1 });
         // Remap the pins.
         svd.peripherals.AFIO.PCFR1.modify(pins.remap.afio_pcfr1);
-        if (config.chip_series != .ch32v003) {
+        if (config.chip.series != .ch32v003) {
             svd.peripherals.AFIO.PCFR2.modify(pins.remap.afio_pcfr2);
         }
     }

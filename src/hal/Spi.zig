@@ -102,14 +102,14 @@ pub const FirstBit = enum(u1) {
     lsb = 1,
 };
 
-pub const Pins = switch (config.chip_series) {
+pub const Pins = switch (config.chip.series) {
     .ch32v003 => @import("spi/ch32v003.zig").Pins,
     .ch32v30x => @import("spi/ch32v30x.zig").Pins,
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
 
-const rcc = switch (config.chip_series) {
+const rcc = switch (config.chip.series) {
     .ch32v003 => @import("spi/ch32v003.zig").rcc,
     .ch32v30x => @import("spi/ch32v30x.zig").rcc,
     // TODO: implement other chips

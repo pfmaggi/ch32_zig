@@ -8,7 +8,7 @@ pub const DMDATA1: *volatile u32 = @ptrFromInt(isCpuQingkeV2(0xe00000f8, 0xe0000
 const DMSTATUS_SENTINEL: *volatile u32 = @ptrFromInt(isCpuQingkeV2(0xe00000fc, 0xe0000388));
 
 fn isCpuQingkeV2(yes: comptime_int, no: comptime_int) comptime_int {
-    if (config.chip_series == .ch32v003) {
+    if (config.chip.series == .ch32v003) {
         return yes;
     }
 

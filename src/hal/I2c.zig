@@ -41,14 +41,14 @@ pub const Address = union(enum) {
     }
 };
 
-pub const Pins = switch (config.chip_series) {
+pub const Pins = switch (config.chip.series) {
     .ch32v003 => @import("i2c/ch32v003.zig").Pins,
     // .ch32v30x => @import("i2c/ch32v30x.zig").Pins,
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
 
-const rcc = switch (config.chip_series) {
+const rcc = switch (config.chip.series) {
     .ch32v003 => @import("i2c/ch32v003.zig").rcc,
     // .ch32v30x => @import("i2c/ch32v30x.zig").rcc,
     // TODO: implement other chips
@@ -104,7 +104,7 @@ fn configurePins(self: I2C, comptime cfg: Config) void {
         svd.peripherals.RCC.APB2PCENR.modify(.{ .AFIOEN = 1 });
         // Remap the pins.
         svd.peripherals.AFIO.PCFR1.modify(pins.remap.afio_pcfr1);
-        if (config.chip_series != .ch32v003) {
+        if (config.chip.series != .ch32v003) {
             svd.peripherals.AFIO.PCFR2.modify(pins.remap.afio_pcfr2);
         }
     }
@@ -137,7 +137,7 @@ pub fn configureBaudRate(self: I2C, baud_rate: BaudRate) !void {
         break :blk @max(result, 1);
     };
 
-    if (config.chip_series != .ch32v003) {
+    if (config.chip.series != .ch32v003) {
         const trise = if (is_standard_mode) freq + 1 else freq * 300 / 1000 + 1;
         self.reg.RTR.modify(.{ .TRISE = @truncate(trise) });
     }
@@ -332,7 +332,7 @@ fn checkEvent(self: I2C, event: Event) bool {
 fn checkErrors(self: I2C) Error!void {
     const star1 = self.reg.STAR1.read();
 
-    if (config.chip_series != .ch32v003) {
+    if (config.chip.series != .ch32v003) {
         if (star1.TIMEOUT == 1) {
             self.reg.STAR1.modify(.{ .TIMEOUT = 0 });
             return error.Timeout;

@@ -65,7 +65,7 @@ const PllMul = enum(u32) {
         // 1100: PLL input clock x 14; 1101: PLL input clock x 6.5;
         // 1110: PLL input clock x 15; 1111: PLL input clock x 16.
 
-        if (config.chip_class == .d8c) {
+        if (config.chip.class == .d8c) {
             return switch (self) {
                 .mul18 => 0b0000,
                 .mul3 => 0b0001,
@@ -117,7 +117,7 @@ const PllMul = enum(u32) {
     }
 
     fn fromBits(b: u4) ?PllMul {
-        if (config.chip_class == .d8c) {
+        if (config.chip.class == .d8c) {
             return switch (b) {
                 0b0000 => .mul18,
                 0b0001 => .mul3,

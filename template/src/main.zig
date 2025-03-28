@@ -28,7 +28,7 @@ pub fn main() !void {
 
     USART1 = hal.Uart.init(.USART1, .{});
     USART1.configureBaudRate(.{
-        .peripheral_clock = switch (config.chip_series) {
+        .peripheral_clock = switch (config.chip.series) {
             .ch32v003 => clock.hb,
             else => clock.pb2,
         },
@@ -44,13 +44,13 @@ pub fn main() !void {
     // Одно из решений сделать NSS как software, что отключит его распознование и МК будет думать что NSS всегда low.
     // Но лучше всего использовать короткие провода с экраном, а на плате между пинами сделать землю.
     // const SPI1 = try hal.Spi.init(.SPI1, .{
-    //     .mode = if (config.chip_series == .ch32v003) .slave else .master,
+    //     .mode = if (config.chip.series == .ch32v003) .slave else .master,
     //     // .pins = hal.Spi.Pins.softwareNss(hal.Spi.Pins.spi1.default, hal.Spi.Pins.spi1.default.nss.?.pin),
     //     .cpol = .high,
     //     .cpha = .second_edge,
     // });
     // SPI1.configureBaudRate(.{
-    //     .peripheral_clock = switch (config.chip_series) {
+    //     .peripheral_clock = switch (config.chip.series) {
     //         .ch32v003 => clock.hb,
     //         else => clock.pb2,
     //     },
@@ -60,7 +60,7 @@ pub fn main() !void {
 
     const I2C1 = hal.I2c.init(.I2C1, .{});
     try I2C1.configureBaudRate(.{
-        .peripheral_clock = switch (config.chip_series) {
+        .peripheral_clock = switch (config.chip.series) {
             .ch32v003 => clock.hb,
             else => clock.pb2,
         },
@@ -69,7 +69,7 @@ pub fn main() !void {
     });
     // I2C1.deinit();
 
-    const led = switch (config.chip_series) {
+    const led = switch (config.chip.series) {
         .ch32v003 => hal.Pin.init(.GPIOC, 0),
         .ch32v30x => hal.Pin.init(.GPIOA, 3),
         else => @compileError("Unsupported chip series"),
@@ -92,7 +92,7 @@ pub fn main() !void {
         count += 1;
 
         // var spiBuf: [18 * 2]u8 = undefined;
-        // const spiSend = if (config.chip_series == .ch32v003) "World___" else "Hello___";
+        // const spiSend = if (config.chip.series == .ch32v003) "World___" else "Hello___";
         // _ = SPI1.transferBlocking(u8, spiSend, &spiBuf, null) catch 0;
         // _ = try USART1.writeVecBlocking(&.{ "SPI recv: ", &spiBuf, "\r\n" }, null);
         //
@@ -100,7 +100,7 @@ pub fn main() !void {
         // _ = hal.debug.sdi_print.transfer(try std.fmt.bufPrint(&buffer, "{x} {s}", .{ spiBuf, spiBuf }), null);
         // _ = hal.debug.sdi_print.transfer("\r\n", null);
         //
-        // if (config.chip_series != .ch32v003) {
+        // if (config.chip.series != .ch32v003) {
         //     var i: u32 = 0;
         //     while (i < 1_000_000) : (i += 1) {
         //         // ZIG please don't optimize this loop away.
