@@ -3,6 +3,8 @@ const config = @import("config");
 const hal = @import("hal");
 
 pub fn main() !void {
+    hal.delay.init(.default);
+
     // Select LED pin based on chip series.
     const led = switch (config.chip.series) {
         .ch32v003 => hal.Pin.init(.GPIOC, 0),
@@ -22,14 +24,6 @@ pub fn main() !void {
         const on = led.read();
         led.write(!on);
 
-        dummyLoop(8_000_000);
-    }
-}
-
-inline fn dummyLoop(count: u32) void {
-    var i: u32 = 0;
-    while (i < count) : (i += 1) {
-        // ZIG please don't optimize this loop away.
-        asm volatile ("" ::: "memory");
+        hal.delay.ms(1_000);
     }
 }
