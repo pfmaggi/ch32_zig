@@ -13,6 +13,9 @@ pub fn build(b: *std.Build) void {
         // .{ .chip = .{ .model = .ch32v003f4p6 } },
     };
 
+    //      ┌──────────────────────────────────────────────────────────┐
+    //      │                          Build                           │
+    //      └──────────────────────────────────────────────────────────┘
     const optimize = b.option(
         std.builtin.OptimizeMode,
         "optimize",
@@ -33,5 +36,21 @@ pub fn build(b: *std.Build) void {
 
         // Emit the elf file for debugging.
         _ = ch32.installFirmware(b, fw, .{ .format = .elf });
+    }
+
+    //      ┌──────────────────────────────────────────────────────────┐
+    //      │                           Test                           │
+    //      └──────────────────────────────────────────────────────────┘
+    const native_target = b.standardTargetOptions(.{});
+    const test_step = b.step("test", "Run platform-independent tests");
+    for (targets) |target| {
+        const fw_test = ch32.addFirmwareTest(b, ch32_dep, native_target, .{
+            .name = b.fmt("{s}_{s}", .{ name, target.chip.string() }),
+            .root_source_file = b.path("src/main.zig"),
+            .target = target,
+            .optimize = .Debug,
+        });
+        const unit_tests_run = b.addRunArtifact(fw_test);
+        test_step.dependOn(&unit_tests_run.step);
     }
 }

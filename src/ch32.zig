@@ -21,6 +21,9 @@ comptime {
             .section = ".init",
         });
     }
+
+    // Execute comptime code.
+    _ = root;
 }
 
 pub const std_options: std.Options = if (@hasDecl(root, "std_options")) root.std_options else .{};

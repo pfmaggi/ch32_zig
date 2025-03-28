@@ -14,44 +14,26 @@ pub const FirmwareOptions = struct {
     optimize: std.builtin.OptimizeMode = .ReleaseSmall,
 };
 
+pub fn addFirmwareTest(app_builder: *std.Build, dep_maybe: ?*std.Build.Dependency, native_target: std.Build.ResolvedTarget, options: FirmwareOptions) *std.Build.Step.Compile {
+    const ch32_builder = if (dep_maybe) |dep| dep.builder else app_builder;
+
+    const root_mod = createModules(ch32_builder, native_target, options);
+
+    const firmware = ch32_builder.addTest(.{
+        .name = options.name,
+        .root_module = root_mod.import_table.get("app"),
+        .test_runner = .{ .path = ch32_builder.path("test_runner.zig"), .mode = .simple },
+    });
+
+    return firmware;
+}
+
 pub fn addFirmware(app_builder: *std.Build, dep_maybe: ?*std.Build.Dependency, options: FirmwareOptions) *std.Build.Step.Compile {
     const ch32_builder = if (dep_maybe) |dep| dep.builder else app_builder;
 
     const target = ch32_builder.resolveTargetQuery(options.target.chip.target());
 
-    const config_options = buildConfigOptions(ch32_builder, options.name, options.target.chip);
-    const config_mod = config_options.createModule();
-
-    const svd_mod = svdModule(ch32_builder, target, options.target.chip.asSeries().svdName());
-
-    const hal_mod = halModule(ch32_builder, target);
-    hal_mod.addImport("config", config_mod);
-    hal_mod.addImport("svd", svd_mod);
-
-    const app_mod = ch32_builder.createModule(.{
-        .root_source_file = options.root_source_file,
-        .target = target,
-        .optimize = options.optimize,
-        .single_threaded = true,
-        .imports = &.{
-            .{ .name = "config", .module = config_mod },
-            .{ .name = "svd", .module = svd_mod },
-            .{ .name = "hal", .module = hal_mod },
-        },
-    });
-
-    const root_mod = ch32_builder.createModule(.{
-        .root_source_file = ch32_builder.path("src/ch32.zig"),
-        .target = target,
-        .optimize = options.optimize,
-        .single_threaded = true,
-        .imports = &.{
-            .{ .name = "config", .module = config_mod },
-            .{ .name = "svd", .module = svd_mod },
-            .{ .name = "hal", .module = hal_mod },
-            .{ .name = "app", .module = app_mod },
-        },
-    });
+    const root_mod = createModules(ch32_builder, target, options);
 
     const firmware = ch32_builder.addExecutable(.{
         .name = options.name,
@@ -71,6 +53,44 @@ pub fn addFirmware(app_builder: *std.Build, dep_maybe: ?*std.Build.Dependency, o
     return firmware;
 }
 
+pub fn createModules(b: *std.Build, target: std.Build.ResolvedTarget, options: FirmwareOptions) *std.Build.Module {
+    const config_options = buildConfigOptions(b, options.name, options.target.chip);
+    const config_mod = config_options.createModule();
+
+    const svd_mod = svdModule(b, target, options.target.chip.asSeries().svdName());
+
+    const hal_mod = halModule(b, target);
+    hal_mod.addImport("config", config_mod);
+    hal_mod.addImport("svd", svd_mod);
+
+    const app_mod = b.createModule(.{
+        .root_source_file = options.root_source_file,
+        .target = target,
+        .optimize = options.optimize,
+        .single_threaded = true,
+        .imports = &.{
+            .{ .name = "config", .module = config_mod },
+            .{ .name = "svd", .module = svd_mod },
+            .{ .name = "hal", .module = hal_mod },
+        },
+    });
+
+    const root_mod = b.createModule(.{
+        .root_source_file = b.path("src/ch32.zig"),
+        .target = target,
+        .optimize = options.optimize,
+        .single_threaded = true,
+        .imports = &.{
+            .{ .name = "config", .module = config_mod },
+            .{ .name = "svd", .module = svd_mod },
+            .{ .name = "hal", .module = hal_mod },
+            .{ .name = "app", .module = app_mod },
+        },
+    });
+
+    return root_mod;
+}
+
 const ChipOption = struct {
     series: chip.Series,
     model: chip.Model,
@@ -78,7 +98,7 @@ const ChipOption = struct {
 };
 
 fn buildConfigOptions(b: *std.Build, name: []const u8, c: chip.Chip) *std.Build.Step.Options {
-    const chipOption = ChipOption{
+    const chip_option = ChipOption{
         .series = c.asSeries(),
         .model = c.asModel(),
         .class = c.asClass(),
@@ -86,7 +106,7 @@ fn buildConfigOptions(b: *std.Build, name: []const u8, c: chip.Chip) *std.Build.
 
     const config_options = b.addOptions();
     config_options.addOption([]const u8, "name", name);
-    config_options.addOption(ChipOption, "chip", chipOption);
+    config_options.addOption(ChipOption, "chip", chip_option);
     return config_options;
 }
 
@@ -194,12 +214,35 @@ fn makeFirmwareSize(step: *std.Build.Step, options: std.Build.Step.MakeOptions) 
 }
 
 pub fn build(b: *std.Build) void {
-    const options = FirmwareOptions{
+    //      ┌──────────────────────────────────────────────────────────┐
+    //      │                          Build                           │
+    //      └──────────────────────────────────────────────────────────┘
+    const fw = addFirmware(b, null, .{
         .name = "build",
         .target = .{ .chip = .{ .series = .ch32v30x } },
         .root_source_file = b.path("src/main.zig"),
-    };
-
-    const fw = addFirmware(b, null, options);
+    });
     _ = installFirmware(b, fw, .{});
+
+    //      ┌──────────────────────────────────────────────────────────┐
+    //      │                           Test                           │
+    //      └──────────────────────────────────────────────────────────┘
+    const native_target = b.standardTargetOptions(.{});
+    const targets: []const Target = &.{
+        .{ .chip = .{ .series = .ch32v003 } },
+        .{ .chip = .{ .series = .ch32v103 } },
+        .{ .chip = .{ .series = .ch32v20x } },
+        .{ .chip = .{ .series = .ch32v30x } },
+    };
+    const test_step = b.step("test", "Run platform-independent tests");
+    for (targets) |target| {
+        const fw_test = addFirmwareTest(b, null, native_target, .{
+            .name = target.chip.string(),
+            .root_source_file = b.path("src/main.zig"),
+            .target = target,
+            .optimize = .Debug,
+        });
+        const unit_tests_run = b.addRunArtifact(fw_test);
+        test_step.dependOn(&unit_tests_run.step);
+    }
 }
