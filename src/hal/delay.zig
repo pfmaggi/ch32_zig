@@ -41,6 +41,14 @@ pub inline fn us(n: u32) void {
 
 /// Delay in milliseconds.
 pub inline fn ms(n: u32) void {
-    // FIXME: fix systick overflow
-    sysTick(n * data.ms);
+    const max_systicks = std.math.maxInt(u32);
+    const max_ms_per_systick = max_systicks / @as(u32, data.ms);
+
+    var _n = n;
+    while (_n > max_ms_per_systick) {
+        sysTick(max_systicks);
+        _n -= max_ms_per_systick;
+    }
+
+    sysTick(_n * data.ms);
 }
