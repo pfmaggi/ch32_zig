@@ -1,7 +1,7 @@
 .{
-    .name = .blink,
+    .name = .blink_delay,
     .version = "0.0.0",
-    .fingerprint = 0x323895dd27cf37c6,
+    .fingerprint = 0x9d942a26eedb41dd,
     .minimum_zig_version = "0.14.0",
     .dependencies = .{
         .ch32 = .{

@@ -4,7 +4,7 @@ const ch32 = @import("ch32");
 pub fn build(b: *std.Build) void {
     const ch32_dep = b.dependency("ch32", .{});
 
-    const name = "blink";
+    const name = "blink_delay";
     const targets: []const ch32.Target = &.{
         // You can specify a series of the chip.
         .{ .chip = .{ .series = .ch32v003 } },
