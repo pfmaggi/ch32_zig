@@ -26,6 +26,10 @@ pub const BaudRate = struct {
     /// Duty cycle for fast mode(>100 kHz).
     /// Ignored for standard mode.
     duty_cycle: DutyCycle = .@"2",
+
+    pub fn isValid(self: BaudRate) bool {
+        return self.peripheral_clock > 0 and self.speed > 0 and self.speed <= 400_000;
+    }
 };
 
 pub const Address = union(enum) {
@@ -67,18 +71,26 @@ pub const Error = error{
     Timeout,
 };
 
+pub const BaudRateError = error{
+    /// Invalid baud rate.
+    InvalidBaudRate,
+};
+
 const I2C = @This();
 
 reg: *volatile svd.types.I2C,
 
-pub fn init(i2c: svd.peripherals.I2C, comptime cfg: Config) I2C {
+pub fn init(comptime i2c: svd.peripherals.I2C, comptime cfg: Config) I2C {
     const self = I2C{ .reg = i2c.get() };
 
     self.reset();
     self.enable();
     self.configurePins(cfg);
     if (cfg.baud_rate) |baud_rate| {
-        self.configureBaudRate(baud_rate);
+        comptime if (!baud_rate.isValid()) {
+            @compileError("Invalid baud rate configuration");
+        };
+        self.configureBaudRate(baud_rate) catch unreachable;
     }
     self.configureCtrl(cfg);
 
@@ -93,8 +105,12 @@ pub fn deinit(self: I2C) void {
     self.reset();
 }
 
-fn configurePins(self: I2C, comptime cfg: Config) void {
-    const pins = cfg.pins orelse Pins.get_default(self.reg);
+fn configurePins(comptime self: I2C, comptime cfg: Config) void {
+    if (cfg.pins) |pins| {
+        comptime checkPins(self.reg, pins);
+    }
+
+    const pins = cfg.pins orelse Pins.defaultFor(self.reg);
 
     if (pins.remap.has()) {
         // Alternate function I/O clock enable
@@ -113,8 +129,8 @@ fn configurePins(self: I2C, comptime cfg: Config) void {
 }
 
 /// Runtime baud rate configuration.
-pub fn configureBaudRate(self: I2C, baud_rate: BaudRate) !void {
-    if (baud_rate.peripheral_clock == 0 or baud_rate.speed == 0 or baud_rate.speed > 400_000) {
+pub fn configureBaudRate(self: I2C, baud_rate: BaudRate) BaudRateError!void {
+    if (!baud_rate.isValid()) {
         return error.InvalidBaudRate;
     }
 
@@ -433,4 +449,24 @@ fn wait(self: I2C, conditionFn: fn (self: I2C) bool, deadlineFn: ?DeadlineFn) Er
         }
         asm volatile ("" ::: "memory");
     }
+}
+
+// Comptime pins checks.
+pub fn checkPins(comptime reg: *volatile svd.types.I2C, comptime pins: Pins) void {
+    const pins_namespace = Pins.namespaceFor(reg);
+
+    // Find pins from namespace.
+    var periph_pins_maybe: ?Pins = null;
+    for (@typeInfo(pins_namespace).@"struct".decls) |decl| {
+        const p_pins: Pins = @field(pins_namespace, decl.name);
+        if (p_pins.eqWithoutNss(pins)) {
+            periph_pins_maybe = p_pins;
+            break;
+        }
+    }
+    _ = periph_pins_maybe orelse @compileError(
+        \\Pins not found in namespace for selected I2C.
+        \\This may be due to an incorrect pin configuration.
+        \\For example, if you are using I2C1, the pins should be from Pins.i2c1 namespace.
+    );
 }

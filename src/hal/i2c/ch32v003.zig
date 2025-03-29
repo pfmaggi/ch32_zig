@@ -41,11 +41,15 @@ pub const Pins = struct {
         };
     };
 
-    pub inline fn get_default(reg: *volatile svd.types.I2C) Pins {
-        switch (reg.addr()) {
-            svd.types.I2C.I2C1.addr() => return Pins.i2c1.default,
-            else => unreachable,
-        }
+    pub inline fn namespaceFor(comptime reg: *volatile svd.types.I2C) type {
+        return switch (reg.addr()) {
+            svd.types.I2C.I2C1.addr() => Pins.i2c1,
+            else => @compileError("Unsupported I2C peripheral"),
+        };
+    }
+
+    pub inline fn defaultFor(comptime reg: *volatile svd.types.I2C) Pins {
+        return namespaceFor(reg).default;
     }
 };
 
