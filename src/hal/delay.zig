@@ -4,36 +4,43 @@ const svd = @import("svd");
 
 const hal = @import("hal.zig");
 
-var p_us: u32 = 0;
-var p_ms: u32 = 0;
+const Data = packed struct(u32) {
+    us: u8 = 0, // 1 - 144
+    ms: u24 = 0, // 1_000 - 144_000
+};
 
-pub fn init(c: hal.clock.Clocks) void {
-    const clock = c.hb;
+var data = Data{};
 
-    p_us = clock / 1_000_000;
-    p_ms = clock / 1_000;
+/// Initialize delay dividers for the given clock and enable SysTick timer.
+pub fn init(clock: hal.clock.Clocks) void {
+    data.us = @truncate(clock.hb / 1_000_000);
+    data.ms = @truncate(clock.hb / 1_000);
 
     // Enable SysTick timer.
     svd.peripherals.PFIC.STK_CTLR.modify(.{
-        .STE = 1,
+        .STE = 1, // Enable SysTick.
         .STCLK = 1, // HCLK/1 for time base.
     });
 }
 
+/// Delay in SysTick clock cycles.
 pub fn sysTick(n: u32) void {
     const PFIC = svd.peripherals.PFIC;
 
-    const end: i32 = @intCast(PFIC.STK_CNTL.raw + n);
+    const end: i32 = @intCast(PFIC.STK_CNTL.raw +% n);
 
-    while (@as(i32, @intCast(PFIC.STK_CNTL.raw)) - end < 0) {
+    while (@as(i32, @intCast(PFIC.STK_CNTL.raw)) -% end < 0) {
         asm volatile ("" ::: "memory");
     }
 }
 
-pub fn us(n: u32) void {
-    sysTick(n * p_us);
+/// Delay in microseconds.
+pub inline fn us(n: u32) void {
+    sysTick(n * data.us);
 }
 
-pub fn ms(n: u32) void {
-    sysTick(n * p_ms);
+/// Delay in milliseconds.
+pub inline fn ms(n: u32) void {
+    // FIXME: fix systick overflow
+    sysTick(n * data.ms);
 }
