@@ -36,7 +36,7 @@ pub fn build(b: *std.Build) void {
             config_options.addOption(SpiModeOption, "spi_mode", spi_mode);
 
             const fw = ch32.addFirmware(b, ch32_dep, .{
-                .name = b.fmt("{s}_{s}_{s}", .{ name, @tagName(spi_mode), target.chip.string() }),
+                .name = b.fmt("{s}_{s}_{s}", .{ name, target.chip.string(), @tagName(spi_mode) }),
                 .root_source_file = b.path("src/main.zig"),
                 .target = target,
                 .optimize = optimize,
@@ -63,7 +63,7 @@ pub fn build(b: *std.Build) void {
             config_options.addOption(SpiModeOption, "spi_mode", spi_mode);
 
             const fw_test = ch32.addFirmwareTest(b, ch32_dep, native_target, .{
-                .name = b.fmt("{s}_{s}_{s}", .{ name, @tagName(spi_mode), target.chip.string() }),
+                .name = b.fmt("{s}_{s}_{s}", .{ name, target.chip.string(), @tagName(spi_mode) }),
                 .root_source_file = b.path("src/main.zig"),
                 .target = target,
                 .optimize = .Debug,
