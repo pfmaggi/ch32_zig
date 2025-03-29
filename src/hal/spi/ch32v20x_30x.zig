@@ -89,8 +89,8 @@ pub const Pins = struct {
         };
     }
 
-    pub inline fn namespaceFor(comptime spi: *volatile svd.types.SPI) type {
-        switch (spi.addr()) {
+    pub inline fn namespaceFor(comptime reg: *volatile svd.types.SPI) type {
+        switch (reg.addr()) {
             svd.types.SPI.SPI1.addr() => return Pins.spi1,
             svd.types.SPI_2.SPI2.addr() => return Pins.spi2,
             svd.types.SPI_2.SPI3.addr() => return Pins.spi3,
@@ -98,8 +98,8 @@ pub const Pins = struct {
         }
     }
 
-    pub inline fn defaultFor(comptime spi: *volatile svd.types.SPI) Pins {
-        return namespaceFor(spi).default;
+    pub inline fn defaultFor(comptime reg: *volatile svd.types.SPI) Pins {
+        return namespaceFor(reg).default;
     }
 
     pub fn isHardwareNss(self: Pins) bool {

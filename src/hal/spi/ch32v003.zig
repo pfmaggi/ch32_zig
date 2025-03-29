@@ -57,15 +57,15 @@ pub const Pins = struct {
         };
     }
 
-    pub inline fn namespaceFor(comptime spi: *volatile svd.types.SPI) type {
-        return switch (spi.addr()) {
+    pub inline fn namespaceFor(comptime reg: *volatile svd.types.SPI) type {
+        return switch (reg.addr()) {
             svd.types.SPI.SPI1.addr() => Pins.spi1,
             else => @compileError("Unsupported SPI peripheral"),
         };
     }
 
-    pub inline fn defaultFor(comptime spi: *volatile svd.types.SPI) Pins {
-        return namespaceFor(spi).default;
+    pub inline fn defaultFor(comptime reg: *volatile svd.types.SPI) Pins {
+        return namespaceFor(reg).default;
     }
 
     pub fn isHardwareNss(self: Pins) bool {

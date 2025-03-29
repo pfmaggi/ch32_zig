@@ -162,7 +162,7 @@ pub fn deinit(self: SPI) void {
     self.reset();
 }
 
-fn configurePins(self: SPI, comptime cfg: Config, pins: Pins) void {
+fn configurePins(self: SPI, comptime cfg: Config, comptime pins: Pins) void {
     _ = self;
     if (pins.remap.has()) {
         // Alternate function I/O clock enable
@@ -358,8 +358,8 @@ fn wait(self: SPI, conditionFn: fn (self: SPI) bool, deadlineFn: ?DeadlineFn) Ti
 }
 
 // Comptime pins checks.
-pub fn checkPins(comptime spi: *volatile svd.types.SPI, comptime pins: Pins) void {
-    const pins_namespace = Pins.namespaceFor(spi);
+pub fn checkPins(comptime reg: *volatile svd.types.SPI, comptime pins: Pins) void {
+    const pins_namespace = Pins.namespaceFor(reg);
 
     // Find pins from namespace.
     var periph_pins_maybe: ?Pins = null;
