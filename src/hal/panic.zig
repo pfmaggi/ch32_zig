@@ -2,11 +2,11 @@ const std = @import("std");
 const config = @import("config");
 
 const zasm = @import("asm.zig");
-const interrups = @import("interrups.zig");
+const interrupts = @import("interrupts.zig");
 
 // Prints the message and registers dump to the logger if configured.
 pub fn log(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
-    interrups.disable();
+    interrupts.disable();
 
     std.log.err(
         \\PANIC: {s}
@@ -48,7 +48,7 @@ pub fn nop(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
 }
 
 pub fn hang() noreturn {
-    interrups.disable();
+    interrupts.disable();
 
     const has_led = true;
     if (!has_led) {

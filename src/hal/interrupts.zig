@@ -1,9 +1,9 @@
 const std = @import("std");
 const config = @import("config");
 
-pub const Interrups = switch (config.chip.series) {
-    .ch32v003 => @import("interrups/ch32v003.zig").Interrups,
-    .ch32v30x => @import("interrups/ch32v30x.zig").Interrups,
+pub const Interrupts = switch (config.chip.series) {
+    .ch32v003 => @import("interrupts/ch32v003.zig").Interrupts,
+    .ch32v20x, .ch32v30x => @import("interrupts/ch32v20x_30x.zig").Interrupts,
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };

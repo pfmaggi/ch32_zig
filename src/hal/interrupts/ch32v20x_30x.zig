@@ -2,7 +2,7 @@ const handler = @import("handler.zig");
 const Handler = handler.Handler;
 const unhandledFn = handler.unhandled;
 
-pub const Interrups = extern struct {
+pub const Interrupts = extern struct {
     _reserved1: [1]u32 = undefined,
     NMI: Handler = unhandledFn,
     EXC: Handler = unhandledFn,

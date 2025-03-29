@@ -16,8 +16,8 @@ comptime {
             .name = "_start",
         });
 
-        @export(&interrups, .{
-            .name = "interrups",
+        @export(&interrupts, .{
+            .name = "interrupts",
             .section = ".init",
         });
 
@@ -33,4 +33,4 @@ pub const std_options: std.Options = if (@hasDecl(root, "std_options")) root.std
 
 pub const panic = if (@hasDecl(root, "panic")) root.panic else hal.panic.nop;
 
-const interrups: hal.Interrups = if (@hasDecl(root, "interrups")) root.interrups else .{};
+const interrupts: hal.Interrupts = if (@hasDecl(root, "interrupts")) root.interrupts else .{};
