@@ -238,7 +238,7 @@ pub fn build(b: *std.Build) void {
     for (targets) |target| {
         const fw_test = addFirmwareTest(b, null, native_target, .{
             .name = target.chip.string(),
-            .root_source_file = b.path("src/main.zig"),
+            .root_source_file = b.path("src/ch32.zig"),
             .target = target,
             .optimize = .Debug,
         });

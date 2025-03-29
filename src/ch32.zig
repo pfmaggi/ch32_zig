@@ -20,10 +20,13 @@ comptime {
             .name = "interrups",
             .section = ".init",
         });
+
+        _ = root;
     }
 
     // Execute comptime code.
-    _ = root;
+    _ = hal;
+    _ = startup;
 }
 
 pub const std_options: std.Options = if (@hasDecl(root, "std_options")) root.std_options else .{};
