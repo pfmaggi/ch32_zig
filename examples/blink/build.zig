@@ -8,7 +8,9 @@ pub fn build(b: *std.Build) void {
     const targets: []const ch32.Target = &.{
         // You can specify a series of the chip.
         .{ .chip = .{ .series = .ch32v003 } },
-        // .{ .chip = .{ .series = .ch32v30x } },
+        // .{ .chip = .{ .series = .ch32v103 } },
+        .{ .chip = .{ .series = .ch32v20x } },
+        .{ .chip = .{ .series = .ch32v30x } },
         // Or a specific model.
         // .{ .chip = .{ .model = .ch32v003f4p6 } },
     };
