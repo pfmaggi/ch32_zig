@@ -20,34 +20,23 @@ pub fn didDebuggerAttach() bool {
 }
 
 pub const sdi_print = struct {
-    pub fn isBufferFree() bool {
+    const timeout_iters = 100_000;
+
+    pub inline fn isBufferFree() bool {
         return (DMDATA0.* & 0x80) == 0;
     }
 
-    pub fn enable() void {
+    pub fn init() void {
         DMDATA0.* = 0x00;
         DMDATA1.* = 0x80;
-        var timeout: u32 = 100_000;
+        var timeout: u32 = timeout_iters;
         while (timeout > 0) : (timeout -= 1) {
             // ZIG please don't optimize this loop away.
             asm volatile ("" ::: "memory");
         }
     }
 
-    /// Transfer data to and from the debug print buffer.
-    /// Example:
-    /// ```zig
-    ///     // Print and read from debug print.
-    ///     var recvBuf: [32]u8 = undefined;
-    ///     var len = hal.debug.transfer("Hello Debug Print: ", &recvBuf);
-    ///     len += hal.debug.transfer(intToStr(&buffer, count), recvBuf[len..]);
-    ///     len += hal.debug.transfer("\r\n", recvBuf[len..]);
-    ///     if (len > 0) {
-    ///         _ = try USART1.writeBlocking("Debug recv: ", null);
-    ///         _ = try USART1.writeBlocking(recvBuf[0..len], null);
-    ///         _ = try USART1.writeBlocking("\r\n", null);
-    ///     }
-    /// ```
+    /// Transfer data to and from the SDI.
     pub fn transfer(send: ?[]const u8, recv: ?[]u8) usize {
         // Timeout.
         if ((DMDATA0.* & 0xc0) == 0xc0) return 0;
@@ -56,7 +45,7 @@ pub const sdi_print = struct {
 
         if (send) |send_buf| {
             var recv_len: usize = 0;
-            var timeout: u32 = 100_000;
+            var timeout: u32 = timeout_iters;
             var buffer: [8]u8 = undefined;
 
             // Split send_buf into 7 byte chunks.
@@ -72,10 +61,10 @@ pub const sdi_print = struct {
                 }
 
                 if (recv) |r| {
-                    recv_len += pollInput(r);
+                    recv_len += read(r);
                 }
 
-                timeout = 100_000;
+                timeout = timeout_iters;
 
                 for (0..buf.len) |i| buffer[i + 1] = buf[i];
                 buffer[0] = 0x80 | @as(u8, @truncate(buf.len + 4));
@@ -88,18 +77,27 @@ pub const sdi_print = struct {
         }
 
         if (recv) |r| {
-            return pollInput(r);
+            return read(r);
         }
 
         return 0;
     }
 
-    pub fn write(buf: []const u8) void {
-        _ = transfer(buf, null);
+    /// Write data and discard any received data.
+    pub inline fn write(payload: []const u8) void {
+        _ = transfer(payload, null);
     }
 
-    // Returns max 3 bytes per call.
-    pub fn pollInput(buf: []u8) usize {
+    /// Write data and discard any received data.
+    pub inline fn writeVec(payloads: []const []const u8) void {
+        for (payloads) |payload| {
+            write(payload);
+        }
+    }
+
+    /// Read input data.
+    /// Returns max 3 bytes per call.
+    pub fn read(buf: []u8) usize {
         if (DMDATA0.* & 0x80 != 0) {
             return 0;
         }

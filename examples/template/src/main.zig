@@ -11,7 +11,7 @@ pub const std_options: std.Options = .{
 };
 
 pub fn main() !void {
-    hal.debug.sdi_print.enable();
+    hal.debug.sdi_print.init();
     // hal.log.setWriter(hal.debug.sdi_print.writer().any());
 
     // Set clock to 48MHz.
