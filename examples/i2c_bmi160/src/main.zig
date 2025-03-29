@@ -61,8 +61,8 @@ pub fn main() !void {
         else => return err,
     };
 
+    var imu_data: bmi160.ImuData = undefined;
     while (true) {
-        var imu_data: bmi160.ImuData = undefined;
         try bmi160.readImuData(I2C1, BMI160_I2C_ADDR, &imu_data, null);
 
         std.log.info("{any}", .{imu_data});
