@@ -156,7 +156,6 @@ const PllMul = enum(u32) {
             0b1101 => .mul15,
             0b1110 => .mul16,
             0b1111 => .mul18,
-            else => null,
         };
     }
 };
