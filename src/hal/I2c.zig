@@ -41,19 +41,16 @@ pub const Address = union(enum) {
     }
 };
 
-pub const Pins = switch (config.chip.series) {
-    .ch32v003 => @import("i2c/ch32v003.zig").Pins,
-    // .ch32v30x => @import("i2c/ch32v30x.zig").Pins,
+const chip = switch (config.chip.series) {
+    .ch32v003 => @import("i2c/ch32v003.zig"),
+    // .ch32v30x => @import("i2c/ch32v30x.zig"),
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
 
-const rcc = switch (config.chip.series) {
-    .ch32v003 => @import("i2c/ch32v003.zig").rcc,
-    // .ch32v30x => @import("i2c/ch32v30x.zig").rcc,
-    // TODO: implement other chips
-    else => @compileError("Unsupported chip series"),
-};
+pub const Pins = chip.Pins;
+
+const rcc = chip.rcc;
 
 pub const Error = error{
     /// Bus error (BERR).

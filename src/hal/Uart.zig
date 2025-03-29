@@ -61,19 +61,16 @@ pub const FlowControl = enum {
     cts_rts,
 };
 
-pub const Pins = switch (config.chip.series) {
-    .ch32v003 => @import("uart/ch32v003.zig").Pins,
-    .ch32v30x => @import("uart/ch32v30x.zig").Pins,
+const chip = switch (config.chip.series) {
+    .ch32v003 => @import("uart/ch32v003.zig"),
+    .ch32v30x => @import("uart/ch32v30x.zig"),
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
 
-const rcc = switch (config.chip.series) {
-    .ch32v003 => @import("uart/ch32v003.zig").rcc,
-    .ch32v30x => @import("uart/ch32v30x.zig").rcc,
-    // TODO: implement other chips
-    else => @compileError("Unsupported chip series"),
-};
+pub const Pins = chip.Pins;
+
+const rcc = chip.rcc;
 
 pub const Timeout = error{
     Timeout,
