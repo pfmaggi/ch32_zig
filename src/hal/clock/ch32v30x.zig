@@ -8,6 +8,7 @@ pub const Clocks = struct {
     pb1: u32,
     pb2: u32,
 
+    // Default clock configuration after systemInit() routine.
     pub const default: Clocks = .{
         .sys = hsi_frequency,
         .hb = hsi_frequency,
@@ -291,7 +292,13 @@ pub const Config = struct {
         .pb1_pre = .div1,
         .pb2_pre = .div1,
     };
-    pub const hse_8mhz = Config{ .source = .{ .hse = .{} } };
+    pub const hse_8mhz = Config{
+        .source = .{ .hse = .{} },
+        .sys_clk = .hse,
+        .hb_pre = .div1,
+        .pb1_pre = .div1,
+        .pb2_pre = .div1,
+    };
     pub const hse_48mhz = Config{
         .source = .{ .hse = .{} },
         .sys_clk = .{ .pll = .{ .mul = .mul6 } },
@@ -319,6 +326,12 @@ pub const Config = struct {
     };
 };
 
+pub const Error = error{
+    WaitHseTimeout,
+    WaitPllTimeout,
+    WaitSysClkTimeout,
+};
+
 pub fn setOrGet(comptime cfg: Config) Clocks {
     const hse_frequency = switch (cfg.source) {
         .hse => |hse| hse.frequency,
@@ -327,7 +340,7 @@ pub fn setOrGet(comptime cfg: Config) Clocks {
     return set(cfg) catch get(hse_frequency) orelse .default;
 }
 
-pub fn set(comptime cfg: Config) !Clocks {
+pub fn set(comptime cfg: Config) Error!Clocks {
     const EXTEN = svd.peripherals.EXTEND;
     const RCC = svd.peripherals.RCC;
     const AFIO = svd.peripherals.AFIO;
@@ -345,8 +358,8 @@ pub fn set(comptime cfg: Config) !Clocks {
             // Enable HSE.
             .HSEON = 1,
             // HSE bypass.
-            .HSEBYP = boolToU1(cfg.source.hse.bypass),
-            .CSSON = boolToU1(cfg.source.hse.clock_security_system),
+            .HSEBYP = if (cfg.source.hse.bypass) 1 else 0,
+            .CSSON = if (cfg.source.hse.clock_security_system) 1 else 0,
         });
 
         // Wait for HSE to be ready or timeout.
@@ -392,7 +405,7 @@ pub fn set(comptime cfg: Config) !Clocks {
     if (cfg.sys_clk == .pll) {
         // Configure PLL source.
         RCC.CFGR0.modify(.{
-            .PLLSRC = boolToU1(cfg.source == .hse),
+            .PLLSRC = if (cfg.source == .hse) 1 else 0,
             .PLLXTPRE = 0,
             .PLLMUL = cfg.sys_clk.pll.mul.bits(),
         });
@@ -477,8 +490,4 @@ pub fn get(hse_frequency: u32) ?Clocks {
 pub fn adjustHsiCalibrationValue(value: u5) void {
     const RCC = svd.peripherals.RCC;
     RCC.CTLR.modify(.{ .HSITRIM = value });
-}
-
-inline fn boolToU1(b: bool) u1 {
-    return if (b) 1 else 0;
 }

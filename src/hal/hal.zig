@@ -16,7 +16,7 @@ pub const delay = @import("delay.zig");
 
 pub const clock = switch (config.chip.series) {
     .ch32v003 => @import("clock/ch32v003.zig"),
-    .ch32v30x => @import("clock/ch32v30x.zig"),
+    .ch32v20x, .ch32v30x => @import("clock/ch32v30x.zig"),
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
