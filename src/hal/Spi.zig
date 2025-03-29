@@ -18,9 +18,9 @@ pub const Config = struct {
     cpha: CPHA = .first_edge,
     /// Baud Rate prescaler value which will be
     /// used to configure the transmit and receive SCK clock.
-    baud_rate: BaudRate = .default,
+    /// Can be set in runtime using configureBaudRate method.
+    baud_rate: ?BaudRate = null,
     /// Whether data transfers start from MSB bit.
-    /// NOTE: LSB is only supported by SPI as host.
     first_bit: FirstBit = .msb,
     /// SPI data size.
     data_size: DataSize = .eight_bits,
@@ -59,8 +59,6 @@ pub const BaudRate = struct {
     peripheral_clock: u32,
     baud_rate: u32,
 
-    pub const default = BaudRate{ .peripheral_clock = 0, .baud_rate = 0 };
-
     fn calculate(self: BaudRate) BaudRatePrescaler {
         if (self.peripheral_clock == 0 or self.baud_rate == 0) {
             return .div64;
@@ -98,13 +96,12 @@ pub const BiDirectionalMode = enum(u1) {
 
 pub const FirstBit = enum(u1) {
     msb = 0,
-    /// LSB is only supported by SPI as host.
     lsb = 1,
 };
 
 const chip = switch (config.chip.series) {
     .ch32v003 => @import("spi/ch32v003.zig"),
-    .ch32v30x => @import("spi/ch32v30x.zig"),
+    .ch32v20x, .ch32v30x => @import("spi/ch32v20x_30x.zig"),
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
@@ -127,8 +124,12 @@ reg: *volatile svd.types.SPI,
 sw_nss: ?Pin,
 has_hardware_nss: bool,
 
-pub fn init(uart: svd.peripherals.SPI, comptime cfg: Config) ConfigureError!SPI {
-    const pins = cfg.pins orelse Pins.get_default(uart.get());
+pub fn init(comptime uart: svd.peripherals.SPI, comptime cfg: Config) ConfigureError!SPI {
+    if (cfg.pins) |pins| {
+        comptime checkPins(uart.get(), pins);
+    }
+
+    const pins = cfg.pins orelse Pins.defaultFor(uart.get());
 
     // Software NSS pin allowed only in master mode.
     const sw_nss: ?Pin = if (cfg.mode == .master and !pins.isHardwareNss()) blk: {
@@ -145,7 +146,9 @@ pub fn init(uart: svd.peripherals.SPI, comptime cfg: Config) ConfigureError!SPI 
     self.enable();
     self.configurePins(cfg, pins);
     self.configureCtrl(cfg);
-    self.configureBaudRate(cfg.baud_rate);
+    if (cfg.baud_rate) |baud_rate| {
+        self.configureBaudRate(baud_rate);
+    }
     try self.configureCheck();
 
     return self;
@@ -209,7 +212,7 @@ fn configureCtrl(self: SPI, comptime cfg: Config) void {
         // Clock polarity.
         .CPOL = @intFromEnum(cfg.cpol),
         // Master selection.
-        .MSTR = boolToU1(cfg.mode == .master),
+        .MSTR = if (cfg.mode == .master) 1 else 0,
         // BR: Baud rate control.
         .BR = 0,
         // SPI enable.
@@ -217,11 +220,11 @@ fn configureCtrl(self: SPI, comptime cfg: Config) void {
         // Frame format.
         .LSBFIRST = @intFromEnum(cfg.first_bit),
         // Internal slave select. Required for master mode.
-        .SSI = boolToU1(cfg.mode == .master),
+        .SSI = if (cfg.mode == .master) 1 else 0,
         // SSM: Software slave management.
-        .SSM = boolToU1(!self.has_hardware_nss),
+        .SSM = if (!self.has_hardware_nss) 1 else 0,
         // Receive only.
-        .RXONLY = boolToU1(cfg.direction == .two_lines_rx_only),
+        .RXONLY = if (cfg.direction == .two_lines_rx_only) 1 else 0,
         // Data frame format.
         .DFF = @intFromEnum(cfg.data_size),
         // CRC transfer next.
@@ -229,12 +232,12 @@ fn configureCtrl(self: SPI, comptime cfg: Config) void {
         // CRC enable.
         .CRCEN = 0,
         // Output enable in bidirectional mode.
-        .BIDIOE = boolToU1(cfg.direction == .one_line_tx),
+        .BIDIOE = if (cfg.direction == .one_line_tx) 1 else 0,
         // Bidirectional data mode enable
-        .BIDIMODE = boolToU1(cfg.direction == .one_line_rx or cfg.direction == .one_line_tx),
+        .BIDIMODE = if (cfg.direction == .one_line_rx or cfg.direction == .one_line_tx) 1 else 0,
     });
     self.reg.CTLR2.write(.{
-        .SSOE = boolToU1(cfg.mode == .master and self.has_hardware_nss),
+        .SSOE = if (cfg.mode == .master and self.has_hardware_nss) 1 else 0,
     });
 
     // SPI enable.
@@ -354,6 +357,38 @@ fn wait(self: SPI, conditionFn: fn (self: SPI) bool, deadlineFn: ?DeadlineFn) Ti
     }
 }
 
-inline fn boolToU1(b: bool) u1 {
-    return if (b) 1 else 0;
+// Comptime pins checks.
+pub fn checkPins(comptime spi: *volatile svd.types.SPI, comptime pins: Pins) void {
+    const pins_namespace = Pins.namespaceFor(spi);
+
+    // Find pins from namespace.
+    var periph_pins_maybe: ?Pins = null;
+    for (@typeInfo(pins_namespace).@"struct".decls) |decl| {
+        const p_pins: Pins = @field(pins_namespace, decl.name);
+        if (p_pins.eqWithoutNss(pins)) {
+            periph_pins_maybe = p_pins;
+            break;
+        }
+    }
+    const periph_pins = periph_pins_maybe orelse @compileError(
+        \\Pins not found in namespace for selected SPI.
+        \\This may be due to an incorrect pin configuration.
+        \\For example, if you are using SPI1, the pins should be from Pins.spi1 namespace.
+    );
+
+    const nss = pins.nss orelse return;
+    if (nss.is_hardware) {
+        return;
+    }
+
+    // Software NSS pin must not be the same as any of the SPI pins.
+    const pin_names = &.{ "sck", "miso", "mosi" };
+    for (pin_names) |pin_name| {
+        const periph_pin = @field(periph_pins, pin_name);
+        if (periph_pin.eq(nss.pin)) {
+            var buf = [_]u8{0} ** pin_name.len;
+            const pin_name_upper = std.ascii.upperString(&buf, pin_name);
+            @compileError("NSS pin must not be the same as " ++ pin_name_upper ++ " pins");
+        }
+    }
 }

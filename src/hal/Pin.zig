@@ -81,6 +81,10 @@ pub fn read(self: Pin) bool {
     return (self.port.get().INDR.raw & mask(self)) != 0;
 }
 
+pub fn eq(self: Pin, other: Pin) bool {
+    return self.port == other.port and self.num == other.num;
+}
+
 inline fn mask(pin: Pin) u16 {
     return @as(u16, 1) << pin.num;
 }

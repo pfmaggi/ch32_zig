@@ -89,13 +89,17 @@ pub const Pins = struct {
         };
     }
 
-    pub inline fn get_default(spi: *volatile svd.types.SPI) Pins {
+    pub inline fn namespaceFor(comptime spi: *volatile svd.types.SPI) type {
         switch (spi.addr()) {
-            svd.types.SPI.SPI1.addr() => return Pins.spi1.default,
-            svd.types.SPI_2.SPI2.addr() => return Pins.spi2.default,
-            svd.types.SPI_2.SPI3.addr() => return Pins.spi3.default,
+            svd.types.SPI.SPI1.addr() => return Pins.spi1,
+            svd.types.SPI_2.SPI2.addr() => return Pins.spi2,
+            svd.types.SPI_2.SPI3.addr() => return Pins.spi3,
             else => unreachable,
         }
+    }
+
+    pub inline fn defaultFor(comptime spi: *volatile svd.types.SPI) Pins {
+        return namespaceFor(spi).default;
     }
 
     pub fn isHardwareNss(self: Pins) bool {
@@ -104,6 +108,10 @@ pub const Pins = struct {
         }
 
         return false;
+    }
+
+    pub fn eqWithoutNss(self: Pins, other: Pins) bool {
+        return self.sck.eq(other.sck) and self.miso.eq(other.miso) and self.mosi.eq(other.mosi);
     }
 };
 

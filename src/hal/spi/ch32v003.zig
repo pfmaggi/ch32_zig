@@ -57,11 +57,15 @@ pub const Pins = struct {
         };
     }
 
-    pub inline fn get_default(spi: *volatile svd.types.SPI) Pins {
-        switch (spi.addr()) {
-            svd.types.SPI.SPI1.addr() => return Pins.spi1.default,
-            else => unreachable,
-        }
+    pub inline fn namespaceFor(comptime spi: *volatile svd.types.SPI) type {
+        return switch (spi.addr()) {
+            svd.types.SPI.SPI1.addr() => Pins.spi1,
+            else => @compileError("Unsupported SPI peripheral"),
+        };
+    }
+
+    pub inline fn defaultFor(comptime spi: *volatile svd.types.SPI) Pins {
+        return namespaceFor(spi).default;
     }
 
     pub fn isHardwareNss(self: Pins) bool {
@@ -70,6 +74,10 @@ pub const Pins = struct {
         }
 
         return false;
+    }
+
+    pub fn eqWithoutNss(self: Pins, other: Pins) bool {
+        return self.sck.eq(other.sck) and self.miso.eq(other.miso) and self.mosi.eq(other.mosi);
     }
 };
 
