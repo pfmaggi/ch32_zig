@@ -53,4 +53,11 @@ pub fn build(b: *std.Build) void {
         const unit_tests_run = b.addRunArtifact(fw_test);
         test_step.dependOn(&unit_tests_run.step);
     }
+
+    //      ┌──────────────────────────────────────────────────────────┐
+    //      │                          Clean                           │
+    //      └──────────────────────────────────────────────────────────┘
+    const clean_step = b.step("clean", "Clean up");
+    clean_step.dependOn(&b.addRemoveDirTree(.{ .cwd_relative = b.install_path }).step);
+    clean_step.dependOn(&b.addRemoveDirTree(.{ .cwd_relative = b.pathFromRoot(".zig-cache") }).step);
 }
