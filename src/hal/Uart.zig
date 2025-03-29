@@ -76,7 +76,7 @@ pub const Timeout = error{
     Timeout,
 };
 
-pub const ErrorStates = packed struct(u4) {
+pub const ErrorStates = packed struct {
     overrun_error: bool = false,
     break_error: bool = false,
     parity_error: bool = false,
