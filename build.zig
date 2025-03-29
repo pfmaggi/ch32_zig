@@ -12,6 +12,9 @@ pub const FirmwareOptions = struct {
     root_source_file: std.Build.LazyPath,
     target: Target,
     optimize: std.builtin.OptimizeMode = .ReleaseSmall,
+    /// Override the default config options.
+    /// Use `createConfigOptions(b, name, target.chip)` for default and add options to it.
+    config_options: ?*std.Build.Step.Options = null,
 };
 
 pub fn addFirmwareTest(app_builder: *std.Build, dep_maybe: ?*std.Build.Dependency, native_target: std.Build.ResolvedTarget, options: FirmwareOptions) *std.Build.Step.Compile {
@@ -54,7 +57,7 @@ pub fn addFirmware(app_builder: *std.Build, dep_maybe: ?*std.Build.Dependency, o
 }
 
 pub fn createModules(b: *std.Build, target: std.Build.ResolvedTarget, options: FirmwareOptions) *std.Build.Module {
-    const config_options = buildConfigOptions(b, options.name, options.target.chip);
+    const config_options = options.config_options orelse createConfigOptions(b, options.name, options.target.chip);
     const config_mod = config_options.createModule();
 
     const svd_mod = svdModule(b, target, options.target.chip.asSeries().svdName());
@@ -95,18 +98,25 @@ const ChipOption = struct {
     series: chip.Series,
     model: chip.Model,
     class: chip.Class,
+
+    fn from(c: chip.Chip) ChipOption {
+        return .{
+            .series = c.asSeries(),
+            .model = c.asModel(),
+            .class = c.asClass(),
+        };
+    }
 };
 
-fn buildConfigOptions(b: *std.Build, name: []const u8, c: chip.Chip) *std.Build.Step.Options {
-    const chip_option = ChipOption{
-        .series = c.asSeries(),
-        .model = c.asModel(),
-        .class = c.asClass(),
-    };
-
+pub fn createConfigOptions(
+    b: *std.Build,
+    name: []const u8,
+    c: chip.Chip,
+) *std.Build.Step.Options {
     const config_options = b.addOptions();
     config_options.addOption([]const u8, "name", name);
-    config_options.addOption(ChipOption, "chip", chip_option);
+    config_options.addOption(ChipOption, "chip", ChipOption.from(c));
+
     return config_options;
 }
 
