@@ -40241,5 +40241,45 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
         </register>        
 		</registers>
 		</peripheral>
+
+    <peripheral>
+      <name>StubInterrupts_GeneratorIgnoreMe</name>
+      <interrupt>
+        <name>NMI</name>
+        <description>Non-maskable interrupt</description>
+        <value>2</value>
+      </interrupt>
+      <interrupt>
+        <name>HardFault</name>
+        <description>Abnormal interruptions</description>
+        <value>3</value>
+      </interrupt>
+      <interrupt>
+        <name>EcallM</name>
+        <description>Callback interrupt in machine mode</description>
+        <value>5</value>
+      </interrupt>
+      <interrupt>
+        <name>EcallU</name>
+        <description>Callback interrupt in user mode</description>
+        <value>8</value>
+      </interrupt>
+      <interrupt>
+        <name>BreakPoint</name>
+        <description>Breakpoint callback interrupt</description>
+        <value>9</value>
+      </interrupt>
+      <interrupt>
+        <name>SysTick</name>
+        <description>System timer interrupt</description>
+        <value>12</value>
+      </interrupt>
+      <interrupt>
+        <name>SW</name>
+        <description>Software interrupt</description>
+        <value>14</value>
+      </interrupt>
+    </peripheral>
+
 	</peripherals>
  </device>

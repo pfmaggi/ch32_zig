@@ -34382,71 +34382,152 @@ pub const nullable_types = struct {
 };
 
 pub const interrupts = struct {
-    pub const DMA1_Channel2 = 28;
-    pub const DMA1_Channel7 = 33;
-    pub const TIM1_TRG_COM = 42;
-    pub const USBHS = 85;
-    pub const TIM9_UP_ = 91;
-    pub const UART5 = 69;
-    pub const TIM9_CC = 93;
-    pub const UART8 = 89;
-    pub const CAN1_RX1 = 37;
-    pub const DMA1_Channel1 = 27;
-    pub const USART3 = 55;
-    pub const DMA1_Channel3 = 29;
-    pub const TIM8_TRG_COM = 61;
-    pub const TIM4 = 46;
-    pub const USB_LP_CAN1_RX0 = 36;
-    pub const USART2 = 54;
-    pub const PVD = 17;
-    pub const TIM10_BRK = 94;
-    pub const TAMPER = 18;
-    pub const FLASH = 20;
-    pub const DMA1_Channel6 = 32;
+    /// Non-maskable interrupt
+    pub const NMI = 2;
+    /// Abnormal interruptions
+    pub const HardFault = 3;
+    /// Callback interrupt in machine mode
+    pub const EcallM = 5;
+    /// Callback interrupt in user mode
+    pub const EcallU = 8;
+    /// Breakpoint callback interrupt
+    pub const BreakPoint = 9;
+    /// System timer interrupt
+    pub const SysTick = 12;
+    /// Software interrupt
+    pub const SW = 14;
+    /// Window Watchdog interrupt
     pub const WWDG = 16;
-    pub const USBHSWakeup = 84;
-    pub const TIM2 = 44;
-    pub const TIM8_BRK = 59;
-    pub const TIM8_UP_ = 60;
-    pub const TIM1_CC = 43;
-    pub const I2C2_ER = 50;
-    pub const USB_HP_CAN1_TX = 35;
-    pub const SPI2 = 52;
-    pub const EXTI0 = 22;
-    pub const DMA1_Channel4 = 30;
-    pub const TIM9_BRK = 90;
-    pub const TIM5 = 66;
-    pub const CAN1_SCE = 38;
-    pub const UART7 = 88;
-    pub const OTG_FS = 83;
-    pub const I2C1_ER = 48;
-    pub const EXTI2 = 24;
-    pub const RTCAlarm = 57;
-    pub const TIM8_CC = 62;
-    pub const TIM10_CC = 97;
-    pub const I2C2_EV = 49;
-    pub const RCC = 21;
-    pub const TIM10_UP_ = 95;
-    pub const USBWakeUp = 58;
-    pub const TIM1_BRK = 40;
-    pub const TIM3 = 45;
-    pub const ADC = 34;
-    pub const SPI1 = 51;
-    pub const SPI3 = 67;
-    pub const EXTI4 = 26;
-    pub const DMA1_Channel5 = 31;
-    pub const ETH_WKUP = 78;
-    pub const TIM9_TRG_COM = 92;
-    pub const ETH = 77;
-    pub const TIM1_UP_ = 41;
-    pub const TIM10_TRG_COM = 96;
-    pub const I2C1_EV = 47;
-    pub const EXTI9_5 = 39;
+    /// PVD through EXTI line detection interrupt
+    pub const PVD = 17;
+    /// Tamper interrupt
+    pub const TAMPER = 18;
+    /// RTC global interrupt
     pub const RTC = 19;
-    pub const EXTI3 = 25;
-    pub const USART1 = 53;
+    /// Flash global interrupt
+    pub const FLASH = 20;
+    /// RCC global interrupt
+    pub const RCC = 21;
+    /// EXTI Line0 interrupt
+    pub const EXTI0 = 22;
+    /// EXTI Line1 interrupt
     pub const EXTI1 = 23;
-    pub const UART6 = 87;
-    pub const UART4 = 68;
+    /// EXTI Line2 interrupt
+    pub const EXTI2 = 24;
+    /// EXTI Line3 interrupt
+    pub const EXTI3 = 25;
+    /// EXTI Line4 interrupt
+    pub const EXTI4 = 26;
+    /// DMA1 Channel1 global interrupt
+    pub const DMA1_Channel1 = 27;
+    /// DMA1 Channel2 global interrupt
+    pub const DMA1_Channel2 = 28;
+    /// DMA1 Channel3 global interrupt
+    pub const DMA1_Channel3 = 29;
+    /// DMA1 Channel4 global interrupt
+    pub const DMA1_Channel4 = 30;
+    /// DMA1 Channel5 global interrupt
+    pub const DMA1_Channel5 = 31;
+    /// DMA1 Channel6 global interrupt
+    pub const DMA1_Channel6 = 32;
+    /// DMA1 Channel7 global interrupt
+    pub const DMA1_Channel7 = 33;
+    /// ADC global interrupt
+    pub const ADC = 34;
+    /// CAN1 TX interrupts
+    pub const USB_HP_CAN1_TX = 35;
+    /// CAN1 RX0 interrupts
+    pub const USB_LP_CAN1_RX0 = 36;
+    /// CAN1 RX1 interrupt
+    pub const CAN1_RX1 = 37;
+    /// CAN1 SCE interrupt
+    pub const CAN1_SCE = 38;
+    /// EXTI Line[9:5] interrupts
+    pub const EXTI9_5 = 39;
+    /// TIM1 Break interrupt
+    pub const TIM1_BRK = 40;
+    /// TIM1 Update interrupt
+    pub const TIM1_UP_ = 41;
+    /// TIM1 Trigger and Commutation interrupts
+    pub const TIM1_TRG_COM = 42;
+    /// TIM1 Capture Compare interrupt
+    pub const TIM1_CC = 43;
+    /// TIM2 global interrupt
+    pub const TIM2 = 44;
+    /// TIM3 global interrupt
+    pub const TIM3 = 45;
+    /// TIM4 global interrupt
+    pub const TIM4 = 46;
+    /// I2C1 event interrupt
+    pub const I2C1_EV = 47;
+    /// I2C1 error interrupt
+    pub const I2C1_ER = 48;
+    /// I2C2 event interrupt
+    pub const I2C2_EV = 49;
+    /// I2C2 error interrupt
+    pub const I2C2_ER = 50;
+    /// SPI1 global interrupt
+    pub const SPI1 = 51;
+    /// SPI2 global interrupt
+    pub const SPI2 = 52;
+    /// USART1 global interrupt
+    pub const USART1 = 53;
+    /// USART2 global interrupt
+    pub const USART2 = 54;
+    /// USART3 global interrupt
+    pub const USART3 = 55;
+    /// EXTI Line[15:10] interrupts
     pub const EXTI15_10 = 56;
+    /// RTC Alarms through EXTI line interrupt
+    pub const RTCAlarm = 57;
+    /// USB Device WakeUp from suspend through EXTI Line Interrupt
+    pub const USBWakeUp = 58;
+    /// TIM8 Break interrupt
+    pub const TIM8_BRK = 59;
+    /// TIM8 Update interrupt
+    pub const TIM8_UP_ = 60;
+    /// TIM8 Trigger and Commutation interrupts
+    pub const TIM8_TRG_COM = 61;
+    /// TIM8 Capture Compare interrupt
+    pub const TIM8_CC = 62;
+    /// TIM5 global interrupt
+    pub const TIM5 = 66;
+    /// SPI3 global interrupt
+    pub const SPI3 = 67;
+    /// UART4 global interrupt
+    pub const UART4 = 68;
+    /// UART5 global interrupt
+    pub const UART5 = 69;
+    /// Ethernet global interrupt
+    pub const ETH = 77;
+    /// Ethernet Wakeup through EXTI line interrupt
+    pub const ETH_WKUP = 78;
+    /// OTG_FS
+    pub const OTG_FS = 83;
+    /// USBHSWakeup
+    pub const USBHSWakeup = 84;
+    /// USBHS
+    pub const USBHS = 85;
+    /// UART6 global interrupt
+    pub const UART6 = 87;
+    /// UART7 global interrupt
+    pub const UART7 = 88;
+    /// UART8 global interrupt
+    pub const UART8 = 89;
+    /// TIM9 Break interrupt
+    pub const TIM9_BRK = 90;
+    /// TIM9 Update interrupt
+    pub const TIM9_UP_ = 91;
+    /// TIM9 Trigger and Commutation interrupts
+    pub const TIM9_TRG_COM = 92;
+    /// TIM9 Capture Compare interrupt
+    pub const TIM9_CC = 93;
+    /// TIM10 Break interrupt
+    pub const TIM10_BRK = 94;
+    /// TIM10 Update interrupt
+    pub const TIM10_UP_ = 95;
+    /// TIM10 Trigger and Commutation interrupts
+    pub const TIM10_TRG_COM = 96;
+    /// TIM10 Capture Compare interrupt
+    pub const TIM10_CC = 97;
 };

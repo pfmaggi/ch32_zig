@@ -8711,27 +8711,58 @@ pub const nullable_types = struct {
 };
 
 pub const interrupts = struct {
-    pub const AWU = 21;
-    pub const TIM1UP = 35;
-    pub const TIM1RG = 36;
-    pub const TIM1BRK = 34;
-    pub const DMA1_Channel7 = 28;
-    pub const PVD = 17;
-    pub const DMA1_Channel1 = 22;
-    pub const DMA1_Channel5 = 26;
-    pub const I2C1_EV = 30;
-    pub const EXTI7_0 = 20;
-    pub const I2C1_ER = 31;
-    pub const SPI1 = 33;
-    pub const TIM2 = 38;
+    /// Non-maskable interrupt
+    pub const NMI = 2;
+    /// Abnormal interruptions
+    pub const HardFault = 3;
+    /// System timer interrupt
+    pub const SysTick = 12;
+    /// Software interrupt
+    pub const SW = 14;
+    /// Window Watchdog interrupt
     pub const WWDG = 16;
-    pub const RCC = 19;
-    pub const DMA1_Channel4 = 25;
-    pub const USART1 = 32;
-    pub const DMA1_Channel2 = 23;
+    /// PVD through EXTI line detection interrupt
+    pub const PVD = 17;
+    /// Flash global interrupt
     pub const FLASH = 18;
+    /// Reset and clock control interrupt
+    pub const RCC = 19;
+    /// EXTI Line[7:0] interrupt
+    pub const EXTI7_0 = 20;
+    /// AWU global interrupt
+    pub const AWU = 21;
+    /// DMA1 Channel 1 global interrupt
+    pub const DMA1_Channel1 = 22;
+    /// DMA1 Channel 2 global interrupt
+    pub const DMA1_Channel2 = 23;
+    /// DMA1 Channel 3 global interrupt
     pub const DMA1_Channel3 = 24;
+    /// DMA1 Channel 4 global interrupt
+    pub const DMA1_Channel4 = 25;
+    /// DMA1 Channel 5 global interrupt
+    pub const DMA1_Channel5 = 26;
+    /// DMA1 Channel 6 global interrupt
     pub const DMA1_Channel6 = 27;
-    pub const TIM1CC = 37;
+    /// DMA1 Channel 7 global interrupt
+    pub const DMA1_Channel7 = 28;
+    /// ADC global interrupt
     pub const ADC = 29;
+    /// I2C1 event interrupt
+    pub const I2C1_EV = 30;
+    /// I2C1 error interrupt
+    pub const I2C1_ER = 31;
+    /// USART1 global interrupt
+    pub const USART1 = 32;
+    /// SPI1 global interrupt
+    pub const SPI1 = 33;
+    /// TIM1 Break interrupt
+    pub const TIM1BRK = 34;
+    /// TIM1 Update interrupt
+    pub const TIM1UP = 35;
+    /// TIM1 Trigger and Commutation interrupts
+    pub const TIM1RG = 36;
+    /// TIM1 Capture Compare interrupt
+    pub const TIM1CC = 37;
+    /// TIM2 global interrupt
+    pub const TIM2 = 38;
 };

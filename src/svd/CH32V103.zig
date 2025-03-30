@@ -11760,44 +11760,94 @@ pub const nullable_types = struct {
 };
 
 pub const interrupts = struct {
-    pub const I2C2_ER = 50;
-    pub const SPI2 = 52;
-    pub const DMA1_CH2 = 28;
-    pub const EXTI0 = 22;
-    pub const DMA1_CH4 = 30;
-    pub const DMA1_CH7 = 33;
-    pub const TIM1_TRG_COM = 42;
-    pub const RCC = 5;
-    pub const I2C1_ER = 48;
-    pub const DMA1_CH1 = 27;
-    pub const EXTI2 = 24;
-    pub const RTCAlarm = 57;
-    pub const DMA1_CH3 = 29;
-    pub const I2C2_EV = 49;
-    pub const USART3 = 55;
-    pub const USB_FS_WKUP = 58;
-    pub const TIM1_BRK = 40;
-    pub const TIM3 = 45;
-    pub const TIM4 = 46;
-    pub const SPI1 = 51;
-    pub const USART2 = 54;
-    pub const PVD = 17;
-    pub const EXTI4 = 26;
-    pub const DMA1_CH5 = 31;
-    pub const ADC = 34;
-    pub const TAMPER = 18;
-    pub const TIM1_UP = 41;
-    pub const FLASH = 20;
-    pub const I2C1_EV = 47;
-    pub const EXTI9_5 = 39;
-    pub const DMA1_CH6 = 32;
-    pub const EXTI3 = 25;
-    pub const RTC = 19;
-    pub const EXTI1 = 23;
+    /// Reset
+    pub const Reset = 1;
+    /// Non-maskable interrupt
+    pub const NMI = 2;
+    /// Exception interrupt
+    pub const EXC = 3;
+    /// System timer interrupt
+    pub const SysTick = 12;
+    /// Software interrupt
+    pub const SW = 14;
+    /// Window Watchdog interrupt
     pub const WWDG = 16;
-    pub const USART1 = 53;
-    pub const TIM2 = 44;
-    pub const USBFS = 59;
-    pub const EXTI15_10 = 56;
+    /// PVD through EXTI line detection interrupt
+    pub const PVD = 17;
+    /// Tamper interrupt
+    pub const TAMPER = 18;
+    /// RTC global interrupt
+    pub const RTC = 19;
+    /// Flash global interrupt
+    pub const FLASH = 20;
+    /// RCC global interrupt
+    pub const RCC = 21;
+    /// EXTI Line0 interrupt
+    pub const EXTI0 = 22;
+    /// EXTI Line1 interrupt
+    pub const EXTI1 = 23;
+    /// EXTI Line2 interrupt
+    pub const EXTI2 = 24;
+    /// EXTI Line3 interrupt
+    pub const EXTI3 = 25;
+    /// EXTI Line4 interrupt
+    pub const EXTI4 = 26;
+    /// DMA1 Channel1 global interrupt
+    pub const DMA1_CH1 = 27;
+    /// DMA1 Channel2 global interrupt
+    pub const DMA1_CH2 = 28;
+    /// DMA1 Channel3 global interrupt
+    pub const DMA1_CH3 = 29;
+    /// DMA1 Channel4 global interrupt
+    pub const DMA1_CH4 = 30;
+    /// DMA1 Channel5 global interrupt
+    pub const DMA1_CH5 = 31;
+    /// DMA1 Channel6 global interrupt
+    pub const DMA1_CH6 = 32;
+    /// DMA1 Channel7 global interrupt
+    pub const DMA1_CH7 = 33;
+    /// ADC1 global interrupt
+    pub const ADC = 34;
+    /// EXTI Line[9:5] interrupts
+    pub const EXTI9_5 = 39;
+    /// TIM1 Break interrupt and TIM9 global interrupt
+    pub const TIM1_BRK = 40;
+    /// TIM1 Update interrupt and TIM10 global interrupt
+    pub const TIM1_UP = 41;
+    /// TIM1 Trigger and Commutation interrupts and TIM11 global interrupt
+    pub const TIM1_TRG_COM = 42;
+    /// TIM1 Capture Compare interrupt
     pub const TIM1_CC = 43;
+    /// TIM2 global interrupt
+    pub const TIM2 = 44;
+    /// TIM3 global interrupt
+    pub const TIM3 = 45;
+    /// TIM4 global interrupt
+    pub const TIM4 = 46;
+    /// I2C1 event interrupt
+    pub const I2C1_EV = 47;
+    /// I2C1 error interrupt
+    pub const I2C1_ER = 48;
+    /// I2C2 event interrupt
+    pub const I2C2_EV = 49;
+    /// I2C2 error interrupt
+    pub const I2C2_ER = 50;
+    /// SPI1 global interrupt
+    pub const SPI1 = 51;
+    /// SPI2 global interrupt
+    pub const SPI2 = 52;
+    /// USART1 global interrupt
+    pub const USART1 = 53;
+    /// USART2 global interrupt
+    pub const USART2 = 54;
+    /// USART3 global interrupt
+    pub const USART3 = 55;
+    /// EXTI Line[15:10] interrupts
+    pub const EXTI15_10 = 56;
+    /// RTC Alarms through EXTI line interrupt
+    pub const RTCAlarm = 57;
+    /// USB Device FS Wakeup through EXTI line interrupt
+    pub const USB_FS_WKUP = 58;
+    /// USBFS_IRQHandler
+    pub const USBFS = 59;
 };

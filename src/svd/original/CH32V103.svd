@@ -146,7 +146,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
       <interrupt>
         <name>RCC</name>
         <description>RCC global interrupt</description>
-        <value>21</value>
+        <value>5</value>
       </interrupt>
       <registers>
         <register>
@@ -12242,37 +12242,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
             </fields>
           </register>
       </registers>
-    </peripheral>
-
-    <peripheral>
-      <name>StubInterrupts_GeneratorIgnoreMe</name>
-      <interrupt>
-        <name>Reset</name>
-        <description>Reset</description>
-        <value>1</value>
-      </interrupt>
-      <interrupt>
-        <name>NMI</name>
-        <description>Non-maskable interrupt</description>
-        <value>2</value>
-      </interrupt>
-      <interrupt>
-        <name>EXC</name>
-        <description>Exception interrupt</description>
-        <value>3</value>
-      </interrupt>
-      <interrupt>
-        <name>SysTick</name>
-        <description>System timer interrupt</description>
-        <value>12</value>
-      </interrupt>
-      <interrupt>
-        <name>SW</name>
-        <description>Software interrupt</description>
-        <value>14</value>
-      </interrupt>
-    </peripheral>
-
+    </peripheral>  
   </peripherals>
  
  </device>

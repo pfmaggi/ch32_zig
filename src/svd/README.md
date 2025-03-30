@@ -67,8 +67,26 @@ sed -i 's/CH32V203xx/CH32V20x/g' CH32V20x.svd
 sed -i 's/CH32V30[37]xx/CH32V30x/g' CH32V30x.svd
 ```
 
+Apply patches from `patches/*.patch`.
+
+```shell
+for f in patches/*.patch; do
+  git apply "$f"
+done
+```
+
+For creating patches, use:
+
+```shell
+git diff CH32V003.svd > patches/0xx_CH32V003.svd.patch
+git diff CH32V103.svd > patches/0xx_CH32V103.svd.patch
+git diff CH32V20x.svd > patches/0xx_CH32V20x.svd.patch
+git diff CH32V30x.svd > patches/0xx_CH32V30x.svd.patch
+```
+
 Generate Zig files:
 
 ```shell
 zig build
 ```
+
