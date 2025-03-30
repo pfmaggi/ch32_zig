@@ -80,12 +80,15 @@ pub const Timeout = error{
     Timeout,
 };
 
-pub const ErrorStates = packed struct {
-    overrun_error: bool = false,
-    break_error: bool = false,
-    parity_error: bool = false,
-    framing_error: bool = false,
-    noise_error: bool = false,
+pub const Error = error{
+    /// Parity error (PE)
+    Parity,
+    /// Framing error (FE)
+    Framing,
+    /// Noise error (NE)
+    Noise,
+    /// Overrun error (ORE)
+    Overrun,
 };
 
 const UART = @This();
@@ -282,6 +285,12 @@ pub fn writeVecBlocking(self: UART, payloads: []const []const u8, deadlineFn: ?D
     return total;
 }
 
+pub fn writeByteBlocking(self: UART, byte: u8, deadlineFn: ?DeadlineFn) Timeout!void {
+    try self.wait(isWriteable, deadlineFn);
+    self.reg.DATAR.raw = byte;
+    try self.wait(isWriteComplete, deadlineFn);
+}
+
 pub fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
     return self.readVecBlocking(&.{buffer}, deadlineFn);
 }
@@ -306,31 +315,29 @@ pub fn readVecBlocking(self: UART, buffers: []const []u8, deadlineFn: ?DeadlineF
 }
 
 pub fn readByteBlocking(self: UART, deadlineFn: ?DeadlineFn) Timeout!u8 {
-    self.wait(isReadable, deadlineFn) catch |err| {
-        return err;
-    };
+    try self.wait(isReadable, deadlineFn);
     return @truncate(self.reg.DATAR.raw & 0xFF);
 }
 
-pub fn getErrors(self: UART) ErrorStates {
+fn checkErrors(self: UART) Error!void {
     const statr = self.reg.STATR.read();
-    return .{
-        .overrun_error = statr.ORE,
-        .break_error = statr.LBD,
-        .parity_error = statr.PE,
-        .framing_error = statr.FE,
-        .noise_error = statr.NE,
-    };
-}
 
-pub fn clearErrors(self: UART) void {
-    self.reg.STATR.modify(.{
-        .ORE = 0,
-        .LBD = 0,
-        .PE = 0,
-        .FE = 0,
-        .NE = 0,
-    });
+    if (statr.PE == 1) {
+        self.reg.STATR.modify(.{ .PE = 0 });
+        return error.Parity;
+    }
+    if (statr.FE == 1) {
+        self.reg.STATR.modify(.{ .FE = 0 });
+        return error.Framing;
+    }
+    if (statr.NE == 1) {
+        self.reg.STATR.modify(.{ .NE = 0 });
+        return error.Noise;
+    }
+    if (statr.ORE == 1) {
+        self.reg.STATR.modify(.{ .ORE = 0 });
+        return error.Overrun;
+    }
 }
 
 // Wait for a condition to be true.
