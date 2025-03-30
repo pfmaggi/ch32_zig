@@ -280,7 +280,7 @@ fn reset(self: SPI) void {
 ///
 /// This function blocks execution until all data is transferred or a timeout occurs.
 /// The deadlineFn parameter allows specifying a timeout check function to avoid infinite waiting.
-pub noinline fn transferBlocking(self: SPI, comptime u8_or_u16: type, send: ?[]const u8_or_u16, recv: ?[]u8_or_u16, deadlineFn: ?DeadlineFn) Timeout!usize {
+pub noinline fn transferBlocking(self: SPI, comptime u8_or_u16: type, send: ?[]const u8_or_u16, recv: ?[]u8_or_u16, deadlineFn: ?DeadlineFn) Timeout!void {
     const type_info = @typeInfo(u8_or_u16).int;
     if (type_info.bits != 8 and type_info.bits != 16 or @typeInfo(u8_or_u16).int.signedness != .unsigned) {
         @compileError("Unsupported type, only u8 and u16 are supported");
@@ -299,9 +299,6 @@ pub noinline fn transferBlocking(self: SPI, comptime u8_or_u16: type, send: ?[]c
         } else 0;
 
         const v = self.transferWordBlocking(word, deadlineFn) catch |err| {
-            if (offset > 0) {
-                return offset;
-            }
             return err;
         };
 
@@ -313,8 +310,6 @@ pub noinline fn transferBlocking(self: SPI, comptime u8_or_u16: type, send: ?[]c
     }
 
     try self.wait(isNotBusy, deadlineFn);
-
-    return len;
 }
 
 inline fn swNssWrite(self: SPI, v: bool) void {

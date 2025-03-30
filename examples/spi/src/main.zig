@@ -41,9 +41,9 @@ pub fn main() !void {
     while (true) {
         sdi_print.writeVec(&.{ "SPI send: ", spi_send, "\r\n" });
 
-        const n = SPI1.transferBlocking(u8, spi_send, &buf, null) catch 0;
+        SPI1.transferBlocking(u8, spi_send, &buf, null) catch {};
 
-        sdi_print.writeVec(&.{ "SPI recv: ", buf[0..n], "\r\n" });
+        sdi_print.writeVec(&.{ "SPI recv: ", &buf, "\r\n" });
 
         hal.delay.ms(100);
     }
