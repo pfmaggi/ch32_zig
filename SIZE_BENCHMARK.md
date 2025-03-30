@@ -68,8 +68,8 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 8216 | 4 | 16 | 8236 | 
-| ReleaseFast | 12260 | 4 | 16 | 12280 | 
+| ReleaseSmall | 8066 | 4 | 16 | 8086 | 
+| ReleaseFast | 12124 | 4 | 16 | 12144 | 
 
 
 ## [examples/spi](examples/spi)
@@ -78,51 +78,79 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2680 | 0 | 4 | 2684 | 
-| ReleaseFast | 3658 | 0 | 4 | 3662 | 
-| ReleaseSafe | 10756 | 0 | 4 | 10760 | 
+| ReleaseSmall | 2582 | 0 | 4 | 2586 | 
+| ReleaseFast | 3458 | 0 | 4 | 3462 | 
+| ReleaseSafe | 10720 | 0 | 4 | 10724 | 
 
 ### spi_ch32v003_slave.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2688 | 0 | 4 | 2692 | 
-| ReleaseFast | 3610 | 0 | 4 | 3614 | 
-| ReleaseSafe | 10754 | 0 | 4 | 10758 | 
+| ReleaseSmall | 2578 | 0 | 4 | 2582 | 
+| ReleaseFast | 3368 | 0 | 4 | 3372 | 
+| ReleaseSafe | 10632 | 0 | 4 | 10636 | 
 
 ### spi_ch32v20x_master.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2782 | 0 | 4 | 2786 | 
-| ReleaseFast | 3734 | 0 | 4 | 3738 | 
-| ReleaseSafe | 9536 | 0 | 4 | 9540 | 
+| ReleaseSmall | 2664 | 0 | 4 | 2668 | 
+| ReleaseFast | 3454 | 0 | 4 | 3458 | 
+| ReleaseSafe | 9470 | 0 | 4 | 9474 | 
 
 ### spi_ch32v20x_slave.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2804 | 0 | 4 | 2808 | 
-| ReleaseFast | 3668 | 0 | 4 | 3672 | 
-| ReleaseSafe | 9472 | 0 | 4 | 9476 | 
+| ReleaseSmall | 2656 | 0 | 4 | 2660 | 
+| ReleaseFast | 3384 | 0 | 4 | 3388 | 
+| ReleaseSafe | 9394 | 0 | 4 | 9398 | 
 
 ### spi_ch32v30x_master.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2796 | 0 | 4 | 2800 | 
-| ReleaseFast | 3748 | 0 | 4 | 3752 | 
-| ReleaseSafe | 9550 | 0 | 4 | 9554 | 
-| Debug | 53202 | 0 | 4 | 53206 | 
+| ReleaseSmall | 2678 | 0 | 4 | 2682 | 
+| ReleaseFast | 3468 | 0 | 4 | 3472 | 
+| ReleaseSafe | 9484 | 0 | 4 | 9488 | 
+| Debug | 51262 | 0 | 4 | 51266 | 
 
 ### spi_ch32v30x_slave.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2818 | 0 | 4 | 2822 | 
-| ReleaseFast | 3682 | 0 | 4 | 3686 | 
-| ReleaseSafe | 9486 | 0 | 4 | 9490 | 
-| Debug | 53072 | 0 | 4 | 53076 | 
+| ReleaseSmall | 2670 | 0 | 4 | 2674 | 
+| ReleaseFast | 3398 | 0 | 4 | 3402 | 
+| ReleaseSafe | 9408 | 0 | 4 | 9412 | 
+| Debug | 51128 | 0 | 4 | 51132 | 
+
+
+## [examples/uart](examples/uart)
+
+### uart_ch32v003.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 2044 | 4 | 4 | 2052 | 
+| ReleaseFast | 2656 | 4 | 4 | 2664 | 
+| ReleaseSafe | 3516 | 4 | 4 | 3524 | 
+
+### uart_ch32v20x.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 2084 | 4 | 4 | 2092 | 
+| ReleaseFast | 2594 | 4 | 4 | 2602 | 
+| ReleaseSafe | 2974 | 4 | 4 | 2982 | 
+
+### uart_ch32v30x.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 2098 | 4 | 4 | 2106 | 
+| ReleaseFast | 2608 | 4 | 4 | 2616 | 
+| ReleaseSafe | 2988 | 4 | 4 | 2996 | 
+| Debug | 59778 | 4 | 4 | 59786 | 
 
 
 
