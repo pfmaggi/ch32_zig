@@ -3,9 +3,6 @@ const config = @import("config");
 const hal = @import("hal");
 
 pub fn main() !void {
-    // Get default system clock configuration.
-    const clock = hal.clock.Clocks.default;
-
     // Select LED pin based on chip series.
     const led = switch (config.chip.series) {
         .ch32v003 => hal.Pin.init(.GPIOC, 0),
@@ -25,8 +22,7 @@ pub fn main() !void {
         // or
         led.toggle();
 
-        // Wait 1 second.
-        dummyLoop(clock.sys);
+        dummyLoop(1_000_000);
     }
 }
 
