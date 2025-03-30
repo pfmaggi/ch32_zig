@@ -8,8 +8,8 @@ const deadline = @import("deadline.zig");
 pub const DeadlineFn = fn () bool;
 
 pub const Config = struct {
-    brr: ?BaudRate = null,
     mode: Mode = .tx_rx,
+    baud_rate: ?BaudRate = null,
     word_bits: WordBits = .eight,
     stop_bits: StopBits = .one,
     parity: Parity = .none,
@@ -17,23 +17,27 @@ pub const Config = struct {
     pins: ?Pins = null,
 };
 
+pub const Mode = enum {
+    tx,
+    rx,
+    tx_rx,
+};
+
 pub const BaudRate = struct {
     peripheral_clock: u32,
     baud_rate: u32,
 
     fn calculate(self: BaudRate) u32 {
-        if (self.peripheral_clock == 0 or self.baud_rate == 0) {
+        if (!self.isValid()) {
             return 0;
         }
 
         return (self.peripheral_clock + self.baud_rate / 2) / self.baud_rate;
     }
-};
 
-pub const Mode = enum {
-    tx,
-    rx,
-    tx_rx,
+    pub fn isValid(self: BaudRate) bool {
+        return self.peripheral_clock > 0 and self.baud_rate > 0;
+    }
 };
 
 pub const WordBits = enum {
@@ -63,7 +67,7 @@ pub const FlowControl = enum {
 
 const chip = switch (config.chip.series) {
     .ch32v003 => @import("uart/ch32v003.zig"),
-    .ch32v30x => @import("uart/ch32v30x.zig"),
+    .ch32v20x, .ch32v30x => @import("uart/ch32v20x_30x.zig"),
     // TODO: implement other chips
     else => @compileError("Unsupported chip series"),
 };
@@ -88,14 +92,17 @@ const UART = @This();
 
 reg: *volatile svd.types.USART,
 
-pub fn init(uart: svd.peripherals.USART, comptime cfg: Config) UART {
+pub fn init(comptime uart: svd.peripherals.USART, comptime cfg: Config) UART {
     const self = UART{ .reg = uart.get() };
 
     self.reset();
     self.enable();
     self.configurePins(cfg);
-    if (cfg.brr) |brr| {
-        self.configureBaudRate(brr);
+    if (cfg.baud_rate) |baud_rate| {
+        comptime if (!baud_rate.isValid()) {
+            @compileError("Invalid baud rate configuration");
+        };
+        self.configureBaudRate(baud_rate);
     }
     self.configureCtrl(cfg);
 
@@ -110,8 +117,12 @@ pub fn deinit(self: UART) void {
     self.reset();
 }
 
-fn configurePins(self: UART, comptime cfg: Config) void {
-    const pins = cfg.pins orelse Pins.get_default(self.reg);
+fn configurePins(comptime self: UART, comptime cfg: Config) void {
+    if (cfg.pins) |pins| {
+        comptime checkPins(self.reg, pins);
+    }
+
+    const pins = cfg.pins orelse Pins.defaultFor(self.reg);
 
     if (pins.remap.has()) {
         // Alternate function I/O clock enable
@@ -140,23 +151,33 @@ pub fn configureBaudRate(self: UART, cfg: BaudRate) void {
 }
 
 fn configureCtrl(self: UART, comptime cfg: Config) void {
-    const parity_bit = switch (cfg.parity) {
-        .none => @as(u1, 0),
-        .even, .odd => @as(u1, 1),
+    var rx_enable: u1 = 0;
+    var tx_enable: u1 = 0;
+    switch (cfg.mode) {
+        .tx => tx_enable = 1,
+        .rx => rx_enable = 1,
+        .tx_rx => {
+            tx_enable = 1;
+            rx_enable = 1;
+        },
+    }
+    const parity_bit: u1 = switch (cfg.parity) {
+        .none => 0,
+        .even, .odd => 1,
     };
-    const parity_selection_bit = switch (cfg.parity) {
-        .even => @as(u1, 1),
-        .odd, .none => @as(u1, 0),
+    const parity_selection_bit: u1 = switch (cfg.parity) {
+        .even => 1,
+        .odd, .none => 0,
     };
-    const word_long_bit = switch (cfg.word_bits) {
-        .eight => @as(u1, 0),
-        .nine => @as(u1, 1),
+    const word_long_bit: u1 = switch (cfg.word_bits) {
+        .eight => 0,
+        .nine => 1,
     };
-    const stop_bits = switch (cfg.stop_bits) {
-        .one => @as(u2, 0b00),
-        .half => @as(u2, 0b01),
-        .two => @as(u2, 0b10),
-        .one_and_a_half => @as(u2, 0b11),
+    const stop_bits: u2 = switch (cfg.stop_bits) {
+        .one => 0b00,
+        .half => 0b01,
+        .two => 0b10,
+        .one_and_a_half => 0b11,
     };
     var rts_bit: u1 = 0;
     var cts_bit: u1 = 0;
@@ -172,9 +193,9 @@ fn configureCtrl(self: UART, comptime cfg: Config) void {
 
     self.reg.CTLR1.write(.{
         // Receiver enable
-        .RE = 1,
+        .RE = rx_enable,
         // Transmitter enable
-        .TE = 1,
+        .TE = tx_enable,
         // Parity check interrupt enable bit
         .PEIE = parity_bit,
         // Parity selection bit
@@ -233,11 +254,11 @@ pub fn isWriteComplete(self: UART) bool {
     return self.reg.STATR.read().TC == 1;
 }
 
-pub noinline fn writeBlocking(self: UART, payload: []const u8, deadlineFn: ?DeadlineFn) Timeout!usize {
+pub fn writeBlocking(self: UART, payload: []const u8, deadlineFn: ?DeadlineFn) Timeout!usize {
     return self.writeVecBlocking(&.{payload}, deadlineFn);
 }
 
-pub noinline fn writeVecBlocking(self: UART, payloads: []const []const u8, deadlineFn: ?DeadlineFn) Timeout!usize {
+pub fn writeVecBlocking(self: UART, payloads: []const []const u8, deadlineFn: ?DeadlineFn) Timeout!usize {
     var total: usize = 0;
 
     for (payloads) |payload| {
@@ -261,28 +282,34 @@ pub noinline fn writeVecBlocking(self: UART, payloads: []const []const u8, deadl
     return total;
 }
 
-pub noinline fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
+pub fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
     return self.readVecBlocking(&.{buffer}, deadlineFn);
 }
 
-pub noinline fn readVecBlocking(self: UART, buffers: []const []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
+pub fn readVecBlocking(self: UART, buffers: []const []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
     var total: usize = 0;
 
     for (buffers) |buffer| {
         for (buffer) |*byte| {
-            self.wait(isReadable, deadlineFn) catch |err| {
+            byte.* = self.readByteBlocking(deadlineFn) catch |err| {
                 if (total > 0) {
                     return total;
                 }
                 return err;
             };
 
-            byte.* = @truncate(self.reg.DATAR.raw & 0xFF);
             total += 1;
         }
     }
 
     return total;
+}
+
+pub fn readByteBlocking(self: UART, deadlineFn: ?DeadlineFn) Timeout!u8 {
+    self.wait(isReadable, deadlineFn) catch |err| {
+        return err;
+    };
+    return @truncate(self.reg.DATAR.raw & 0xFF);
 }
 
 pub fn getErrors(self: UART) ErrorStates {
@@ -318,12 +345,32 @@ fn wait(self: UART, conditionFn: fn (self: UART) bool, deadlineFn: ?DeadlineFn) 
     }
 }
 
+// Comptime pins checks.
+pub fn checkPins(comptime reg: *volatile svd.types.I2C, comptime pins: Pins) void {
+    const pins_namespace = Pins.namespaceFor(reg);
+
+    // Find pins from namespace.
+    var periph_pins_maybe: ?Pins = null;
+    for (@typeInfo(pins_namespace).@"struct".decls) |decl| {
+        const p_pins: Pins = @field(pins_namespace, decl.name);
+        if (p_pins.eqWithoutNss(pins)) {
+            periph_pins_maybe = p_pins;
+            break;
+        }
+    }
+    _ = periph_pins_maybe orelse @compileError(
+        \\Pins not found in namespace for selected UART.
+        \\This may be due to an incorrect pin configuration.
+        \\For example, if you are using USART1, the pins should be from Pins.usart1 namespace.
+    );
+}
+
 pub const Writer = std.io.GenericWriter(UART, Timeout, genericWriterFn);
 
 pub fn writer(self: UART) Writer {
     return .{ .context = self };
 }
 
-pub fn genericWriterFn(self: UART, buffer: []const u8) Timeout!usize {
+fn genericWriterFn(self: UART, buffer: []const u8) Timeout!usize {
     return self.writeBlocking(buffer, deadline.simple(100_000));
 }

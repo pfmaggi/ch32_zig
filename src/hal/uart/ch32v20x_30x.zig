@@ -77,18 +77,22 @@ pub const Pins = struct {
 
     // TODO: add other USARTs
 
-    pub inline fn get_default(uart: *volatile svd.types.USART) Pins {
-        switch (uart.addr()) {
-            svd.types.USART.USART1.addr() => return Pins.usart1.default,
-            // svd.types.USART.USART2.addr() => return Pins.usart2.default,
-            // svd.types.USART.USART3.addr() => return Pins.usart3.default,
-            // svd.types.USART.UART4.addr() => return Pins.uart4.default,
-            // svd.types.USART.UART5.addr() => return Pins.uart5.default,
-            // svd.types.USART.UART6.addr() => return Pins.uart6.default,
-            // svd.types.USART.UART7.addr() => return Pins.uart7.default,
-            // svd.types.USART.UART8.addr() => return Pins.uart8.default,
-            else => unreachable,
-        }
+    pub inline fn namespaceFor(comptime reg: *volatile svd.types.USART) type {
+        return switch (reg.addr()) {
+            svd.types.USART.USART1.addr() => return Pins.usart1,
+            // svd.types.USART.USART2.addr() => return Pins.usart2,
+            // svd.types.USART.USART3.addr() => return Pins.usart3,
+            // svd.types.USART.UART4.addr() => return Pins.uart4,
+            // svd.types.USART.UART5.addr() => return Pins.uart5,
+            // svd.types.USART.UART6.addr() => return Pins.uart6,
+            // svd.types.USART.UART7.addr() => return Pins.uart7,
+            // svd.types.USART.UART8.addr() => return Pins.uart8,
+            else => @compileError("Unsupported USART peripheral"),
+        };
+    }
+
+    pub inline fn defaultFor(comptime reg: *volatile svd.types.USART) Pins {
+        return namespaceFor(reg).default;
     }
 };
 

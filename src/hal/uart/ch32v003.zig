@@ -62,11 +62,15 @@ pub const Pins = struct {
         };
     };
 
-    pub inline fn get_default(uart: *volatile svd.types.USART) Pins {
-        switch (uart.addr()) {
-            svd.types.USART.USART1.addr() => return Pins.usart1.default,
-            else => unreachable,
-        }
+    pub inline fn namespaceFor(comptime reg: *volatile svd.types.USART) type {
+        return switch (reg.addr()) {
+            svd.types.USART.USART1.addr() => Pins.usart1,
+            else => @compileError("Unsupported USART peripheral"),
+        };
+    }
+
+    pub inline fn defaultFor(comptime reg: *volatile svd.types.USART) Pins {
+        return namespaceFor(reg).default;
     }
 };
 
