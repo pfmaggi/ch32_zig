@@ -240,7 +240,7 @@ pub fn build(b: *std.Build) void {
     const native_target = b.standardTargetOptions(.{});
     const targets: []const Target = &.{
         .{ .chip = .{ .series = .ch32v003 } },
-        .{ .chip = .{ .series = .ch32v103 } },
+        // .{ .chip = .{ .series = .ch32v103 } },
         .{ .chip = .{ .series = .ch32v20x } },
         .{ .chip = .{ .series = .ch32v30x } },
     };

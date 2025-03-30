@@ -21,6 +21,6 @@ pub const clock = switch (config.chip.series) {
     else => @compileError("Unsupported chip series"),
 };
 
-test {
+comptime {
     @import("std").testing.refAllDecls(@This());
 }
