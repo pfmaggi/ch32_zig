@@ -246,14 +246,23 @@ pub fn build(b: *std.Build) void {
     };
     const test_step = b.step("test", "Run platform-independent tests");
     for (targets) |target| {
-        const fw_test = addFirmwareTest(b, null, native_target, .{
+        const hal_test = addFirmwareTest(b, null, native_target, .{
+            .name = target.chip.string(),
+            .root_source_file = b.path("src/hal/hal.zig"),
+            .target = target,
+            .optimize = .Debug,
+        });
+        const hal_unit_tests_run = b.addRunArtifact(hal_test);
+        test_step.dependOn(&hal_unit_tests_run.step);
+
+        const core_test = addFirmwareTest(b, null, native_target, .{
             .name = target.chip.string(),
             .root_source_file = b.path("src/ch32.zig"),
             .target = target,
             .optimize = .Debug,
         });
-        const unit_tests_run = b.addRunArtifact(fw_test);
-        test_step.dependOn(&unit_tests_run.step);
+        const core_unit_tests_run = b.addRunArtifact(core_test);
+        test_step.dependOn(&core_unit_tests_run.step);
     }
 
     //      ┌──────────────────────────────────────────────────────────┐
