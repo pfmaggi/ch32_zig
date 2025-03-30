@@ -7,9 +7,13 @@ pub fn main() !void {
     // Enable SDI print for logging.
     sdi_print.init();
 
-    const clock = hal.clock.setOrGet(.hse_max);
+    const clock = hal.clock.setOrGet(.hsi_max);
     hal.delay.init(clock);
 
+    // Configure SPI.
+    // The default pins are:
+    // For CH32V003: SCK: PC5, MISO: PC7, MOSI: PC6, NSS: PC1.
+    // For CH32V103, CH32V20x and CH32V30x: SCK: PA5, MISO: PA6, MOSI: PA7, NSS: PA4.
     const SPI1 = try hal.Spi.init(.SPI1, .{
         .mode = if (config.spi_mode == .master) .master else .slave,
         .cpol = .high,

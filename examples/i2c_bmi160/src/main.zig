@@ -11,7 +11,7 @@ pub const std_options: std.Options = .{
 };
 
 pub fn main() !void {
-    const clock = hal.clock.setOrGet(.hse_max);
+    const clock = hal.clock.setOrGet(.hsi_max);
     hal.delay.init(clock);
 
     // Configure UART for logging.
@@ -27,7 +27,9 @@ pub fn main() !void {
     hal.log.setWriter(USART1.writer().any());
 
     // Configure I2C.
-
+    // The default pins are:
+    // For CH32V003: SCL: PC2, SDA: PC1.
+    // For CH32V103, CH32V20x and CH32V30x: SCL: PB6, SDA: PB7.
     const I2C1 = hal.I2c.init(.I2C1, .{
         // You can use the default pins for the selected I2C by leaving the field null or remap it to other pins.
         // For example, to use the remapped pins for I2C1 on CH32V003:
