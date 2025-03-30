@@ -8,28 +8,28 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 538 | 0 | 4 | 542 | 
-| ReleaseFast | 536 | 0 | 4 | 540 | 
-| ReleaseSafe | 530 | 0 | 4 | 534 | 
-| Debug | 4470 | 0 | 4 | 4474 | 
+| ReleaseSmall | 562 | 0 | 4 | 566 | 
+| ReleaseFast | 558 | 0 | 4 | 562 | 
+| ReleaseSafe | 864 | 0 | 4 | 868 | 
+| Debug | 4388 | 0 | 4 | 4392 | 
 
 ### blink_delay_ch32v20x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 604 | 0 | 4 | 608 | 
-| ReleaseFast | 600 | 0 | 4 | 604 | 
-| ReleaseSafe | 598 | 0 | 4 | 602 | 
-| Debug | 4792 | 0 | 4 | 4796 | 
+| ReleaseSmall | 590 | 0 | 4 | 594 | 
+| ReleaseFast | 566 | 0 | 4 | 570 | 
+| ReleaseSafe | 612 | 0 | 4 | 616 | 
+| Debug | 4412 | 0 | 4 | 4416 | 
 
 ### blink_delay_ch32v30x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 622 | 0 | 4 | 626 | 
-| ReleaseFast | 618 | 0 | 4 | 622 | 
-| ReleaseSafe | 608 | 0 | 4 | 612 | 
-| Debug | 5348 | 0 | 4 | 5352 | 
+| ReleaseSmall | 608 | 0 | 4 | 612 | 
+| ReleaseFast | 584 | 0 | 4 | 588 | 
+| ReleaseSafe | 622 | 0 | 4 | 626 | 
+| Debug | 4968 | 0 | 4 | 4972 | 
 
 
 ## [examples/blink_minimal](examples/blink_minimal)
@@ -68,8 +68,8 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 8250 | 4 | 16 | 8270 | 
-| ReleaseFast | 12298 | 4 | 16 | 12318 | 
+| ReleaseSmall | 8216 | 4 | 16 | 8236 | 
+| ReleaseFast | 12260 | 4 | 16 | 12280 | 
 
 
 ## [examples/spi](examples/spi)
@@ -78,51 +78,51 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2690 | 0 | 4 | 2694 | 
-| ReleaseFast | 3726 | 0 | 4 | 3730 | 
-| ReleaseSafe | 11058 | 0 | 4 | 11062 | 
+| ReleaseSmall | 2680 | 0 | 4 | 2684 | 
+| ReleaseFast | 3658 | 0 | 4 | 3662 | 
+| ReleaseSafe | 10756 | 0 | 4 | 10760 | 
 
 ### spi_ch32v003_slave.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2694 | 0 | 4 | 2698 | 
-| ReleaseFast | 3684 | 0 | 4 | 3688 | 
-| ReleaseSafe | 11014 | 0 | 4 | 11018 | 
+| ReleaseSmall | 2688 | 0 | 4 | 2692 | 
+| ReleaseFast | 3610 | 0 | 4 | 3614 | 
+| ReleaseSafe | 10754 | 0 | 4 | 10758 | 
 
 ### spi_ch32v20x_master.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2814 | 0 | 4 | 2818 | 
-| ReleaseFast | 3786 | 0 | 4 | 3790 | 
-| ReleaseSafe | 9754 | 0 | 4 | 9758 | 
+| ReleaseSmall | 2782 | 0 | 4 | 2786 | 
+| ReleaseFast | 3734 | 0 | 4 | 3738 | 
+| ReleaseSafe | 9536 | 0 | 4 | 9540 | 
 
 ### spi_ch32v20x_slave.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2836 | 0 | 4 | 2840 | 
-| ReleaseFast | 3726 | 0 | 4 | 3730 | 
-| ReleaseSafe | 9694 | 0 | 4 | 9698 | 
+| ReleaseSmall | 2804 | 0 | 4 | 2808 | 
+| ReleaseFast | 3668 | 0 | 4 | 3672 | 
+| ReleaseSafe | 9472 | 0 | 4 | 9476 | 
 
 ### spi_ch32v30x_master.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2828 | 0 | 4 | 2832 | 
-| ReleaseFast | 3800 | 0 | 4 | 3804 | 
-| ReleaseSafe | 9768 | 0 | 4 | 9772 | 
-| Debug | 53674 | 0 | 4 | 53678 | 
+| ReleaseSmall | 2796 | 0 | 4 | 2800 | 
+| ReleaseFast | 3748 | 0 | 4 | 3752 | 
+| ReleaseSafe | 9550 | 0 | 4 | 9554 | 
+| Debug | 53202 | 0 | 4 | 53206 | 
 
 ### spi_ch32v30x_slave.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2850 | 0 | 4 | 2854 | 
-| ReleaseFast | 3740 | 0 | 4 | 3744 | 
-| ReleaseSafe | 9708 | 0 | 4 | 9712 | 
-| Debug | 53544 | 0 | 4 | 53548 | 
+| ReleaseSmall | 2818 | 0 | 4 | 2822 | 
+| ReleaseFast | 3682 | 0 | 4 | 3686 | 
+| ReleaseSafe | 9486 | 0 | 4 | 9490 | 
+| Debug | 53072 | 0 | 4 | 53076 | 
 
 
 

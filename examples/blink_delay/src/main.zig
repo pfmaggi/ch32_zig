@@ -19,10 +19,10 @@ pub fn main() !void {
     led.asOutput(.{ .speed = .max_50mhz, .mode = .push_pull });
 
     while (true) {
-        // led.toggle();
+        // const on = led.read();
+        // led.write(!on);
         // or
-        const on = led.read();
-        led.write(!on);
+        led.toggle();
 
         hal.delay.ms(1_000);
     }
