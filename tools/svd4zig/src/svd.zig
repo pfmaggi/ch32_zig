@@ -141,15 +141,24 @@ pub const Device = struct {
         try out_stream.writeAll("};\n");
 
         // now print interrupt table
+        var interrupts_values = ArrayList(u32).init(self.allocator);
+        defer interrupts_values.deinit();
+        var key_iter = self.interrupts.keyIterator();
+        while (key_iter.next()) |key| {
+            try interrupts_values.append(key.*);
+        }
+
+        std.mem.sort(u32, interrupts_values.items, {}, std.sort.asc(u32));
+
         try out_stream.writeAll("\npub const interrupts = struct {\n");
-        var iter = self.interrupts.iterator();
-        while (iter.next()) |entry| {
-            const interrupt = entry.value_ptr.*;
+        for (interrupts_values.items) |key| {
+            const interrupt = self.interrupts.get(key) orelse unreachable;
             if (interrupt.value) |int_value| {
                 try padded_out_stream.print(
-                    "pub const {s} = {};\n",
-                    .{ interrupt.name.items, int_value },
-                );
+                    \\/// {s}
+                    \\pub const {s} = {};
+                    \\
+                , .{ interrupt.description.items, interrupt.name.items, int_value });
             }
         }
         try out_stream.writeAll("};");
@@ -355,11 +364,16 @@ pub const Peripheral = struct {
     }
 
     pub fn write_instance(self: Self, out_stream: anytype, dedupl: *DeduplMap) !void {
-        try out_stream.writeAll("\n");
         if (!self.isValid()) {
+            if (std.mem.endsWith(u8, self.name.items, "GeneratorIgnoreMe")) {
+                return;
+            }
+
             try out_stream.writeAll("// Not enough info to print peripheral value\n");
             return;
         }
+
+        try out_stream.writeAll("\n");
 
         const name = self.name.items;
         const common_name, const has_common_name = try self.generateCommonName(dedupl);
@@ -439,11 +453,16 @@ pub const Peripheral = struct {
     }
 
     pub fn write_type(self: Self, out_stream: anytype, dedupl: *DeduplMap) !void {
-        try out_stream.writeAll("\n");
         if (!self.isValid()) {
-            try out_stream.writeAll("// Not enough info to print peripheral value\n");
+            if (std.mem.endsWith(u8, self.name.items, "GeneratorIgnoreMe")) {
+                return;
+            }
+
+            try out_stream.writeAll("\n// Not enough info to print peripheral value\n");
             return;
         }
+
+        try out_stream.writeAll("\n");
 
         const name = self.name.items;
         const common_name, const has_common_name = try self.generateCommonName(dedupl);
@@ -539,11 +558,16 @@ pub const Peripheral = struct {
     }
 
     pub fn write_nullable_type(self: Self, out_stream: anytype, dedupl: *DeduplMap) !void {
-        try out_stream.writeAll("\n");
         if (!self.isValid()) {
+            if (std.mem.endsWith(u8, self.name.items, "GeneratorIgnoreMe")) {
+                return;
+            }
+
             try out_stream.writeAll("// Not enough info to print peripheral value\n");
             return;
         }
+
+        try out_stream.writeAll("\n");
 
         const name = self.name.items;
         const common_name, const has_common_name = try self.generateCommonName(dedupl);
