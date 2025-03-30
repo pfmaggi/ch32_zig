@@ -85,7 +85,7 @@ pub const Device = struct {
         }
 
         var padded_writer = PaddedWriter.init("    ", out_stream);
-        var padded_out_stream = padded_writer.writer();
+        const padded_out_stream = padded_writer.writer();
 
         try out_stream.writeAll(
             \\
@@ -154,15 +154,33 @@ pub const Device = struct {
         for (interrupts_values.items) |key| {
             const interrupt = self.interrupts.get(key) orelse unreachable;
             if (interrupt.value) |int_value| {
-                try padded_out_stream.print(
-                    \\/// {s}
-                    \\pub const {s} = {};
+                try out_stream.print(
+                    \\    /// {s}
+                    \\    pub const {s} = {};
                     \\
                 , .{ interrupt.description.items, interrupt.name.items, int_value });
             }
         }
+
+        try out_stream.writeAll(
+            \\
+            \\    pub const VectorTable = extern struct {
+            \\        const Handler = *const fn () callconv(.{ .riscv32_interrupt = .{.mode = .machine}}) void;
+            \\
+            \\
+        );
+        for (interrupts_values.items) |key| {
+            const interrupt = self.interrupts.get(key) orelse unreachable;
+            if (interrupt.value) |int_value| {
+                try out_stream.print(
+                    \\        /// {}: {s}
+                    \\        {s}: ?Handler = null,
+                    \\
+                , .{ int_value, interrupt.description.items, interrupt.name.items });
+            }
+        }
+        try out_stream.writeAll("    };\n");
         try out_stream.writeAll("};");
-        return;
     }
 };
 
@@ -228,7 +246,6 @@ pub const Cpu = struct {
             , .{prio_bits});
         }
         try out_stream.writeAll("};");
-        return;
     }
 };
 

@@ -11850,4 +11850,99 @@ pub const interrupts = struct {
     pub const USB_FS_WKUP = 58;
     /// USBFS_IRQHandler
     pub const USBFS = 59;
+
+    pub const VectorTable = extern struct {
+        const Handler = *const fn () callconv(.{ .riscv32_interrupt = .{.mode = .machine}}) void;
+
+        /// 1: Reset
+        Reset: ?Handler = null,
+        /// 2: Non-maskable interrupt
+        NMI: ?Handler = null,
+        /// 3: Exception interrupt
+        EXC: ?Handler = null,
+        /// 12: System timer interrupt
+        SysTick: ?Handler = null,
+        /// 14: Software interrupt
+        SW: ?Handler = null,
+        /// 16: Window Watchdog interrupt
+        WWDG: ?Handler = null,
+        /// 17: PVD through EXTI line detection interrupt
+        PVD: ?Handler = null,
+        /// 18: Tamper interrupt
+        TAMPER: ?Handler = null,
+        /// 19: RTC global interrupt
+        RTC: ?Handler = null,
+        /// 20: Flash global interrupt
+        FLASH: ?Handler = null,
+        /// 21: RCC global interrupt
+        RCC: ?Handler = null,
+        /// 22: EXTI Line0 interrupt
+        EXTI0: ?Handler = null,
+        /// 23: EXTI Line1 interrupt
+        EXTI1: ?Handler = null,
+        /// 24: EXTI Line2 interrupt
+        EXTI2: ?Handler = null,
+        /// 25: EXTI Line3 interrupt
+        EXTI3: ?Handler = null,
+        /// 26: EXTI Line4 interrupt
+        EXTI4: ?Handler = null,
+        /// 27: DMA1 Channel1 global interrupt
+        DMA1_CH1: ?Handler = null,
+        /// 28: DMA1 Channel2 global interrupt
+        DMA1_CH2: ?Handler = null,
+        /// 29: DMA1 Channel3 global interrupt
+        DMA1_CH3: ?Handler = null,
+        /// 30: DMA1 Channel4 global interrupt
+        DMA1_CH4: ?Handler = null,
+        /// 31: DMA1 Channel5 global interrupt
+        DMA1_CH5: ?Handler = null,
+        /// 32: DMA1 Channel6 global interrupt
+        DMA1_CH6: ?Handler = null,
+        /// 33: DMA1 Channel7 global interrupt
+        DMA1_CH7: ?Handler = null,
+        /// 34: ADC1 global interrupt
+        ADC: ?Handler = null,
+        /// 39: EXTI Line[9:5] interrupts
+        EXTI9_5: ?Handler = null,
+        /// 40: TIM1 Break interrupt and TIM9 global interrupt
+        TIM1_BRK: ?Handler = null,
+        /// 41: TIM1 Update interrupt and TIM10 global interrupt
+        TIM1_UP: ?Handler = null,
+        /// 42: TIM1 Trigger and Commutation interrupts and TIM11 global interrupt
+        TIM1_TRG_COM: ?Handler = null,
+        /// 43: TIM1 Capture Compare interrupt
+        TIM1_CC: ?Handler = null,
+        /// 44: TIM2 global interrupt
+        TIM2: ?Handler = null,
+        /// 45: TIM3 global interrupt
+        TIM3: ?Handler = null,
+        /// 46: TIM4 global interrupt
+        TIM4: ?Handler = null,
+        /// 47: I2C1 event interrupt
+        I2C1_EV: ?Handler = null,
+        /// 48: I2C1 error interrupt
+        I2C1_ER: ?Handler = null,
+        /// 49: I2C2 event interrupt
+        I2C2_EV: ?Handler = null,
+        /// 50: I2C2 error interrupt
+        I2C2_ER: ?Handler = null,
+        /// 51: SPI1 global interrupt
+        SPI1: ?Handler = null,
+        /// 52: SPI2 global interrupt
+        SPI2: ?Handler = null,
+        /// 53: USART1 global interrupt
+        USART1: ?Handler = null,
+        /// 54: USART2 global interrupt
+        USART2: ?Handler = null,
+        /// 55: USART3 global interrupt
+        USART3: ?Handler = null,
+        /// 56: EXTI Line[15:10] interrupts
+        EXTI15_10: ?Handler = null,
+        /// 57: RTC Alarms through EXTI line interrupt
+        RTCAlarm: ?Handler = null,
+        /// 58: USB Device FS Wakeup through EXTI line interrupt
+        USB_FS_WKUP: ?Handler = null,
+        /// 59: USBFS_IRQHandler
+        USBFS: ?Handler = null,
+    };
 };

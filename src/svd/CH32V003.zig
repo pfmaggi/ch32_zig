@@ -8765,4 +8765,63 @@ pub const interrupts = struct {
     pub const TIM1CC = 37;
     /// TIM2 global interrupt
     pub const TIM2 = 38;
+
+    pub const VectorTable = extern struct {
+        const Handler = *const fn () callconv(.{ .riscv32_interrupt = .{.mode = .machine}}) void;
+
+        /// 2: Non-maskable interrupt
+        NMI: ?Handler = null,
+        /// 3: Abnormal interruptions
+        HardFault: ?Handler = null,
+        /// 12: System timer interrupt
+        SysTick: ?Handler = null,
+        /// 14: Software interrupt
+        SW: ?Handler = null,
+        /// 16: Window Watchdog interrupt
+        WWDG: ?Handler = null,
+        /// 17: PVD through EXTI line detection interrupt
+        PVD: ?Handler = null,
+        /// 18: Flash global interrupt
+        FLASH: ?Handler = null,
+        /// 19: Reset and clock control interrupt
+        RCC: ?Handler = null,
+        /// 20: EXTI Line[7:0] interrupt
+        EXTI7_0: ?Handler = null,
+        /// 21: AWU global interrupt
+        AWU: ?Handler = null,
+        /// 22: DMA1 Channel 1 global interrupt
+        DMA1_Channel1: ?Handler = null,
+        /// 23: DMA1 Channel 2 global interrupt
+        DMA1_Channel2: ?Handler = null,
+        /// 24: DMA1 Channel 3 global interrupt
+        DMA1_Channel3: ?Handler = null,
+        /// 25: DMA1 Channel 4 global interrupt
+        DMA1_Channel4: ?Handler = null,
+        /// 26: DMA1 Channel 5 global interrupt
+        DMA1_Channel5: ?Handler = null,
+        /// 27: DMA1 Channel 6 global interrupt
+        DMA1_Channel6: ?Handler = null,
+        /// 28: DMA1 Channel 7 global interrupt
+        DMA1_Channel7: ?Handler = null,
+        /// 29: ADC global interrupt
+        ADC: ?Handler = null,
+        /// 30: I2C1 event interrupt
+        I2C1_EV: ?Handler = null,
+        /// 31: I2C1 error interrupt
+        I2C1_ER: ?Handler = null,
+        /// 32: USART1 global interrupt
+        USART1: ?Handler = null,
+        /// 33: SPI1 global interrupt
+        SPI1: ?Handler = null,
+        /// 34: TIM1 Break interrupt
+        TIM1BRK: ?Handler = null,
+        /// 35: TIM1 Update interrupt
+        TIM1UP: ?Handler = null,
+        /// 36: TIM1 Trigger and Commutation interrupts
+        TIM1RG: ?Handler = null,
+        /// 37: TIM1 Capture Compare interrupt
+        TIM1CC: ?Handler = null,
+        /// 38: TIM2 global interrupt
+        TIM2: ?Handler = null,
+    };
 };
