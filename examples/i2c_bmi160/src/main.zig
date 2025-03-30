@@ -67,6 +67,6 @@ pub fn main() !void {
 
         std.log.info("{any}", .{imu_data});
 
-        hal.delay.ms(1000);
+        hal.delay.ms(50);
     }
 }
