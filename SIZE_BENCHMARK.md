@@ -2,8 +2,6 @@
 
 This document contains the size in bytes of the firmware for each optimize mode.
 
-`Failed` means that the firmware is too large to fit in the flash memory.
-
 ## [examples/blink_delay](examples/blink_delay)
 
 ### blink_delay_ch32v003.elf 

@@ -13,8 +13,6 @@ echo "# Size benchmark" >SIZE_BENCHMARK.md
 echo "" >>SIZE_BENCHMARK.md
 echo "This document contains the size in bytes of the firmware for each optimize mode." >>SIZE_BENCHMARK.md
 echo "" >>SIZE_BENCHMARK.md
-echo '`Failed` means that the firmware is too large to fit in the flash memory.' >>SIZE_BENCHMARK.md
-echo "" >>SIZE_BENCHMARK.md
 
 build() {
   local optimize="$1"
