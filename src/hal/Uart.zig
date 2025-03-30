@@ -80,7 +80,7 @@ pub const Timeout = error{
     Timeout,
 };
 
-pub const Error = error{
+pub const Error = Timeout || error{
     /// Parity error (PE)
     Parity,
     /// Framing error (FE)
@@ -314,8 +314,11 @@ pub fn readVecBlocking(self: UART, buffers: []const []u8, deadlineFn: ?DeadlineF
     return total;
 }
 
-pub fn readByteBlocking(self: UART, deadlineFn: ?DeadlineFn) Timeout!u8 {
+pub fn readByteBlocking(self: UART, deadlineFn: ?DeadlineFn) Error!u8 {
     try self.wait(isReadable, deadlineFn);
+
+    try self.checkErrors();
+
     return @truncate(self.reg.DATAR.raw & 0xFF);
 }
 
