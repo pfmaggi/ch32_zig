@@ -4,9 +4,9 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 `Failed` means that the firmware is too large to fit in the flash memory.
 
-## [examples/blink](examples/blink)
+## [examples/blink_delay](examples/blink_delay)
 
-### blink_ch32v003.elf 
+### blink_delay_ch32v003.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
@@ -15,7 +15,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSafe | 1294 | 0 | 4 | 1298 | 
 | Debug | 5108 | 0 | 4 | 5112 | 
 
-### blink_ch32v20x.elf 
+### blink_delay_ch32v20x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
@@ -24,7 +24,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSafe | 704 | 0 | 4 | 708 | 
 | Debug | 4812 | 0 | 4 | 4816 | 
 
-### blink_ch32v30x.elf 
+### blink_delay_ch32v30x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
@@ -32,6 +32,36 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseFast | 614 | 0 | 4 | 618 | 
 | ReleaseSafe | 714 | 0 | 4 | 718 | 
 | Debug | 5368 | 0 | 4 | 5372 | 
+
+
+## [examples/blink_minimal](examples/blink_minimal)
+
+### blink_minimal_ch32v003.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 428 | 0 | 0 | 428 | 
+| ReleaseFast | 460 | 0 | 0 | 460 | 
+| ReleaseSafe | 464 | 0 | 0 | 464 | 
+| Debug | 3360 | 0 | 0 | 3360 | 
+
+### blink_minimal_ch32v20x.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 478 | 0 | 0 | 478 | 
+| ReleaseFast | 512 | 0 | 0 | 512 | 
+| ReleaseSafe | 516 | 0 | 0 | 516 | 
+| Debug | 3682 | 0 | 0 | 3682 | 
+
+### blink_minimal_ch32v30x.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 488 | 0 | 0 | 488 | 
+| ReleaseFast | 522 | 0 | 0 | 522 | 
+| ReleaseSafe | 526 | 0 | 0 | 526 | 
+| Debug | 4238 | 0 | 0 | 4238 | 
 
 
 ## [examples/i2c_bmi160](examples/i2c_bmi160)
