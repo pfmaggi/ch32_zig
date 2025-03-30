@@ -3,6 +3,7 @@ const config = @import("config");
 const svd = @import("svd");
 
 const hal = @import("hal.zig");
+const PFIC = svd.peripherals.PFIC;
 
 const Data = packed struct(u32) {
     us: u8 = 0, // 1 - 144
@@ -25,9 +26,8 @@ pub fn init(clock: hal.clock.Clocks) void {
 
 /// Delay in SysTick clock cycles.
 pub fn sysTick(n: u32) void {
-    const PFIC = svd.peripherals.PFIC;
-
-    const end: i32 = @intCast(PFIC.STK_CNTL.raw +% n);
+    const start = PFIC.STK_CNTL.raw;
+    const end: i32 = @intCast(start +% n);
 
     while (@as(i32, @intCast(PFIC.STK_CNTL.raw)) -% end < 0) {
         asm volatile ("" ::: "memory");
@@ -35,18 +35,24 @@ pub fn sysTick(n: u32) void {
 }
 
 /// Delay in microseconds.
-pub inline fn us(n: u32) void {
-    // n * data.us optimization.
-    for (0..n) |_| {
-        sysTick(data.us);
+pub fn us(n: u32) void {
+    const start = PFIC.STK_CNTL.raw;
+    const ticks: u32 = n * @as(u32, @intCast(data.us));
+    const end: i32 = @intCast(start +% ticks);
+
+    while (@as(i32, @intCast(PFIC.STK_CNTL.raw)) -% end < 0) {
+        asm volatile ("" ::: "memory");
     }
 }
 
 /// Delay in milliseconds.
-pub inline fn ms(n: u32) void {
-    // n * data.ms optimization.
-    for (0..n) |_| {
-        sysTick(data.ms);
+pub fn ms(n: u32) void {
+    const start = PFIC.STK_CNTL.raw;
+    const ticks: u32 = n * @as(u32, @intCast(data.ms));
+    const end: i32 = @intCast(start +% ticks);
+
+    while (@as(i32, @intCast(PFIC.STK_CNTL.raw)) -% end < 0) {
+        asm volatile ("" ::: "memory");
     }
 }
 
