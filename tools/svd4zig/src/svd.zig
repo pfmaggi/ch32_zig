@@ -150,13 +150,13 @@ pub const Device = struct {
 
         std.mem.sort(u32, interrupts_values.items, {}, std.sort.asc(u32));
 
-        try out_stream.writeAll("\npub const interrupts = struct {\n");
+        try out_stream.writeAll("\npub const interrupts = enum(u32) {\n");
         for (interrupts_values.items) |key| {
             const interrupt = self.interrupts.get(key) orelse unreachable;
             if (interrupt.value) |int_value| {
                 try out_stream.print(
                     \\    /// {s}
-                    \\    pub const {s} = {};
+                    \\    {s} = {},
                     \\
                 , .{ interrupt.description.items, interrupt.name.items, int_value });
             }

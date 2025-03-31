@@ -54,9 +54,9 @@ fn createExportedVectorTableType() type {
     @setEvalBranchQuota(100_000);
 
     const offset = 1;
-    const interrupts_list = @typeInfo(interrupts).@"struct".decls;
-    const last_interrupt = interrupts_list[interrupts_list.len - 2].name;
-    const last_interrupt_idx = @field(interrupts, last_interrupt);
+    const interrupts_list = @typeInfo(svd.interrupts).@"enum".fields;
+    const last_interrupt = interrupts_list[interrupts_list.len - 1];
+    const last_interrupt_idx = last_interrupt.value;
 
     var fields: [last_interrupt_idx + 1 - offset]std.builtin.Type.StructField = undefined;
     for (&fields, offset..) |*field, idx| {
@@ -65,8 +65,7 @@ fn createExportedVectorTableType() type {
         for (interrupts_list, 0..) |decl, decl_idx| {
             if (decl_idx == interrupts_list.len - 1) break;
 
-            const v = @field(interrupts, decl.name);
-            if (v == idx) {
+            if (decl.value == idx) {
                 name = decl.name;
                 break;
             }

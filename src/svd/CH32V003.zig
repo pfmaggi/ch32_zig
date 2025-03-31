@@ -8718,61 +8718,61 @@ pub const nullable_types = struct {
     };
 };
 
-pub const interrupts = struct {
+pub const interrupts = enum(u32) {
     /// Non-maskable interrupt
-    pub const NMI = 2;
+    NMI = 2,
     /// Abnormal interruptions
-    pub const HardFault = 3;
+    HardFault = 3,
     /// System timer interrupt
-    pub const SysTick = 12;
+    SysTick = 12,
     /// Software interrupt
-    pub const SW = 14;
+    SW = 14,
     /// Window Watchdog interrupt
-    pub const WWDG = 16;
+    WWDG = 16,
     /// PVD through EXTI line detection interrupt
-    pub const PVD = 17;
+    PVD = 17,
     /// Flash global interrupt
-    pub const FLASH = 18;
+    FLASH = 18,
     /// Reset and clock control interrupt
-    pub const RCC = 19;
+    RCC = 19,
     /// EXTI Line[7:0] interrupt
-    pub const EXTI7_0 = 20;
+    EXTI7_0 = 20,
     /// AWU global interrupt
-    pub const AWU = 21;
+    AWU = 21,
     /// DMA1 Channel 1 global interrupt
-    pub const DMA1_Channel1 = 22;
+    DMA1_Channel1 = 22,
     /// DMA1 Channel 2 global interrupt
-    pub const DMA1_Channel2 = 23;
+    DMA1_Channel2 = 23,
     /// DMA1 Channel 3 global interrupt
-    pub const DMA1_Channel3 = 24;
+    DMA1_Channel3 = 24,
     /// DMA1 Channel 4 global interrupt
-    pub const DMA1_Channel4 = 25;
+    DMA1_Channel4 = 25,
     /// DMA1 Channel 5 global interrupt
-    pub const DMA1_Channel5 = 26;
+    DMA1_Channel5 = 26,
     /// DMA1 Channel 6 global interrupt
-    pub const DMA1_Channel6 = 27;
+    DMA1_Channel6 = 27,
     /// DMA1 Channel 7 global interrupt
-    pub const DMA1_Channel7 = 28;
+    DMA1_Channel7 = 28,
     /// ADC global interrupt
-    pub const ADC = 29;
+    ADC = 29,
     /// I2C1 event interrupt
-    pub const I2C1_EV = 30;
+    I2C1_EV = 30,
     /// I2C1 error interrupt
-    pub const I2C1_ER = 31;
+    I2C1_ER = 31,
     /// USART1 global interrupt
-    pub const USART1 = 32;
+    USART1 = 32,
     /// SPI1 global interrupt
-    pub const SPI1 = 33;
+    SPI1 = 33,
     /// TIM1 Break interrupt
-    pub const TIM1BRK = 34;
+    TIM1BRK = 34,
     /// TIM1 Update interrupt
-    pub const TIM1UP = 35;
+    TIM1UP = 35,
     /// TIM1 Trigger and Commutation interrupts
-    pub const TIM1RG = 36;
+    TIM1RG = 36,
     /// TIM1 Capture Compare interrupt
-    pub const TIM1CC = 37;
+    TIM1CC = 37,
     /// TIM2 global interrupt
-    pub const TIM2 = 38;
+    TIM2 = 38,
 
     pub const VectorTable = struct {
         const call_conv: @import("std").builtin.CallingConvention = if (@import("builtin").cpu.arch != .riscv32) .c else .{ .riscv32_interrupt = .{ .mode = .machine } };
