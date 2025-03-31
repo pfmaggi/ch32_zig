@@ -164,8 +164,9 @@ pub const Device = struct {
 
         try out_stream.writeAll(
             \\
-            \\    pub const VectorTable = extern struct {
-            \\        const Handler = *const fn () callconv(.{ .riscv32_interrupt = .{.mode = .machine}}) void;
+            \\    pub const VectorTable = struct {
+            \\        const call_conv: @import("std").builtin.CallingConvention = if (@import("builtin").cpu.arch != .riscv32) .c else .{ .riscv32_interrupt = .{ .mode = .machine } };
+            \\        const Handler = *const fn () callconv(call_conv) void;
             \\
             \\
         );

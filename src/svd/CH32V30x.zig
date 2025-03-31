@@ -38589,8 +38589,9 @@ pub const interrupts = struct {
     /// DMA2 Channel11 global interrupt
     pub const DMA2_Channel11 = 103;
 
-    pub const VectorTable = extern struct {
-        const Handler = *const fn () callconv(.{ .riscv32_interrupt = .{.mode = .machine}}) void;
+    pub const VectorTable = struct {
+        const call_conv: @import("std").builtin.CallingConvention = if (@import("builtin").cpu.arch != .riscv32) .c else .{ .riscv32_interrupt = .{ .mode = .machine } };
+        const Handler = *const fn () callconv(call_conv) void;
 
         /// 2: Non-maskable interrupt
         NMI: ?Handler = null,

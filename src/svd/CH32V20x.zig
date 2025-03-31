@@ -34531,8 +34531,9 @@ pub const interrupts = struct {
     /// TIM10 Capture Compare interrupt
     pub const TIM10_CC = 97;
 
-    pub const VectorTable = extern struct {
-        const Handler = *const fn () callconv(.{ .riscv32_interrupt = .{.mode = .machine}}) void;
+    pub const VectorTable = struct {
+        const call_conv: @import("std").builtin.CallingConvention = if (@import("builtin").cpu.arch != .riscv32) .c else .{ .riscv32_interrupt = .{ .mode = .machine } };
+        const Handler = *const fn () callconv(call_conv) void;
 
         /// 2: Non-maskable interrupt
         NMI: ?Handler = null,

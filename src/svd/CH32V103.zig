@@ -11851,8 +11851,9 @@ pub const interrupts = struct {
     /// USBFS_IRQHandler
     pub const USBFS = 59;
 
-    pub const VectorTable = extern struct {
-        const Handler = *const fn () callconv(.{ .riscv32_interrupt = .{.mode = .machine}}) void;
+    pub const VectorTable = struct {
+        const call_conv: @import("std").builtin.CallingConvention = if (@import("builtin").cpu.arch != .riscv32) .c else .{ .riscv32_interrupt = .{ .mode = .machine } };
+        const Handler = *const fn () callconv(call_conv) void;
 
         /// 1: Reset
         Reset: ?Handler = null,
