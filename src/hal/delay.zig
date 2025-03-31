@@ -68,7 +68,7 @@ fn div_optimized(n: u32, d: u32) u32 {
     return q;
 }
 
-test "div_optimized" {
+test div_optimized {
     const Test = struct {
         n: u32,
         d: u32,
