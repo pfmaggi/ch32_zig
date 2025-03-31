@@ -1,11 +1,13 @@
 const std = @import("std");
 const config = @import("config");
 const hal = @import("hal");
+const ch32 = @import("ch32");
 
 const bmi160 = @import("bmi160.zig");
 
 pub const panic = hal.panic.log;
-pub const std_options: std.Options = .{
+
+pub const ch32_options: ch32.Options = .{
     .log_level = .debug,
     .logFn = hal.log.logFn,
 };

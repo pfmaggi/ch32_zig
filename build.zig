@@ -90,6 +90,7 @@ pub fn createModules(b: *std.Build, target: std.Build.ResolvedTarget, options: F
             .{ .name = "app", .module = app_mod },
         },
     });
+    app_mod.addImport("ch32", root_mod);
 
     return root_mod;
 }

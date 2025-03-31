@@ -1,7 +1,8 @@
 const std = @import("std");
-const root = @import("app");
+const app = @import("app");
 const builtin = @import("builtin");
 
+pub const svd = @import("svd");
 pub const hal = @import("hal");
 const startup = @import("startup.zig");
 
@@ -16,21 +17,45 @@ comptime {
             .name = "_start",
         });
 
-        @export(&interrupts, .{
-            .name = "interrupts",
+        @export(&exported_vector_table, .{
+            .name = "vector_table",
             .section = ".init",
         });
 
-        _ = root;
-    }
+        // Execute comptime code.
+        _ = app;
 
-    // Execute comptime code.
-    _ = hal;
-    _ = startup;
+        if (@hasDecl(app, "std_options")) {
+            @compileError("std_options is not supported, use ch32_options instead");
+        }
+    }
 }
 
-pub const std_options: std.Options = if (@hasDecl(root, "std_options")) root.std_options else .{};
+pub const Options = struct {
+    /// The current log level.
+    log_level: std.log.Level = std.log.default_level,
+    log_scope_levels: []const std.log.ScopeLevel = &.{},
+    logFn: fn (
+        comptime message_level: std.log.Level,
+        comptime scope: @TypeOf(.enum_literal),
+        comptime format: []const u8,
+        args: anytype,
+    ) void = hal.log.nopFn,
+    fmt_max_depth: usize = std.fmt.default_max_depth,
+    unhandledInterruptFn: fn () callconv(hal.interrupts.call_conv) void = hal.interrupts.unhandled,
+};
 
-pub const panic = if (@hasDecl(root, "panic")) root.panic else hal.panic.nop;
+pub const ch32_options: Options = if (@hasDecl(app, "ch32_options")) app.ch32_options else .{};
 
-const interrupts: hal.Interrupts = if (@hasDecl(root, "interrupts")) root.interrupts else .{};
+pub const std_options: std.Options = .{
+    .log_level = ch32_options.log_level,
+    .log_scope_levels = ch32_options.log_scope_levels,
+    .logFn = ch32_options.logFn,
+    .fmt_max_depth = ch32_options.fmt_max_depth,
+};
+
+pub const panic = if (@hasDecl(app, "panic")) app.panic else hal.panic.nop;
+
+const interrupts: hal.interrupts.VectorTable = if (@hasDecl(app, "interrupts")) app.interrupts else .{};
+
+const exported_vector_table = hal.interrupts.generateExportedVectorTable(interrupts, ch32_options.unhandledInterruptFn);
