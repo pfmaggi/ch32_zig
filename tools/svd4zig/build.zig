@@ -19,6 +19,7 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
+        .test_runner = .{ .path = b.path("test_runner.zig"), .mode = .simple },
     });
     const unit_tests_run = b.addRunArtifact(unit_tests);
     test_step.dependOn(&unit_tests_run.step);
