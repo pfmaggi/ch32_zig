@@ -57,6 +57,14 @@ pub fn RegisterRW(comptime Register: type, comptime Nullable: type) type {
             }
         }
 
+        pub inline fn getBit(self: *volatile Self, pos: u5) u1 {
+            if (pos >= size) {
+                return 0;
+            }
+
+            return @truncate(self.raw >> pos);
+        }
+
         pub inline fn default(_: *volatile Self) Register {
             return Register{};
         }
@@ -154,6 +162,9 @@ test RegisterRW {
         .field4 = 0b11000,
     }, value.read());
 
+    var bit = value.getBit(11);
+    try std.testing.expectEqual(0b0, bit);
+
     value.setBit(11, 1);
     try std.testing.expectEqual(TestPeriferal{
         .field0 = 0b1,
@@ -162,6 +173,9 @@ test RegisterRW {
         .field3 = 0b1,
         .field4 = 0b11010,
     }, value.read());
+
+    bit = value.getBit(11);
+    try std.testing.expectEqual(0b1, bit);
 
     // Modify with int.
     value.modify(.{

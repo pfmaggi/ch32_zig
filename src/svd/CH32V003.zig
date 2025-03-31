@@ -57,6 +57,14 @@ pub fn RegisterRW(comptime Register: type, comptime Nullable: type) type {
             }
         }
 
+        pub inline fn getBit(self: *volatile Self, pos: u5) u1 {
+            if (pos >= size) {
+                return 0;
+            }
+
+            return @truncate(self.raw >> pos);
+        }
+
         pub inline fn default(_: *volatile Self) Register {
             return Register{};
         }
