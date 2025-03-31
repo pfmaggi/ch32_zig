@@ -159,26 +159,26 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 1634 | 0 | 4 | 1638 | 
-| ReleaseFast | 1776 | 0 | 4 | 1780 | 
-| ReleaseSafe | 1782 | 0 | 4 | 1786 | 
+| ReleaseSmall | 1952 | 0 | 4 | 1956 | 
+| ReleaseFast | 2130 | 0 | 4 | 2134 | 
+| ReleaseSafe | 1844 | 0 | 4 | 1848 | 
 
 ### uart_echo_ch32v20x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 1730 | 0 | 4 | 1734 | 
-| ReleaseFast | 1822 | 0 | 4 | 1826 | 
-| ReleaseSafe | 1840 | 0 | 4 | 1844 | 
+| ReleaseSmall | 2062 | 0 | 4 | 2066 | 
+| ReleaseFast | 2172 | 0 | 4 | 2176 | 
+| ReleaseSafe | 1900 | 0 | 4 | 1904 | 
 
 ### uart_echo_ch32v30x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 1744 | 0 | 4 | 1748 | 
-| ReleaseFast | 1836 | 0 | 4 | 1840 | 
-| ReleaseSafe | 1854 | 0 | 4 | 1858 | 
-| Debug | 61630 | 0 | 4 | 61634 | 
+| ReleaseSmall | 2076 | 0 | 4 | 2080 | 
+| ReleaseFast | 2186 | 0 | 4 | 2190 | 
+| ReleaseSafe | 1914 | 0 | 4 | 1918 | 
+| Debug | 64050 | 0 | 4 | 64054 | 
 
 
 
