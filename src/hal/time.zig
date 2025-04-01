@@ -43,7 +43,7 @@ pub fn init(clock: hal.clock.Clocks) void {
 }
 
 pub fn sysTickHandler() callconv(hal.interrupts.call_conv) void {
-    PFIC.STK_CMPLR.raw += systicks_per.ms;
+    PFIC.STK_CMPLR.raw +%= systicks_per.ms;
 
     // Clear the trigger state for the next interrupt.
     PFIC.STK_SR.modify(.{ .CNTIF = 0 });
