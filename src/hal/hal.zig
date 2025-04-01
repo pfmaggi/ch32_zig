@@ -12,6 +12,7 @@ pub const panic = @import("panic.zig");
 pub const @"asm" = @import("asm.zig");
 pub const interrupts = @import("interrupts.zig");
 pub const delay = @import("delay.zig");
+pub const time = @import("time.zig");
 
 pub const clock = switch (config.chip.series) {
     .ch32v003 => @import("clock/ch32v003.zig"),
