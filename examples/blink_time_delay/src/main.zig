@@ -2,7 +2,9 @@ const std = @import("std");
 const config = @import("config");
 const hal = @import("hal");
 
-pub const interrupts: hal.interrupts.VectorTable = .{ .SysTick = hal.time.sysTickHandler };
+pub const interrupts: hal.interrupts.VectorTable = .{
+    .SysTick = hal.time.sysTickHandler,
+};
 
 pub fn main() !void {
     hal.time.init(.default);

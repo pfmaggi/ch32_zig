@@ -14,7 +14,7 @@ var systicks_per = SysTicksPer{};
 /// Initialize delay dividers for the given clock and enable SysTick timer.
 pub fn init(clock: hal.clock.Clocks) void {
     comptime {
-        if (@import("root").interrupts.SysTick == hal.time.sysTickHandler) {
+        if (hal.time.isEnabledInterrupt()) {
             @compileError("Only one delay implementation can be used at same time");
         }
     }

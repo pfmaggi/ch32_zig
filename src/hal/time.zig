@@ -15,7 +15,7 @@ var systick_millis: u32 = 0;
 /// Enable SysTick timer and initialize dividers for the given clock.
 pub fn init(clock: hal.clock.Clocks) void {
     comptime {
-        if (@import("root").interrupts.SysTick != sysTickHandler) {
+        if (!isEnabledInterrupt()) {
             @compileError("SysTick interrupt handler should be defined to `hal.time.sysTickHandler`");
         }
     }
@@ -42,6 +42,10 @@ pub fn init(clock: hal.clock.Clocks) void {
     hal.interrupts.enable(.SysTick);
 }
 
+pub fn isEnabledInterrupt() bool {
+    return @import("root").interrupts.SysTick == sysTickHandler;
+}
+
 pub fn sysTickHandler() callconv(hal.interrupts.call_conv) void {
     PFIC.STK_CMPLR.raw +%= systicks_per.ms;
 
@@ -66,6 +70,8 @@ pub inline fn ticks() u32 {
 }
 
 pub const delay = struct {
+    pub inline fn init(_: hal.clock.Clocks) void {}
+
     /// Delay in SysTick clock cycles.
     pub inline fn ticks(n: u32) void {
         const end = PFIC.STK_CNTL.raw +% n;
