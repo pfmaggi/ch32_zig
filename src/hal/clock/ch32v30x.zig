@@ -2,6 +2,9 @@ const std = @import("std");
 const config = @import("config");
 const svd = @import("svd");
 
+const port = @import("../port.zig");
+const Pin = @import("../Pin.zig");
+
 pub const Clocks = struct {
     sys: u32,
     hb: u32,
@@ -489,4 +492,40 @@ pub fn get(hse_frequency: u32) ?Clocks {
 pub fn adjustHsiCalibrationValue(value: u5) void {
     const RCC = svd.peripherals.RCC;
     RCC.CTLR.modify(.{ .HSITRIM = value });
+}
+
+pub const McoOutput = enum(u4) {
+    /// No clock output.
+    none = 0b0000,
+    /// System clock output.
+    sys = 0b0100,
+    /// HSI. Internal 8 Mhz RC oscillator clock output.
+    hsi = 0b0101,
+    /// HSE. External oscillator clock output.
+    hse = 0b0110,
+    /// PLL clock divided by 2.
+    pll_div_2 = 0b0111,
+    /// PLL2 clock.
+    pll2 = 0b1000,
+    /// PLL3 clock divided by 2.
+    pll3_div_2 = 0b1001,
+    /// XT1 external oscillator clock.
+    xt1 = 0b1010,
+    /// PLL3 clock.
+    pll3 = 0b1011,
+};
+
+/// Configure the Microcontroller MCO pin clock output.
+pub fn mco(comptime o: McoOutput) void {
+    comptime if (config.chip.class != .d8c and @intFromEnum(o) >= 0b1000) {
+        // The values from 1000 to 1011 are applied for CH32F20x_D8C, CH32V30x_D8C, CH32V31x_D8C.
+        @compileError("MCO output " ++ @tagName(o) ++ "not supported for this chip");
+    };
+
+    const pin = Pin.init(.GPIOC, 4);
+    port.enable(pin.port);
+    pin.asOutput(.{ .speed = .max_50mhz, .mode = .alt_push_pull });
+
+    const RCC = svd.peripherals.RCC;
+    RCC.CFGR0.modify(.{ .MCO = @intFromEnum(o) });
 }

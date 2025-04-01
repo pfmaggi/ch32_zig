@@ -132,6 +132,36 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseFast | 12192 | 4 | 16 | 12212 | 
 
 
+## [examples/mco](examples/mco)
+
+### mco_ch32v003.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 568 | 0 | 0 | 568 | 
+| ReleaseFast | 616 | 0 | 0 | 616 | 
+| ReleaseSafe | 848 | 0 | 0 | 848 | 
+| Debug | 8282 | 0 | 0 | 8282 | 
+
+### mco_ch32v20x.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 858 | 0 | 0 | 858 | 
+| ReleaseFast | 906 | 0 | 0 | 906 | 
+| ReleaseSafe | 1438 | 0 | 0 | 1438 | 
+| Debug | 12474 | 0 | 0 | 12474 | 
+
+### mco_ch32v30x.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 898 | 0 | 0 | 898 | 
+| ReleaseFast | 944 | 0 | 0 | 944 | 
+| ReleaseSafe | 1476 | 0 | 0 | 1476 | 
+| Debug | 13268 | 0 | 0 | 13268 | 
+
+
 ## [examples/spi](examples/spi)
 
 ### spi_ch32v003_master.elf 

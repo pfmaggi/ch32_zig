@@ -2,6 +2,9 @@ const std = @import("std");
 const config = @import("config");
 const svd = @import("svd");
 
+const port = @import("../port.zig");
+const Pin = @import("../Pin.zig");
+
 pub const Clocks = struct {
     sys: u32,
     hb: u32,
@@ -260,4 +263,27 @@ pub fn get(hse_frequency: u32) ?Clocks {
 pub fn adjustHsiCalibrationValue(value: u5) void {
     const RCC = svd.peripherals.RCC;
     RCC.CTLR.modify(.{ .HSITRIM = value });
+}
+
+pub const McoOutput = enum(u3) {
+    /// No clock output.
+    none = 0b000,
+    /// System clock output.
+    sys = 0b100,
+    /// HSI. Internal 24 Mhz RC oscillator clock output.
+    hsi = 0b101,
+    /// HSE. External oscillator clock output.
+    hse = 0b110,
+    /// PLL clock output.
+    pll = 0b111,
+};
+
+/// Configure the Microcontroller MCO pin clock output.
+pub fn mco(o: McoOutput) void {
+    const pin = Pin.init(.GPIOC, 4);
+    port.enable(pin.port);
+    pin.asOutput(.{ .speed = .max_50mhz, .mode = .alt_push_pull });
+
+    const RCC = svd.peripherals.RCC;
+    RCC.CFGR0.modify(.{ .MCO = @intFromEnum(o) });
 }
