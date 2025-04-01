@@ -5,17 +5,22 @@ const svd = @import("svd");
 const hal = @import("hal.zig");
 const PFIC = svd.peripherals.PFIC;
 
-const Data = packed struct(u32) {
+const SysTicksPer = packed struct(u32) {
     us: u8 = 0, // 1 - 144
     ms: u24 = 0, // 1_000 - 144_000
 };
-
-var data = Data{};
+var systicks_per = SysTicksPer{};
 
 /// Initialize delay dividers for the given clock and enable SysTick timer.
 pub fn init(clock: hal.clock.Clocks) void {
-    data.us = @truncate(div_optimized(clock.hb, 1_000_000));
-    data.ms = @truncate(div_optimized(clock.hb, 1_000));
+    comptime {
+        if (@import("root").interrupts.SysTick == hal.time.sysTickHandler) {
+            @compileError("Only one delay implementation can be used at same time");
+        }
+    }
+
+    systicks_per.us = @truncate(div_optimized(clock.hb, 1_000_000));
+    systicks_per.ms = @truncate(div_optimized(clock.hb, 1_000));
 
     // Enable SysTick timer.
     svd.peripherals.PFIC.STK_CTLR.modify(.{
@@ -25,11 +30,10 @@ pub fn init(clock: hal.clock.Clocks) void {
 }
 
 /// Delay in SysTick clock cycles.
-pub fn sysTick(n: u32) void {
-    const start = PFIC.STK_CNTL.raw;
-    const end: i32 = @intCast(start +% n);
+pub fn ticks(n: u32) void {
+    const end = PFIC.STK_CNTL.raw +% n;
 
-    while (@as(i32, @intCast(PFIC.STK_CNTL.raw)) -% end < 0) {
+    while (diffTime(PFIC.STK_CNTL.raw, end) < 0) {
         asm volatile ("" ::: "memory");
     }
 }
@@ -37,10 +41,10 @@ pub fn sysTick(n: u32) void {
 /// Delay in microseconds.
 pub fn us(n: u32) void {
     const start = PFIC.STK_CNTL.raw;
-    const ticks: u32 = n * @as(u32, @intCast(data.us));
-    const end: i32 = @intCast(start +% ticks);
+    const ticks_count = n * @as(u32, @intCast(systicks_per.us));
+    const end = start +% ticks_count;
 
-    while (@as(i32, @intCast(PFIC.STK_CNTL.raw)) -% end < 0) {
+    while (diffTime(PFIC.STK_CNTL.raw, end) < 0) {
         asm volatile ("" ::: "memory");
     }
 }
@@ -48,12 +52,16 @@ pub fn us(n: u32) void {
 /// Delay in milliseconds.
 pub fn ms(n: u32) void {
     const start = PFIC.STK_CNTL.raw;
-    const ticks: u32 = n * @as(u32, @intCast(data.ms));
-    const end: i32 = @intCast(start +% ticks);
+    const ticks_count = n * @as(u32, @intCast(systicks_per.ms));
+    const end = start +% ticks_count;
 
-    while (@as(i32, @intCast(PFIC.STK_CNTL.raw)) -% end < 0) {
+    while (diffTime(PFIC.STK_CNTL.raw, end) < 0) {
         asm volatile ("" ::: "memory");
     }
+}
+
+inline fn diffTime(a: u32, b: u32) i32 {
+    return @bitCast(a -% b);
 }
 
 fn div_optimized(n: u32, d: u32) u32 {
