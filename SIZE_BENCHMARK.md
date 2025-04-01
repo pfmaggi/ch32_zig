@@ -62,6 +62,36 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | Debug | 4584 | 0 | 0 | 4584 | 
 
 
+## [examples/blink_systick_interrupt](examples/blink_systick_interrupt)
+
+### blink_systick_interrupt_ch32v003.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 544 | 0 | 0 | 544 | 
+| ReleaseFast | 594 | 0 | 0 | 594 | 
+| ReleaseSafe | 596 | 0 | 0 | 596 | 
+| Debug | 3796 | 0 | 0 | 3796 | 
+
+### blink_systick_interrupt_ch32v20x.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 808 | 0 | 0 | 808 | 
+| ReleaseFast | 858 | 0 | 0 | 858 | 
+| ReleaseSafe | 860 | 0 | 0 | 860 | 
+| Debug | 4386 | 0 | 0 | 4386 | 
+
+### blink_systick_interrupt_ch32v30x.elf 
+
+| Mode | Text | Data | Bss | Total |
+|--------|--------|--------|--------|--------|
+| ReleaseSmall | 854 | 0 | 0 | 854 | 
+| ReleaseFast | 904 | 0 | 0 | 904 | 
+| ReleaseSafe | 906 | 0 | 0 | 906 | 
+| Debug | 5176 | 0 | 0 | 5176 | 
+
+
 ## [examples/i2c_bmi160](examples/i2c_bmi160)
 
 ### i2c_bmi160_ch32v003.elf 
