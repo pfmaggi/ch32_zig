@@ -94,32 +94,32 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 ## [examples/blink_time_delay](examples/blink_time_delay)
 
-### blink_delay_ch32v003.elf 
+### blink_time_delay_ch32v003.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
 | ReleaseSmall | 634 | 0 | 8 | 642 | 
 | ReleaseFast | 614 | 0 | 8 | 622 | 
-| ReleaseSafe | 632 | 0 | 8 | 640 | 
-| Debug | 4342 | 0 | 8 | 4350 | 
+| ReleaseSafe | 626 | 0 | 8 | 634 | 
+| Debug | 4266 | 0 | 8 | 4274 | 
 
-### blink_delay_ch32v20x.elf 
+### blink_time_delay_ch32v20x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
 | ReleaseSmall | 920 | 0 | 8 | 928 | 
 | ReleaseFast | 902 | 0 | 8 | 910 | 
-| ReleaseSafe | 920 | 0 | 8 | 928 | 
-| Debug | 4938 | 0 | 8 | 4946 | 
+| ReleaseSafe | 914 | 0 | 8 | 922 | 
+| Debug | 4834 | 0 | 8 | 4842 | 
 
-### blink_delay_ch32v30x.elf 
+### blink_time_delay_ch32v30x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
 | ReleaseSmall | 954 | 0 | 8 | 962 | 
 | ReleaseFast | 936 | 0 | 8 | 944 | 
-| ReleaseSafe | 954 | 0 | 8 | 962 | 
-| Debug | 5734 | 0 | 8 | 5742 | 
+| ReleaseSafe | 948 | 0 | 8 | 956 | 
+| Debug | 5470 | 0 | 8 | 5478 | 
 
 
 ## [examples/i2c_bmi160](examples/i2c_bmi160)
