@@ -6,7 +6,7 @@ const interrupts = @import("interrupts.zig");
 
 // Prints the message and registers dump to the logger if configured.
 pub fn log(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
-    interrupts.disable();
+    interrupts.globalDisable();
 
     std.log.err(
         \\PANIC: {s}
@@ -48,12 +48,12 @@ pub fn nop(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
 }
 
 pub fn hang() noreturn {
-    interrupts.disable();
+    interrupts.globalDisable();
 
     const has_led = true;
     if (!has_led) {
         while (true) {
-            zasm.wfi();
+            interrupts.wait();
         }
     }
 
