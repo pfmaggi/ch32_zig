@@ -56,6 +56,6 @@ pub const std_options: std.Options = .{
 
 pub const panic = if (@hasDecl(app, "panic")) app.panic else hal.panic.nop;
 
-const interrupts: hal.interrupts.VectorTable = if (@hasDecl(app, "interrupts")) app.interrupts else .{};
+pub const interrupts: hal.interrupts.VectorTable = if (@hasDecl(app, "interrupts")) app.interrupts else .{};
 
 const exported_vector_table = hal.interrupts.generateExportedVectorTable(interrupts, ch32_options.unhandledInterruptFn);
