@@ -70,6 +70,9 @@ merge_size() {
 
 cd "$root_dir" || exit 1
 
+# Clean up old files
+rm -f "tmp_size_per_fw_"*".md"
+
 for dir in "examples/"*/; do
   if [ ! -f "${dir}build.zig" ]; then
     continue
