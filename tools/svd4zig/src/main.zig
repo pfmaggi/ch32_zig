@@ -32,12 +32,9 @@ const register_def =
     \\            var old_value = self.read();
     \\            const info = @typeInfo(@TypeOf(new_value));
     \\            inline for (info.@"struct".fields) |field| {
-    \\                const old_field_value = @field(old_value, field.name);
-    \\                const new_field_value = @field(new_value, field.name);
-    \\                // Null values don't modify the field.
-    \\                const new_field_value_unwrapped = if (new_field_value == null) old_field_value else new_field_value.?;
-    \\
-    \\                @field(old_value, field.name) = new_field_value_unwrapped;
+    \\                if (@field(new_value, field.name)) |v| {
+    \\                    @field(old_value, field.name) = v;
+    \\                }
     \\            }
     \\            self.write(old_value);
     \\        }
