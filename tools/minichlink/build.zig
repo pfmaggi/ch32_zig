@@ -7,9 +7,11 @@ const builtin = @import("builtin");
 pub fn build(b: *std.Build) !void {
     const target = b.standardTargetOptions(.{});
 
-    // Minichlink only works with ReleaseFast optimization mode.
-    const optimize = std.builtin.OptimizeMode.ReleaseFast;
-    // const optimize = b.standardOptimizeOption(.{});
+    const optimize = if (b.option(
+        std.builtin.OptimizeMode,
+        "optimize",
+        "Prioritize performance, safety, or binary size",
+    )) |mode| mode else .ReleaseFast;
 
     const minichlink = try buildMinichlink(b, .exe, target, optimize);
     b.installArtifact(minichlink);
@@ -52,6 +54,8 @@ fn createMinichlink(
         .root_module = b.createModule(.{
             .target = target,
             .optimize = optimize,
+            .sanitize_c = false,
+            .sanitize_thread = false,
         }),
     });
 
@@ -139,6 +143,8 @@ fn createLibusb(
         .root_module = b.createModule(.{
             .target = target,
             .optimize = optimize,
+            .sanitize_c = false,
+            .sanitize_thread = false,
         }),
     });
     lib.installHeader(dep.path("libusb/libusb.h"), "libusb.h");
