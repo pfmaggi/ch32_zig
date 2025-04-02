@@ -3,43 +3,15 @@ const config = @import("config");
 const hal = @import("hal");
 const svd = @import("svd");
 
-fn dmaSetup() void {
-    const DMA1 = svd.peripherals.DMA1;
-
-    // Enable clock for DMA and SRAM.
-    svd.peripherals.RCC.AHBPCENR.modify(.{
-        .DMA1EN = 1,
-        .SRAMEN = 1,
-    });
-
-    // Disable DMA before setup.
-    DMA1.CFGR4.write(.{ .EN = 0 });
-    // Configure DMA.
-    DMA1.CFGR4.write(.{
-        .DIR = 1, // From Memory to Peripheral.
-        .CIRC = 0, // Circular mode disabled.
-        .PINC = 0, // Peripheral increment mode.
-        .MINC = 1, // Memory increment mode.
-        .PSIZE = 0, // Peripheral size 8 bits.
-        .MSIZE = 0, // Memory size 8 bits.
-        .PL = 0, // Low priority.
-        .MEM2MEM = 0, // Memory to Peripheral mode.
-    });
-    // Set USART1 TX peripheral address.
-    DMA1.PADDR4.raw = @intFromPtr(&svd.peripherals.USART1.DATAR);
-}
+const usart1_tx_dma_channel = hal.dma.Channel{ .dma1 = .channel4 };
 
 fn dmaWrite(msg: []const u8) void {
-    const DMA1 = svd.peripherals.DMA1;
-
-    // Disbale DMA before set new message.
-    DMA1.CFGR4.modify(.{ .EN = 0 });
-    // Set transfer length.
-    DMA1.CNTR4.raw = msg.len;
-    // Set source address.
-    DMA1.MADDR4.raw = @intFromPtr(msg.ptr);
+    // Disable DMA before set new message.
+    hal.dma.Channel.disable(usart1_tx_dma_channel);
+    // Set source and transfer length.
+    hal.dma.Channel.setMemoryPtr(usart1_tx_dma_channel, @constCast(msg.ptr), msg.len);
     // Enable DMA.
-    DMA1.CFGR4.modify(.{ .EN = 1 });
+    hal.dma.Channel.enable(usart1_tx_dma_channel);
 }
 
 pub fn main() !void {
@@ -63,8 +35,23 @@ pub fn main() !void {
         .baud_rate = 115_200,
     });
 
-    // Setup DMA for USART1 TX.
-    dmaSetup();
+    // Configure DMA for USART1 TX.
+    hal.dma.Channel.configure(usart1_tx_dma_channel, .{
+        // Set USART1 TX peripheral address.
+        .periph_ptr = @volatileCast(&svd.peripherals.USART1.DATAR),
+        // Memory address will be set in dmaWrite.
+        .mem_ptr = null,
+        .direction = .mem_to_periphh,
+        // Transfer length will be set in dmaWrite.
+        .data_length = 0,
+        .periph_inc = false,
+        .mem_inc = true,
+        .periph_data_size = .byte,
+        .mem_data_size = .byte,
+        .mode = .normal,
+        .priority = .low,
+        .mem_to_mem = false,
+    });
 
     // Counter is 32 bits, so we need 10 bytes to store it,
     // because max value is 4294967295.

@@ -13,6 +13,7 @@ pub const @"asm" = @import("asm.zig");
 pub const interrupts = @import("interrupts.zig");
 pub const time = @import("time.zig");
 pub const delay = if (time.isEnabledInterrupt()) time.delay else @import("delay.zig");
+pub const dma = @import("dma.zig");
 
 pub const clock = switch (config.chip.series) {
     .ch32v003 => @import("clock/ch32v003.zig"),
