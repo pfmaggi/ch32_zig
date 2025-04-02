@@ -11,22 +11,46 @@ pub const Channel = union(enum) {
     dma2: Dma2Channel,
 
     pub fn enable(comptime self: Channel) void {
-        set(self, 1);
+        enableInternal(self, 1);
     }
 
     pub fn disable(comptime self: Channel) void {
-        set(self, 0);
+        enableInternal(self, 0);
+    }
+
+    pub fn reset(comptime self: Channel) void {
+        const v = switch (self) {
+            .dma1 => |ch| .{ DMA1, ch },
+            .dma2 => |ch| .{ DMA2, ch },
+        };
+        const DMA = v[0];
+        const ch = v[1];
+        const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
+
+        // Zero out the registers.
+        @field(DMA, "CFGR" ++ ch_str).raw = 0;
+        @field(DMA, "CNTR" ++ ch_str).raw = 0;
+        @field(DMA, "PADDR" ++ ch_str).raw = 0;
+        @field(DMA, "MADDR" ++ ch_str).raw = 0;
+
+        // Clear flags.
+        const flag_names = comptime &.{ "CGIF", "CTCIF", "CHTIF", "CTEIF" };
+        var flags = DMA.INTFCR.read();
+        inline for (flag_names) |flag| {
+            @field(flags, flag ++ ch_str) = 0;
+        }
+        DMA.INTFCR.write(flags);
     }
 
     pub fn configure(comptime dma: Channel, comptime cfg: Config) void {
         switch (dma) {
             .dma1 => |ch| {
                 RCC.AHBPCENR.modify(.{ .DMA1EN = 1, .SRAMEN = 1 });
-                configure_internal(DMA1, @intFromEnum(ch), cfg);
+                configureInternal(DMA1, @intFromEnum(ch), cfg);
             },
             .dma2 => |ch| {
                 RCC.AHBPCENR.modify(.{ .DMA2EN = 1, .SRAMEN = 1 });
-                configure_internal(DMA2, @intFromEnum(ch), cfg);
+                configureInternal(DMA2, @intFromEnum(ch), cfg);
             },
         }
     }
@@ -45,6 +69,7 @@ pub const Channel = union(enum) {
             @field(DMA, "CNTR" ++ ch_str).raw = len;
         }
     }
+
     pub fn setPeripheralPtr(comptime self: Channel, ptr: *anyopaque, length: ?u32) void {
         const v = switch (self) {
             .dma1 => |ch| .{ DMA1, ch },
@@ -58,19 +83,6 @@ pub const Channel = union(enum) {
         if (length) |len| {
             @field(DMA, "CNTR" ++ ch_str).raw = len;
         }
-    }
-
-    fn set(comptime self: Channel, comptime value: u1) void {
-        const v = switch (self) {
-            .dma1 => |ch| .{ DMA1, ch },
-            .dma2 => |ch| .{ DMA2, ch },
-        };
-
-        const DMA = v[0];
-        const ch = v[1];
-        const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
-
-        @field(DMA, "CFGR" ++ ch_str).modify(.{ .EN = value });
     }
 };
 
@@ -162,7 +174,20 @@ pub const Priority = enum(u2) {
     very_high = 0b11,
 };
 
-inline fn configure_internal(comptime DMA: anytype, ch_num: u4, comptime cfg: Config) void {
+inline fn enableInternal(comptime dma: Channel, comptime value: u1) void {
+    const v = switch (dma) {
+        .dma1 => |ch| .{ DMA1, ch },
+        .dma2 => |ch| .{ DMA2, ch },
+    };
+
+    const DMA = v[0];
+    const ch = v[1];
+    const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
+
+    @field(DMA, "CFGR" ++ ch_str).modify(.{ .EN = value });
+}
+
+inline fn configureInternal(comptime DMA: anytype, ch_num: u4, comptime cfg: Config) void {
     const ch_str = std.fmt.comptimePrint("{}", .{ch_num});
 
     const pre_reg_cfg = svd.nullable_types.DMA1.CFGR1{
