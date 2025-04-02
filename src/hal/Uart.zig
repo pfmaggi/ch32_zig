@@ -162,16 +162,9 @@ pub fn configureBaudRate(self: UART, cfg: BaudRate) void {
 }
 
 fn configureCtrl(self: UART, comptime cfg: Config) void {
-    var rx_enable: u1 = 0;
-    var tx_enable: u1 = 0;
-    switch (cfg.mode) {
-        .tx => tx_enable = 1,
-        .rx => rx_enable = 1,
-        .tx_rx => {
-            tx_enable = 1;
-            rx_enable = 1;
-        },
-    }
+    const rx_enable = if (cfg.mode == .rx or cfg.mode == .tx_rx) 1 else 0;
+    const tx_enable = if (cfg.mode == .tx or cfg.mode == .tx_rx) 1 else 0;
+
     const parity_bit: u1 = switch (cfg.parity) {
         .none => 0,
         .even, .odd => 1,
@@ -190,28 +183,12 @@ fn configureCtrl(self: UART, comptime cfg: Config) void {
         .two => 0b10,
         .one_and_a_half => 0b11,
     };
-    var rts_bit: u1 = 0;
-    var cts_bit: u1 = 0;
-    switch (cfg.flow_control) {
-        .none => {},
-        .cts => cts_bit = 1,
-        .rts => rts_bit = 1,
-        .cts_rts => {
-            cts_bit = 1;
-            rts_bit = 1;
-        },
-    }
-    var dma_rx_enable: u1 = 0;
-    var dma_tx_enable: u1 = 0;
-    switch (cfg.dma) {
-        .none => {},
-        .tx => dma_tx_enable = 1,
-        .rx => dma_rx_enable = 1,
-        .tx_rx => {
-            dma_tx_enable = 1;
-            dma_rx_enable = 1;
-        },
-    }
+
+    const rts_bit = if (cfg.flow_control == .rts or cfg.flow_control == .cts_rts) 1 else 0;
+    const cts_bit = if (cfg.flow_control == .cts or cfg.flow_control == .cts_rts) 1 else 0;
+
+    const dma_rx_enable = if (cfg.dma == .rx or cfg.dma == .tx_rx) 1 else 0;
+    const dma_tx_enable = if (cfg.dma == .tx or cfg.dma == .tx_rx) 1 else 0;
 
     self.reg.CTLR1.write(.{
         // Receiver enable

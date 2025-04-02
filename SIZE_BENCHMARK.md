@@ -128,8 +128,8 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 8118 | 4 | 16 | 8138 | 
-| ReleaseFast | 12200 | 4 | 16 | 12220 | 
+| ReleaseSmall | 8090 | 4 | 16 | 8110 | 
+| ReleaseFast | 12174 | 4 | 16 | 12194 | 
 
 
 ## [examples/mco](examples/mco)
@@ -221,26 +221,26 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2068 | 4 | 4 | 2076 | 
-| ReleaseFast | 2686 | 4 | 4 | 2694 | 
-| ReleaseSafe | 3502 | 4 | 4 | 3510 | 
+| ReleaseSmall | 2048 | 4 | 4 | 2056 | 
+| ReleaseFast | 2660 | 4 | 4 | 2668 | 
+| ReleaseSafe | 3472 | 4 | 4 | 3480 | 
 
 ### uart_ch32v20x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2348 | 4 | 4 | 2356 | 
-| ReleaseFast | 2860 | 4 | 4 | 2868 | 
-| ReleaseSafe | 3222 | 4 | 4 | 3230 | 
+| ReleaseSmall | 2324 | 4 | 4 | 2332 | 
+| ReleaseFast | 2834 | 4 | 4 | 2842 | 
+| ReleaseSafe | 3196 | 4 | 4 | 3204 | 
 
 ### uart_ch32v30x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2386 | 4 | 4 | 2394 | 
-| ReleaseFast | 2898 | 4 | 4 | 2906 | 
-| ReleaseSafe | 3260 | 4 | 4 | 3268 | 
-| Debug | 60122 | 4 | 12 | 60138 | 
+| ReleaseSmall | 2362 | 4 | 4 | 2370 | 
+| ReleaseFast | 2872 | 4 | 4 | 2880 | 
+| ReleaseSafe | 3234 | 4 | 4 | 3242 | 
+| Debug | 60036 | 4 | 12 | 60052 | 
 
 
 ## [examples/uart_dma_tx](examples/uart_dma_tx)
@@ -249,26 +249,26 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 1730 | 0 | 4 | 1734 | 
-| ReleaseFast | 2204 | 0 | 4 | 2208 | 
-| ReleaseSafe | 3466 | 0 | 4 | 3470 | 
+| ReleaseSmall | 1706 | 0 | 4 | 1710 | 
+| ReleaseFast | 2178 | 0 | 4 | 2182 | 
+| ReleaseSafe | 3438 | 0 | 4 | 3442 | 
 
 ### uart_dma_tx_ch32v20x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2032 | 0 | 4 | 2036 | 
-| ReleaseFast | 2380 | 0 | 4 | 2384 | 
-| ReleaseSafe | 3190 | 0 | 4 | 3194 | 
+| ReleaseSmall | 2006 | 0 | 4 | 2010 | 
+| ReleaseFast | 2354 | 0 | 4 | 2358 | 
+| ReleaseSafe | 3164 | 0 | 4 | 3168 | 
 
 ### uart_dma_tx_ch32v30x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2070 | 0 | 4 | 2074 | 
-| ReleaseFast | 2418 | 0 | 4 | 2422 | 
-| ReleaseSafe | 3228 | 0 | 4 | 3232 | 
-| Debug | 60478 | 0 | 12 | 60490 | 
+| ReleaseSmall | 2044 | 0 | 4 | 2048 | 
+| ReleaseFast | 2392 | 0 | 4 | 2396 | 
+| ReleaseSafe | 3202 | 0 | 4 | 3206 | 
+| Debug | 60390 | 0 | 12 | 60402 | 
 
 
 ## [examples/uart_echo](examples/uart_echo)
@@ -277,26 +277,26 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 1984 | 0 | 4 | 1988 | 
-| ReleaseFast | 2160 | 0 | 4 | 2164 | 
-| ReleaseSafe | 1852 | 0 | 4 | 1856 | 
+| ReleaseSmall | 1954 | 0 | 4 | 1958 | 
+| ReleaseFast | 2134 | 0 | 4 | 2138 | 
+| ReleaseSafe | 1826 | 0 | 4 | 1830 | 
 
 ### uart_echo_ch32v20x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2328 | 0 | 4 | 2332 | 
-| ReleaseFast | 2438 | 0 | 4 | 2442 | 
-| ReleaseSafe | 2144 | 0 | 4 | 2148 | 
+| ReleaseSmall | 2304 | 0 | 4 | 2308 | 
+| ReleaseFast | 2412 | 0 | 4 | 2416 | 
+| ReleaseSafe | 2118 | 0 | 4 | 2122 | 
 
 ### uart_echo_ch32v30x.elf 
 
 | Mode | Text | Data | Bss | Total |
 |--------|--------|--------|--------|--------|
-| ReleaseSmall | 2366 | 0 | 4 | 2370 | 
-| ReleaseFast | 2476 | 0 | 4 | 2480 | 
-| ReleaseSafe | 2182 | 0 | 4 | 2186 | 
-| Debug | 64424 | 0 | 12 | 64436 | 
+| ReleaseSmall | 2342 | 0 | 4 | 2346 | 
+| ReleaseFast | 2450 | 0 | 4 | 2454 | 
+| ReleaseSafe | 2156 | 0 | 4 | 2160 | 
+| Debug | 64334 | 0 | 12 | 64346 | 
 
 
 
