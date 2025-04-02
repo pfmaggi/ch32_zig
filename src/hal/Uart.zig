@@ -15,6 +15,7 @@ pub const Config = struct {
     parity: Parity = .none,
     flow_control: FlowControl = .none,
     pins: ?Pins = null,
+    dma: DmaMode = .none,
 };
 
 pub const Mode = enum {
@@ -63,6 +64,13 @@ pub const FlowControl = enum {
     cts,
     rts,
     cts_rts,
+};
+
+pub const DmaMode = enum {
+    none,
+    tx,
+    rx,
+    tx_rx,
 };
 
 const chip = switch (config.chip.series) {
@@ -193,6 +201,17 @@ fn configureCtrl(self: UART, comptime cfg: Config) void {
             rts_bit = 1;
         },
     }
+    var dma_rx_enable: u1 = 0;
+    var dma_tx_enable: u1 = 0;
+    switch (cfg.dma) {
+        .none => {},
+        .tx => dma_tx_enable = 1,
+        .rx => dma_rx_enable = 1,
+        .tx_rx => {
+            dma_tx_enable = 1;
+            dma_rx_enable = 1;
+        },
+    }
 
     self.reg.CTLR1.write(.{
         // Receiver enable
@@ -213,6 +232,10 @@ fn configureCtrl(self: UART, comptime cfg: Config) void {
     });
 
     self.reg.CTLR3.write(.{
+        // DMA enable receiver.
+        .DMAR = dma_rx_enable,
+        // DMA enable transmitter.
+        .DMAT = dma_tx_enable,
         // RTS enable.
         .RTSE = rts_bit,
         // CTS enable.
