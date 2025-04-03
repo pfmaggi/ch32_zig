@@ -30,7 +30,7 @@ fn dmaWrite(msg: []const u8) void {
     // Disable DMA before set new message.
     hal.dma.Channel.disable(usart1_tx_dma_channel);
     // Set source and transfer length.
-    hal.dma.Channel.setMemoryPtr(usart1_tx_dma_channel, @constCast(msg.ptr), msg.len);
+    hal.dma.Channel.setMemoryPtr(usart1_tx_dma_channel, msg.ptr, msg.len);
     // Enable DMA.
     hal.dma.Channel.enable(usart1_tx_dma_channel);
 }

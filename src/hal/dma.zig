@@ -56,7 +56,8 @@ pub const Channel = union(enum) {
         }
     }
 
-    pub fn setMemoryPtr(comptime self: Channel, ptr: *anyopaque, length: ?u32) void {
+    /// Set the memory pointer. Length is optional.
+    pub fn setMemoryPtr(comptime self: Channel, pointer: anytype, length: ?u32) void {
         const v = switch (self) {
             .dma1 => |ch| .{ DMA1, ch },
             .dma2 => |ch| .{ DMA2, ch },
@@ -65,13 +66,14 @@ pub const Channel = union(enum) {
         const ch = v[1];
         const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
 
-        @field(DMA, "MADDR" ++ ch_str).raw = @intFromPtr(ptr);
+        @field(DMA, "MADDR" ++ ch_str).raw = @intFromPtr(pointer);
         if (length) |len| {
             @field(DMA, "CNTR" ++ ch_str).raw = len;
         }
     }
 
-    pub fn setPeripheralPtr(comptime self: Channel, ptr: *anyopaque, length: ?u32) void {
+    /// Set the peripheral pointer. Length is optional.
+    pub fn setPeripheralPtr(comptime self: Channel, pointer: anytype, length: ?u32) void {
         const v = switch (self) {
             .dma1 => |ch| .{ DMA1, ch },
             .dma2 => |ch| .{ DMA2, ch },
@@ -80,7 +82,7 @@ pub const Channel = union(enum) {
         const ch = v[1];
         const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
 
-        @field(DMA, "PADDR" ++ ch_str).raw = @intFromPtr(ptr);
+        @field(DMA, "PADDR" ++ ch_str).raw = @intFromPtr(pointer);
         if (length) |len| {
             @field(DMA, "CNTR" ++ ch_str).raw = len;
         }
@@ -212,9 +214,11 @@ pub const Dma2Channel = enum(u4) {
 
 /// DMA configuration options.
 pub const Config = struct {
-    /// Peripheral pointer. Can be configured later.
+    /// Peripheral pointer. Can be configured later through setPeripheralPtr().
+    /// Use @volatileCast() for converting peripheral pointer to anyopaque.
     periph_ptr: ?*anyopaque = null,
-    /// Memory pointer. Can be configured later.
+    /// Memory pointer. Can be configured later through setMemoryPtr().
+    /// Use @constCast() for converting pointer to anyopaque.
     mem_ptr: ?*anyopaque = null,
     /// Direction of data transfer.
     direction: Direction,
