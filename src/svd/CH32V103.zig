@@ -487,73 +487,73 @@ pub const registers = struct {
         /// DMA interrupt flag clear register (DMA_INTFCR)
         INTFCR: RegisterRW(types.DMA.INTFCR, nullable_types.DMA.INTFCR),
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR1: RegisterRW(types.DMA.CFGR1, nullable_types.DMA.CFGR1),
+        CFGR1: RegisterRW(types.DMA.CFGRx, nullable_types.DMA.CFGRx),
         /// DMA channel 1 number of data register
-        CNTR1: RegisterRW(types.DMA.CNTR1, nullable_types.DMA.CNTR1),
+        CNTR1: RegisterRW(types.DMA.CNTRx, nullable_types.DMA.CNTRx),
         /// DMA channel 1 peripheral address register
-        PADDR1: RegisterRW(types.DMA.PADDR1, nullable_types.DMA.PADDR1),
+        PADDR1: RegisterRW(types.DMA.PADDRx, nullable_types.DMA.PADDRx),
         /// DMA channel 1 memory address register
-        MADDR1: RegisterRW(types.DMA.MADDR1, nullable_types.DMA.MADDR1),
+        MADDR1: RegisterRW(types.DMA.MADDRx, nullable_types.DMA.MADDRx),
         /// offset 0x4
         _offset6: [4]u8,
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR2: RegisterRW(types.DMA.CFGR2, nullable_types.DMA.CFGR2),
+        CFGR2: RegisterRW(types.DMA.CFGRx, nullable_types.DMA.CFGRx),
         /// DMA channel 2 number of data register
-        CNTR2: RegisterRW(types.DMA.CNTR2, nullable_types.DMA.CNTR2),
+        CNTR2: RegisterRW(types.DMA.CNTRx, nullable_types.DMA.CNTRx),
         /// DMA channel 2 peripheral address register
-        PADDR2: RegisterRW(types.DMA.PADDR2, nullable_types.DMA.PADDR2),
+        PADDR2: RegisterRW(types.DMA.PADDRx, nullable_types.DMA.PADDRx),
         /// DMA channel 2 memory address register
-        MADDR2: RegisterRW(types.DMA.MADDR2, nullable_types.DMA.MADDR2),
+        MADDR2: RegisterRW(types.DMA.MADDRx, nullable_types.DMA.MADDRx),
         /// offset 0x4
         _offset10: [4]u8,
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR3: RegisterRW(types.DMA.CFGR3, nullable_types.DMA.CFGR3),
+        CFGR3: RegisterRW(types.DMA.CFGRx, nullable_types.DMA.CFGRx),
         /// DMA channel 3 number of data register
-        CNTR3: RegisterRW(types.DMA.CNTR3, nullable_types.DMA.CNTR3),
+        CNTR3: RegisterRW(types.DMA.CNTRx, nullable_types.DMA.CNTRx),
         /// DMA channel 3 peripheral address register
-        PADDR3: RegisterRW(types.DMA.PADDR3, nullable_types.DMA.PADDR3),
+        PADDR3: RegisterRW(types.DMA.PADDRx, nullable_types.DMA.PADDRx),
         /// DMA channel 3 memory address register
-        MADDR3: RegisterRW(types.DMA.MADDR3, nullable_types.DMA.MADDR3),
+        MADDR3: RegisterRW(types.DMA.MADDRx, nullable_types.DMA.MADDRx),
         /// offset 0x4
         _offset14: [4]u8,
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR4: RegisterRW(types.DMA.CFGR4, nullable_types.DMA.CFGR4),
+        CFGR4: RegisterRW(types.DMA.CFGRx, nullable_types.DMA.CFGRx),
         /// DMA channel 4 number of data register
-        CNTR4: RegisterRW(types.DMA.CNTR4, nullable_types.DMA.CNTR4),
+        CNTR4: RegisterRW(types.DMA.CNTRx, nullable_types.DMA.CNTRx),
         /// DMA channel 4 peripheral address register
-        PADDR4: RegisterRW(types.DMA.PADDR4, nullable_types.DMA.PADDR4),
+        PADDR4: RegisterRW(types.DMA.PADDRx, nullable_types.DMA.PADDRx),
         /// DMA channel 4 memory address register
-        MADDR4: RegisterRW(types.DMA.MADDR4, nullable_types.DMA.MADDR4),
+        MADDR4: RegisterRW(types.DMA.MADDRx, nullable_types.DMA.MADDRx),
         /// offset 0x4
         _offset18: [4]u8,
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR5: RegisterRW(types.DMA.CFGR5, nullable_types.DMA.CFGR5),
+        CFGR5: RegisterRW(types.DMA.CFGRx, nullable_types.DMA.CFGRx),
         /// DMA channel 5 number of data register
-        CNTR5: RegisterRW(types.DMA.CNTR5, nullable_types.DMA.CNTR5),
+        CNTR5: RegisterRW(types.DMA.CNTRx, nullable_types.DMA.CNTRx),
         /// DMA channel 5 peripheral address register
-        PADDR5: RegisterRW(types.DMA.PADDR5, nullable_types.DMA.PADDR5),
+        PADDR5: RegisterRW(types.DMA.PADDRx, nullable_types.DMA.PADDRx),
         /// DMA channel 5 memory address register
-        MADDR5: RegisterRW(types.DMA.MADDR5, nullable_types.DMA.MADDR5),
+        MADDR5: RegisterRW(types.DMA.MADDRx, nullable_types.DMA.MADDRx),
         /// offset 0x4
         _offset22: [4]u8,
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR6: RegisterRW(types.DMA.CFGR6, nullable_types.DMA.CFGR6),
+        CFGR6: RegisterRW(types.DMA.CFGRx, nullable_types.DMA.CFGRx),
         /// DMA channel 6 number of data register
-        CNTR6: RegisterRW(types.DMA.CNTR6, nullable_types.DMA.CNTR6),
+        CNTR6: RegisterRW(types.DMA.CNTRx, nullable_types.DMA.CNTRx),
         /// DMA channel 6 peripheral address register
-        PADDR6: RegisterRW(types.DMA.PADDR6, nullable_types.DMA.PADDR6),
+        PADDR6: RegisterRW(types.DMA.PADDRx, nullable_types.DMA.PADDRx),
         /// DMA channel 6 memory address register
-        MADDR6: RegisterRW(types.DMA.MADDR6, nullable_types.DMA.MADDR6),
+        MADDR6: RegisterRW(types.DMA.MADDRx, nullable_types.DMA.MADDRx),
         /// offset 0x4
         _offset26: [4]u8,
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR7: RegisterRW(types.DMA.CFGR7, nullable_types.DMA.CFGR7),
+        CFGR7: RegisterRW(types.DMA.CFGRx, nullable_types.DMA.CFGRx),
         /// DMA channel 7 number of data register
-        CNTR7: RegisterRW(types.DMA.CNTR7, nullable_types.DMA.CNTR7),
+        CNTR7: RegisterRW(types.DMA.CNTRx, nullable_types.DMA.CNTRx),
         /// DMA channel 7 peripheral address register
-        PADDR7: RegisterRW(types.DMA.PADDR7, nullable_types.DMA.PADDR7),
+        PADDR7: RegisterRW(types.DMA.PADDRx, nullable_types.DMA.PADDRx),
         /// DMA channel 7 memory address register
-        MADDR7: RegisterRW(types.DMA.MADDR7, nullable_types.DMA.MADDR7),
+        MADDR7: RegisterRW(types.DMA.MADDRx, nullable_types.DMA.MADDRx),
     };
 
     /// Real time clock
@@ -3103,7 +3103,7 @@ pub const types = struct {
         };
 
         /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR1 = packed struct(u32) {
+        pub const CFGRx = packed struct(u32) {
             /// EN [0:0]
             /// Channel enable
             EN: u1 = 0,
@@ -3145,7 +3145,7 @@ pub const types = struct {
         };
 
         /// DMA channel 1 number of data register
-        pub const CNTR1 = packed struct(u32) {
+        pub const CNTRx = packed struct(u32) {
             /// NDT [0:15]
             /// Number of data to transfer
             NDT: u16 = 0,
@@ -3154,404 +3154,14 @@ pub const types = struct {
         };
 
         /// DMA channel 1 peripheral address register
-        pub const PADDR1 = packed struct(u32) {
+        pub const PADDRx = packed struct(u32) {
             /// PA [0:31]
             /// Peripheral address
             PA: u32 = 0,
         };
 
         /// DMA channel 1 memory address register
-        pub const MADDR1 = packed struct(u32) {
-            /// MA [0:31]
-            /// Memory address
-            MA: u32 = 0,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR2 = packed struct(u32) {
-            /// EN [0:0]
-            /// Channel enable
-            EN: u1 = 0,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: u1 = 0,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: u1 = 0,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: u1 = 0,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: u1 = 0,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: u1 = 0,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: u1 = 0,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: u1 = 0,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: u2 = 0,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: u2 = 0,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: u2 = 0,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: u1 = 0,
-            /// padding [15:31]
-            _padding: u17 = 0,
-        };
-
-        /// DMA channel 2 number of data register
-        pub const CNTR2 = packed struct(u32) {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: u16 = 0,
-            /// padding [16:31]
-            _padding: u16 = 0,
-        };
-
-        /// DMA channel 2 peripheral address register
-        pub const PADDR2 = packed struct(u32) {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: u32 = 0,
-        };
-
-        /// DMA channel 2 memory address register
-        pub const MADDR2 = packed struct(u32) {
-            /// MA [0:31]
-            /// Memory address
-            MA: u32 = 0,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR3 = packed struct(u32) {
-            /// EN [0:0]
-            /// Channel enable
-            EN: u1 = 0,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: u1 = 0,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: u1 = 0,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: u1 = 0,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: u1 = 0,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: u1 = 0,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: u1 = 0,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: u1 = 0,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: u2 = 0,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: u2 = 0,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: u2 = 0,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: u1 = 0,
-            /// padding [15:31]
-            _padding: u17 = 0,
-        };
-
-        /// DMA channel 3 number of data register
-        pub const CNTR3 = packed struct(u32) {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: u16 = 0,
-            /// padding [16:31]
-            _padding: u16 = 0,
-        };
-
-        /// DMA channel 3 peripheral address register
-        pub const PADDR3 = packed struct(u32) {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: u32 = 0,
-        };
-
-        /// DMA channel 3 memory address register
-        pub const MADDR3 = packed struct(u32) {
-            /// MA [0:31]
-            /// Memory address
-            MA: u32 = 0,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR4 = packed struct(u32) {
-            /// EN [0:0]
-            /// Channel enable
-            EN: u1 = 0,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: u1 = 0,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: u1 = 0,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: u1 = 0,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: u1 = 0,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: u1 = 0,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: u1 = 0,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: u1 = 0,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: u2 = 0,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: u2 = 0,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: u2 = 0,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: u1 = 0,
-            /// padding [15:31]
-            _padding: u17 = 0,
-        };
-
-        /// DMA channel 4 number of data register
-        pub const CNTR4 = packed struct(u32) {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: u16 = 0,
-            /// padding [16:31]
-            _padding: u16 = 0,
-        };
-
-        /// DMA channel 4 peripheral address register
-        pub const PADDR4 = packed struct(u32) {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: u32 = 0,
-        };
-
-        /// DMA channel 4 memory address register
-        pub const MADDR4 = packed struct(u32) {
-            /// MA [0:31]
-            /// Memory address
-            MA: u32 = 0,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR5 = packed struct(u32) {
-            /// EN [0:0]
-            /// Channel enable
-            EN: u1 = 0,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: u1 = 0,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: u1 = 0,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: u1 = 0,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: u1 = 0,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: u1 = 0,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: u1 = 0,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: u1 = 0,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: u2 = 0,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: u2 = 0,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: u2 = 0,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: u1 = 0,
-            /// padding [15:31]
-            _padding: u17 = 0,
-        };
-
-        /// DMA channel 5 number of data register
-        pub const CNTR5 = packed struct(u32) {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: u16 = 0,
-            /// padding [16:31]
-            _padding: u16 = 0,
-        };
-
-        /// DMA channel 5 peripheral address register
-        pub const PADDR5 = packed struct(u32) {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: u32 = 0,
-        };
-
-        /// DMA channel 5 memory address register
-        pub const MADDR5 = packed struct(u32) {
-            /// MA [0:31]
-            /// Memory address
-            MA: u32 = 0,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR6 = packed struct(u32) {
-            /// EN [0:0]
-            /// Channel enable
-            EN: u1 = 0,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: u1 = 0,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: u1 = 0,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: u1 = 0,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: u1 = 0,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: u1 = 0,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: u1 = 0,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: u1 = 0,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: u2 = 0,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: u2 = 0,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: u2 = 0,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: u1 = 0,
-            /// padding [15:31]
-            _padding: u17 = 0,
-        };
-
-        /// DMA channel 6 number of data register
-        pub const CNTR6 = packed struct(u32) {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: u16 = 0,
-            /// padding [16:31]
-            _padding: u16 = 0,
-        };
-
-        /// DMA channel 6 peripheral address register
-        pub const PADDR6 = packed struct(u32) {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: u32 = 0,
-        };
-
-        /// DMA channel 6 memory address register
-        pub const MADDR6 = packed struct(u32) {
-            /// MA [0:31]
-            /// Memory address
-            MA: u32 = 0,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR7 = packed struct(u32) {
-            /// EN [0:0]
-            /// Channel enable
-            EN: u1 = 0,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: u1 = 0,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: u1 = 0,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: u1 = 0,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: u1 = 0,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: u1 = 0,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: u1 = 0,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: u1 = 0,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: u2 = 0,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: u2 = 0,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: u2 = 0,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: u1 = 0,
-            /// padding [15:31]
-            _padding: u17 = 0,
-        };
-
-        /// DMA channel 7 number of data register
-        pub const CNTR7 = packed struct(u32) {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: u16 = 0,
-            /// padding [16:31]
-            _padding: u16 = 0,
-        };
-
-        /// DMA channel 7 peripheral address register
-        pub const PADDR7 = packed struct(u32) {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: u32 = 0,
-        };
-
-        /// DMA channel 7 memory address register
-        pub const MADDR7 = packed struct(u32) {
+        pub const MADDRx = packed struct(u32) {
             /// MA [0:31]
             /// Memory address
             MA: u32 = 0,
@@ -8676,7 +8286,7 @@ pub const nullable_types = struct {
         };
 
         /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR1 = struct {
+        pub const CFGRx = struct {
             /// EN [0:0]
             /// Channel enable
             EN: ?u1 = null,
@@ -8716,387 +8326,21 @@ pub const nullable_types = struct {
         };
 
         /// DMA channel 1 number of data register
-        pub const CNTR1 = struct {
+        pub const CNTRx = struct {
             /// NDT [0:15]
             /// Number of data to transfer
             NDT: ?u16 = null,
         };
 
         /// DMA channel 1 peripheral address register
-        pub const PADDR1 = struct {
+        pub const PADDRx = struct {
             /// PA [0:31]
             /// Peripheral address
             PA: ?u32 = null,
         };
 
         /// DMA channel 1 memory address register
-        pub const MADDR1 = struct {
-            /// MA [0:31]
-            /// Memory address
-            MA: ?u32 = null,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR2 = struct {
-            /// EN [0:0]
-            /// Channel enable
-            EN: ?u1 = null,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: ?u1 = null,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: ?u1 = null,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: ?u1 = null,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: ?u1 = null,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: ?u1 = null,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: ?u1 = null,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: ?u1 = null,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: ?u2 = null,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: ?u2 = null,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: ?u2 = null,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: ?u1 = null,
-        };
-
-        /// DMA channel 2 number of data register
-        pub const CNTR2 = struct {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: ?u16 = null,
-        };
-
-        /// DMA channel 2 peripheral address register
-        pub const PADDR2 = struct {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: ?u32 = null,
-        };
-
-        /// DMA channel 2 memory address register
-        pub const MADDR2 = struct {
-            /// MA [0:31]
-            /// Memory address
-            MA: ?u32 = null,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR3 = struct {
-            /// EN [0:0]
-            /// Channel enable
-            EN: ?u1 = null,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: ?u1 = null,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: ?u1 = null,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: ?u1 = null,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: ?u1 = null,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: ?u1 = null,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: ?u1 = null,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: ?u1 = null,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: ?u2 = null,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: ?u2 = null,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: ?u2 = null,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: ?u1 = null,
-        };
-
-        /// DMA channel 3 number of data register
-        pub const CNTR3 = struct {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: ?u16 = null,
-        };
-
-        /// DMA channel 3 peripheral address register
-        pub const PADDR3 = struct {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: ?u32 = null,
-        };
-
-        /// DMA channel 3 memory address register
-        pub const MADDR3 = struct {
-            /// MA [0:31]
-            /// Memory address
-            MA: ?u32 = null,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR4 = struct {
-            /// EN [0:0]
-            /// Channel enable
-            EN: ?u1 = null,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: ?u1 = null,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: ?u1 = null,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: ?u1 = null,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: ?u1 = null,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: ?u1 = null,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: ?u1 = null,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: ?u1 = null,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: ?u2 = null,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: ?u2 = null,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: ?u2 = null,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: ?u1 = null,
-        };
-
-        /// DMA channel 4 number of data register
-        pub const CNTR4 = struct {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: ?u16 = null,
-        };
-
-        /// DMA channel 4 peripheral address register
-        pub const PADDR4 = struct {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: ?u32 = null,
-        };
-
-        /// DMA channel 4 memory address register
-        pub const MADDR4 = struct {
-            /// MA [0:31]
-            /// Memory address
-            MA: ?u32 = null,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR5 = struct {
-            /// EN [0:0]
-            /// Channel enable
-            EN: ?u1 = null,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: ?u1 = null,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: ?u1 = null,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: ?u1 = null,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: ?u1 = null,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: ?u1 = null,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: ?u1 = null,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: ?u1 = null,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: ?u2 = null,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: ?u2 = null,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: ?u2 = null,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: ?u1 = null,
-        };
-
-        /// DMA channel 5 number of data register
-        pub const CNTR5 = struct {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: ?u16 = null,
-        };
-
-        /// DMA channel 5 peripheral address register
-        pub const PADDR5 = struct {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: ?u32 = null,
-        };
-
-        /// DMA channel 5 memory address register
-        pub const MADDR5 = struct {
-            /// MA [0:31]
-            /// Memory address
-            MA: ?u32 = null,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR6 = struct {
-            /// EN [0:0]
-            /// Channel enable
-            EN: ?u1 = null,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: ?u1 = null,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: ?u1 = null,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: ?u1 = null,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: ?u1 = null,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: ?u1 = null,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: ?u1 = null,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: ?u1 = null,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: ?u2 = null,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: ?u2 = null,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: ?u2 = null,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: ?u1 = null,
-        };
-
-        /// DMA channel 6 number of data register
-        pub const CNTR6 = struct {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: ?u16 = null,
-        };
-
-        /// DMA channel 6 peripheral address register
-        pub const PADDR6 = struct {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: ?u32 = null,
-        };
-
-        /// DMA channel 6 memory address register
-        pub const MADDR6 = struct {
-            /// MA [0:31]
-            /// Memory address
-            MA: ?u32 = null,
-        };
-
-        /// DMA channel configuration register (DMA_CFGR)
-        pub const CFGR7 = struct {
-            /// EN [0:0]
-            /// Channel enable
-            EN: ?u1 = null,
-            /// TCIE [1:1]
-            /// Transfer complete interrupt enable
-            TCIE: ?u1 = null,
-            /// HTIE [2:2]
-            /// Half Transfer interrupt enable
-            HTIE: ?u1 = null,
-            /// TEIE [3:3]
-            /// Transfer error interrupt enable
-            TEIE: ?u1 = null,
-            /// DIR [4:4]
-            /// Data transfer direction
-            DIR: ?u1 = null,
-            /// CIRC [5:5]
-            /// Circular mode
-            CIRC: ?u1 = null,
-            /// PINC [6:6]
-            /// Peripheral increment mode
-            PINC: ?u1 = null,
-            /// MINC [7:7]
-            /// Memory increment mode
-            MINC: ?u1 = null,
-            /// PSIZE [8:9]
-            /// Peripheral size
-            PSIZE: ?u2 = null,
-            /// MSIZE [10:11]
-            /// Memory size
-            MSIZE: ?u2 = null,
-            /// PL [12:13]
-            /// Channel Priority level
-            PL: ?u2 = null,
-            /// MEM2MEM [14:14]
-            /// Memory to memory mode
-            MEM2MEM: ?u1 = null,
-        };
-
-        /// DMA channel 7 number of data register
-        pub const CNTR7 = struct {
-            /// NDT [0:15]
-            /// Number of data to transfer
-            NDT: ?u16 = null,
-        };
-
-        /// DMA channel 7 peripheral address register
-        pub const PADDR7 = struct {
-            /// PA [0:31]
-            /// Peripheral address
-            PA: ?u32 = null,
-        };
-
-        /// DMA channel 7 memory address register
-        pub const MADDR7 = struct {
+        pub const MADDRx = struct {
             /// MA [0:31]
             /// Memory address
             MA: ?u32 = null,

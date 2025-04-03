@@ -588,7 +588,7 @@ pub const Peripheral = struct {
         }
 
         // and close the peripheral
-        try out_stream.writeAll("};\n");
+        try out_stream.writeAll("\n};\n");
     }
 
     pub fn write_type(self: Self, out_stream: anytype, dedupl: *DeduplMap) !void {
@@ -636,7 +636,7 @@ pub const Peripheral = struct {
         , .{periph_name.items});
 
         var padded_writer = PaddedWriter.init("    ", out_stream);
-        var padded_out_stream = padded_writer.writer();
+        const padded_out_stream = padded_writer.writer();
 
         for (self.registers.items) |register| {
             if (register.alternate_register.items.len > 0) {
@@ -644,8 +644,7 @@ pub const Peripheral = struct {
                 continue;
             }
 
-            try register.write_type(padded_out_stream);
-            _ = try padded_out_stream.write("\n");
+            try register.write_type(periph_name.items, padded_out_stream);
         }
 
         // and close the peripheral
@@ -700,7 +699,7 @@ pub const Peripheral = struct {
         std.sort.heap(Register, self.registers.items, {}, registersSortCompare);
 
         var padded_writer = PaddedWriter.init("    ", out_stream);
-        var padded_out_stream = padded_writer.writer();
+        const padded_out_stream = padded_writer.writer();
 
         for (self.registers.items) |register| {
             if (register.alternate_register.items.len > 0) {
@@ -708,8 +707,7 @@ pub const Peripheral = struct {
                 continue;
             }
 
-            try register.write_nullable_type(padded_out_stream);
-            _ = try padded_out_stream.write("\n");
+            try register.write_nullable_type(periph_name.items, padded_out_stream);
         }
 
         // and close the peripheral
@@ -817,6 +815,8 @@ pub const Register = struct {
 
     access: Access = .ReadWrite,
 
+    allocator: Allocator,
+
     const Self = @This();
 
     pub fn init(allocator: Allocator, periph: []const u8, reset_value: u32, size: u32) !Self {
@@ -844,6 +844,7 @@ pub const Register = struct {
             .size = size,
             .reset_value = reset_value,
             .fields = fields,
+            .allocator = allocator,
         };
     }
 
@@ -923,6 +924,39 @@ pub const Register = struct {
         try out_stream.print("_padding: u{} = {},", .{ chunk_width, unused_value });
     }
 
+    fn generateCommonName(self: Self, periph_name: []const u8) !struct { []u8, bool, bool } {
+        const name = self.name.items;
+
+        var common_name = ArrayList(u8).init(self.allocator);
+        try common_name.replaceRange(0, common_name.items.len, name);
+
+        // Handle special case for DMA.
+        const is_dma = std.mem.startsWith(u8, periph_name, "DMA");
+        var has_dma_common_register = false;
+        if (is_dma) {
+            const prefixes = &.{ "CFGR", "CNTR", "PADDR", "MADDR" };
+            inline for (prefixes) |prefix| {
+                if (std.mem.startsWith(u8, name, prefix)) {
+                    has_dma_common_register = true;
+
+                    try common_name.replaceRange(prefix.len, name.len - prefix.len, "x");
+
+                    break;
+                }
+            }
+
+            if (has_dma_common_register) {
+                if (std.mem.endsWith(u8, name, "R1")) {
+                    return .{ common_name.items, true, false };
+                } else {
+                    return .{ common_name.items, false, true };
+                }
+            }
+        }
+
+        return .{ common_name.items, false, false };
+    }
+
     pub fn write_register(self: Self, periph_name: []const u8, out_stream: anytype) !void {
         try out_stream.writeAll("\n");
         if (!self.isValid()) {
@@ -931,26 +965,33 @@ pub const Register = struct {
         }
         const name = self.name.items;
         const description = if (self.description.items.len == 0) "No description" else self.description.items;
+        const common_name, _, _ = try self.generateCommonName(periph_name);
+
         // print packed struct containing fields
         try out_stream.print(
             \\/// {s}
             \\{s}: RegisterRW(types.{s}.{s}, nullable_types.{s}.{s}),
-        , .{ description, name, periph_name, name, periph_name, name });
+        , .{ description, name, periph_name, common_name, periph_name, common_name });
     }
 
-    pub fn write_type(self: Self, out_stream: anytype) !void {
-        try out_stream.writeAll("\n");
+    pub fn write_type(self: Self, periph_name: []const u8, out_stream: anytype) !void {
         if (!self.isValid()) {
+            try out_stream.writeAll("\n");
             try out_stream.writeAll("// Not enough info to print register value\n");
             return;
         }
-        const name = self.name.items;
         const description = if (self.description.items.len == 0) "No description" else self.description.items;
+        const common_name, _, const is_duplicate = try self.generateCommonName(periph_name);
+        if (is_duplicate) {
+            return;
+        }
+
         // print packed struct containing fields
         try out_stream.print(
+            \\
             \\/// {s}
             \\pub const {s} = packed struct(u{}) {{
-        , .{ description, name, self.size });
+        , .{ description, common_name, self.size });
 
         // Sort fields from LSB to MSB for next step
         std.sort.heap(Field, self.fields.items, {}, fieldsSortCompare);
@@ -984,27 +1025,34 @@ pub const Register = struct {
         try out_stream.writeAll(
             \\
             \\};
+            \\
         );
     }
 
-    pub fn write_nullable_type(self: Self, out_stream: anytype) !void {
-        try out_stream.writeAll("\n");
+    pub fn write_nullable_type(self: Self, periph_name: []const u8, out_stream: anytype) !void {
         if (!self.isValid()) {
+            try out_stream.writeAll("\n");
             try out_stream.writeAll("// Not enough info to print register value\n");
             return;
         }
-        const name = self.name.items;
         const description = if (self.description.items.len == 0) "No description" else self.description.items;
+        const common_name, _, const is_duplicate = try self.generateCommonName(periph_name);
+        if (is_duplicate) {
+            return;
+        }
+
         // print packed struct containing fields
         try out_stream.print(
+            \\
             \\/// {s}
             \\pub const {s} = struct {{
-        , .{ description, name });
+        , .{ description, common_name });
 
         if (self.fields.items.len == 0) {
             // close the struct and init the register
             try out_stream.writeAll(
                 \\};
+                \\
             );
             return;
         }
@@ -1028,6 +1076,7 @@ pub const Register = struct {
         try out_stream.writeAll(
             \\
             \\};
+            \\
         );
     }
 };
@@ -1227,7 +1276,10 @@ const PaddedWriter = struct {
 };
 
 test "Field write" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const fieldDesiredPrint =
         \\
         \\/// RNGEN [2:2]
@@ -1252,7 +1304,10 @@ test "Field write" {
 }
 
 test "Field write nullable" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const fieldDesiredPrint =
         \\
         \\/// RNGEN [2:2]
@@ -1277,7 +1332,10 @@ test "Field write nullable" {
 }
 
 test "Register write register" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const registerDesiredPrint =
         \\
         \\/// RND comment
@@ -1321,7 +1379,10 @@ test "Register write register" {
 }
 
 test "Register write type" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const registerDesiredPrint =
         \\
         \\/// RND comment
@@ -1340,6 +1401,7 @@ test "Register write type" {
         \\    /// padding [13:31]
         \\    _padding: u19 = 0,
         \\};
+        \\
     ;
 
     var output_buffer = ArrayList(u8).init(allocator);
@@ -1374,12 +1436,15 @@ test "Register write type" {
     try register.fields.append(field);
     try register.fields.append(field2);
 
-    try register.write_type(buf_stream);
+    try register.write_type("PERIPH", buf_stream);
     try std.testing.expectEqualStrings(registerDesiredPrint, output_buffer.items);
 }
 
 test "Register write nullable type" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const registerDesiredPrint =
         \\
         \\/// RND comment
@@ -1391,6 +1456,7 @@ test "Register write nullable type" {
         \\    /// SEED comment
         \\    SEED: ?u3 = null,
         \\};
+        \\
     ;
 
     var output_buffer = ArrayList(u8).init(allocator);
@@ -1425,12 +1491,15 @@ test "Register write nullable type" {
     try register.fields.append(field);
     try register.fields.append(field2);
 
-    try register.write_nullable_type(buf_stream);
+    try register.write_nullable_type("PERIPH", buf_stream);
     try std.testing.expectEqualStrings(registerDesiredPrint, output_buffer.items);
 }
 
 test "Register empty write register" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const registerDesiredPrint =
         \\
         \\/// EMPTY comment
@@ -1453,7 +1522,10 @@ test "Register empty write register" {
 }
 
 test "Register empty write type" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const registerDesiredPrint =
         \\
         \\/// EMPTY comment
@@ -1461,6 +1533,7 @@ test "Register empty write type" {
         \\    /// padding [0:31]
         \\    _padding: u32 = 0,
         \\};
+        \\
     ;
 
     var output_buffer = ArrayList(u8).init(allocator);
@@ -1474,16 +1547,20 @@ test "Register empty write type" {
     register.address_offset = 0x100;
     register.size = 0x20;
 
-    try register.write_type(buf_stream);
+    try register.write_type("PERIPH", buf_stream);
     try std.testing.expectEqualStrings(registerDesiredPrint, output_buffer.items);
 }
 
 test "Register empty write nullable type" {
-    const allocator = std.testing.allocator;
+    var arena = std.heap.ArenaAllocator.init(std.testing.allocator);
+    defer arena.deinit();
+    const allocator = arena.allocator();
+
     const registerDesiredPrint =
         \\
         \\/// EMPTY comment
         \\pub const EMPTY = struct {};
+        \\
     ;
 
     var output_buffer = ArrayList(u8).init(allocator);
@@ -1497,7 +1574,7 @@ test "Register empty write nullable type" {
     register.address_offset = 0x100;
     register.size = 0x20;
 
-    try register.write_nullable_type(buf_stream);
+    try register.write_nullable_type("PERIPH", buf_stream);
     try std.testing.expectEqualStrings(registerDesiredPrint, output_buffer.items);
 }
 
@@ -1520,7 +1597,6 @@ test "Peripheral write register" {
         \\
         \\    /// offset 0x100
         \\    _offset0: [256]u8,
-        \\
         \\    /// RND comment
         \\    RND: RegisterRW(types.PERIPH.RND, nullable_types.PERIPH.RND),
         \\};
