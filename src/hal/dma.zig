@@ -301,15 +301,7 @@ inline fn configureInternal(comptime DMA: anytype, ch_num: u4, comptime cfg: Con
         .MEM2MEM = if (cfg.mem_to_mem) 1 else 0,
     };
 
-    // Copy the configuration from the pre_reg_cfg to the reg_cfg.
-    comptime var reg_cfg = @field(DMA, "CFGR" ++ ch_str).default();
-    inline for (@typeInfo(@TypeOf(pre_reg_cfg)).@"struct".fields) |field| {
-        if (@field(pre_reg_cfg, field.name)) |v| {
-            @field(reg_cfg, field.name) = v;
-        }
-    }
-
-    @field(DMA, "CFGR" ++ ch_str).write(@bitCast(reg_cfg));
+    @field(DMA, "CFGR" ++ ch_str).writeAny(pre_reg_cfg);
 
     if (cfg.data_length != 0) {
         @field(DMA, "CNTR" ++ ch_str).raw = cfg.data_length;
