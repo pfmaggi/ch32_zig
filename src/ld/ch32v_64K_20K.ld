@@ -18,6 +18,7 @@ SECTIONS
 
   .rodata :
   {
+     *(.srodata*)
      *(.rodata*)
   } > FLASH
 
