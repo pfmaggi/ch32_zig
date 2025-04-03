@@ -20,12 +20,10 @@ pub const Channel = union(enum) {
     }
 
     pub fn reset(comptime self: Channel) void {
-        const v = switch (self) {
+        const DMA, const ch = switch (self) {
             .dma1 => |ch| .{ DMA1, ch },
             .dma2 => |ch| .{ DMA2, ch },
         };
-        const DMA = v[0];
-        const ch = v[1];
         const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
 
         // Zero out the registers.
@@ -58,12 +56,10 @@ pub const Channel = union(enum) {
 
     /// Set the memory pointer. Length is optional.
     pub fn setMemoryPtr(comptime self: Channel, pointer: anytype, length: ?u32) void {
-        const v = switch (self) {
+        const DMA, const ch = switch (self) {
             .dma1 => |ch| .{ DMA1, ch },
             .dma2 => |ch| .{ DMA2, ch },
         };
-        const DMA = v[0];
-        const ch = v[1];
         const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
 
         @field(DMA, "MADDR" ++ ch_str).raw = @intFromPtr(pointer);
@@ -74,12 +70,10 @@ pub const Channel = union(enum) {
 
     /// Set the peripheral pointer. Length is optional.
     pub fn setPeripheralPtr(comptime self: Channel, pointer: anytype, length: ?u32) void {
-        const v = switch (self) {
+        const DMA, const ch = switch (self) {
             .dma1 => |ch| .{ DMA1, ch },
             .dma2 => |ch| .{ DMA2, ch },
         };
-        const DMA = v[0];
-        const ch = v[1];
         const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
 
         @field(DMA, "PADDR" ++ ch_str).raw = @intFromPtr(pointer);
@@ -89,12 +83,10 @@ pub const Channel = union(enum) {
     }
 
     pub fn getRemaining(comptime self: Channel) u32 {
-        const v = switch (self) {
+        const DMA, const ch = switch (self) {
             .dma1 => |ch| .{ DMA1, ch },
             .dma2 => |ch| .{ DMA2, ch },
         };
-        const DMA = v[0];
-        const ch = v[1];
         const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
 
         return @field(DMA, "CNTR" ++ ch_str).raw;
@@ -138,12 +130,10 @@ pub const Interrupts = enum {
     };
 
     pub fn status(comptime dma: Channel) Flags {
-        const v = switch (dma) {
+        const DMA, const ch = switch (dma) {
             .dma1 => |ch| .{ DMA1, ch },
             .dma2 => |ch| .{ DMA2, ch },
         };
-        const DMA = v[0];
-        const ch = v[1];
         const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
 
         const flags = DMA.INTFR;
@@ -167,12 +157,10 @@ pub const Interrupts = enum {
     };
 
     pub fn clear(comptime dma: Channel, comptime flag: ClearFlag) void {
-        const v = switch (dma) {
+        const DMA, const ch = switch (dma) {
             .dma1 => |ch| .{ DMA1, ch },
             .dma2 => |ch| .{ DMA2, ch },
         };
-        const DMA = v[0];
-        const ch = v[1];
         const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
 
         const name = comptime switch (flag) {
@@ -279,13 +267,10 @@ pub const Priority = enum(u2) {
 };
 
 inline fn enableInternal(comptime dma: Channel, comptime value: u1) void {
-    const v = switch (dma) {
+    const DMA, const ch = switch (dma) {
         .dma1 => |ch| .{ DMA1, ch },
         .dma2 => |ch| .{ DMA2, ch },
     };
-
-    const DMA = v[0];
-    const ch = v[1];
     const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
 
     @field(DMA, "CFGR" ++ ch_str).modify(.{ .EN = value });
@@ -319,12 +304,10 @@ inline fn configureInternal(comptime DMA: anytype, ch_num: u4, comptime cfg: Con
 }
 
 fn enableInterruptsInternal(comptime dma: Channel, irq: Interrupts, value: u1) void {
-    const v = switch (dma) {
+    const DMA, const ch = switch (dma) {
         .dma1 => |ch| .{ DMA1, ch },
         .dma2 => |ch| .{ DMA2, ch },
     };
-    const DMA = v[0];
-    const ch = v[1];
     const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
 
     switch (irq) {
