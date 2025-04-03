@@ -2,6 +2,7 @@ const std = @import("std");
 const config = @import("config");
 const svd = @import("svd");
 
+const hal = @import("hal.zig");
 const RCC = svd.peripherals.RCC;
 const DMA1 = svd.peripherals.DMA1;
 const DMA2 = svd.peripherals.DMA2;
@@ -83,6 +84,105 @@ pub const Channel = union(enum) {
         if (length) |len| {
             @field(DMA, "CNTR" ++ ch_str).raw = len;
         }
+    }
+
+    pub fn getRemaining(comptime self: Channel) u32 {
+        const v = switch (self) {
+            .dma1 => |ch| .{ DMA1, ch },
+            .dma2 => |ch| .{ DMA2, ch },
+        };
+        const DMA = v[0];
+        const ch = v[1];
+        const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
+
+        return @field(DMA, "CNTR" ++ ch_str).raw;
+    }
+};
+
+pub const Interrupts = enum {
+    /// Transfer complete interrupt.
+    transfer_complete,
+    /// Half transfer complete interrupt.
+    half_transfer_complete,
+    /// Transfer error interrupt.
+    transfer_error,
+
+    /// Enabled interrupt for the DMA channel.
+    pub fn enable(comptime dma: Channel, comptime irq: Interrupts) void {
+        enableInterruptsInternal(dma, irq, 1);
+
+        const irq_name = switch (dma) {
+            .dma1 => |ch| "DMA1_Channel" ++ std.fmt.comptimePrint("{}", .{@intFromEnum(ch)}),
+            .dma2 => |ch| "DMA2_Channel" ++ std.fmt.comptimePrint("{}", .{@intFromEnum(ch)}),
+        };
+
+        hal.interrupts.enable(std.meta.stringToEnum(svd.interrupts, irq_name).?);
+    }
+
+    /// Disabled interrupt for the DMA channel.
+    pub fn disable(comptime dma: Channel, irq: Interrupts) void {
+        enableInterruptsInternal(dma, irq, 0);
+    }
+
+    pub const Flags = struct {
+        /// Global interrupt flag.
+        global: bool,
+        /// Transfer complete flag.
+        transfer_complete: bool,
+        /// Half transfer complete flag.
+        half_transfer_complete: bool,
+        /// Transfer error flag.
+        transfer_error: bool,
+    };
+
+    pub fn status(comptime dma: Channel) Flags {
+        const v = switch (dma) {
+            .dma1 => |ch| .{ DMA1, ch },
+            .dma2 => |ch| .{ DMA2, ch },
+        };
+        const DMA = v[0];
+        const ch = v[1];
+        const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
+
+        const flags = DMA.INTFR;
+        return .{
+            .global = @field(flags, "GIF" ++ ch_str),
+            .transfer_complete = @field(flags, "TCIF" ++ ch_str),
+            .half_transfer_complete = @field(flags, "HTIF" ++ ch_str),
+            .transfer_error = @field(flags, "TEIF" ++ ch_str),
+        };
+    }
+
+    pub const ClearFlag = enum {
+        /// Clear global interrupt flag.
+        global,
+        /// Clear transfer complete flag.
+        transfer_complete,
+        /// Clear half transfer complete flag.
+        half_transfer_complete,
+        /// Clear transfer error flag.
+        transfer_error,
+    };
+
+    pub fn clear(comptime dma: Channel, comptime flag: ClearFlag) void {
+        const v = switch (dma) {
+            .dma1 => |ch| .{ DMA1, ch },
+            .dma2 => |ch| .{ DMA2, ch },
+        };
+        const DMA = v[0];
+        const ch = v[1];
+        const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
+
+        const name = comptime switch (flag) {
+            .global => "CGIF" ++ ch_str,
+            .transfer_complete => "CTCIF" ++ ch_str,
+            .half_transfer_complete => "CHTIF" ++ ch_str,
+            .transfer_error => "CTEIF" ++ ch_str,
+        };
+
+        var reg = DMA.INTFCR.default();
+        @field(reg, name) = 1;
+        DMA.INTFCR.write(reg);
     }
 };
 
@@ -191,10 +291,6 @@ inline fn configureInternal(comptime DMA: anytype, ch_num: u4, comptime cfg: Con
     const ch_str = std.fmt.comptimePrint("{}", .{ch_num});
 
     const pre_reg_cfg = svd.nullable_types.DMA1.CFGR1{
-        // TODO: interrupts
-        .TCIE = 0,
-        .HTIE = 0,
-        .TEIE = 0,
         .DIR = @intFromEnum(cfg.direction),
         .CIRC = @intFromEnum(cfg.mode),
         .PINC = if (cfg.periph_inc) 1 else 0,
@@ -223,5 +319,27 @@ inline fn configureInternal(comptime DMA: anytype, ch_num: u4, comptime cfg: Con
     }
     if (cfg.mem_ptr) |ptr| {
         @field(DMA, "MADDR" ++ ch_str).raw = @intFromPtr(ptr);
+    }
+}
+
+fn enableInterruptsInternal(comptime dma: Channel, irq: Interrupts, value: u1) void {
+    const v = switch (dma) {
+        .dma1 => |ch| .{ DMA1, ch },
+        .dma2 => |ch| .{ DMA2, ch },
+    };
+    const DMA = v[0];
+    const ch = v[1];
+    const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
+
+    switch (irq) {
+        .transfer_complete => {
+            @field(DMA, "CFGR" ++ ch_str).modify(.{ .TCIE = value });
+        },
+        .half_transfer_complete => {
+            @field(DMA, "CFGR" ++ ch_str).modify(.{ .HTIE = value });
+        },
+        .transfer_error => {
+            @field(DMA, "CFGR" ++ ch_str).modify(.{ .TEIE = value });
+        },
     }
 }
