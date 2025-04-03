@@ -101,7 +101,7 @@ pub const Error = Timeout || error{
 
 const UART = @This();
 
-reg: *volatile svd.types.USART,
+reg: *volatile svd.registers.USART,
 
 pub fn init(comptime uart: svd.peripherals.USART, comptime cfg: Config) UART {
     const self = UART{ .reg = uart.get() };
@@ -356,7 +356,7 @@ fn wait(self: UART, conditionFn: fn (self: UART) bool, deadlineFn: ?DeadlineFn) 
 }
 
 // Comptime pins checks.
-pub fn checkPins(comptime reg: *volatile svd.types.I2C, comptime pins: Pins) void {
+pub fn checkPins(comptime reg: *volatile svd.registers.I2C, comptime pins: Pins) void {
     const pins_namespace = Pins.namespaceFor(reg);
 
     // Find pins from namespace.

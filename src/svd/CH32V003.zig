@@ -129,13 +129,13 @@ pub const device_description = "CH32V003 View File";
 
 pub const peripherals = struct {
     /// Power control
-    pub const PWR = types.PWR.from(0x40007000);
+    pub const PWR = registers.PWR.from(0x40007000);
 
     /// Reset and clock control
-    pub const RCC = types.RCC.from(0x40021000);
+    pub const RCC = registers.RCC.from(0x40021000);
 
     /// Extend configuration
-    pub const EXTEN = types.EXTEN.from(0x40023800);
+    pub const EXTEN = registers.EXTEN.from(0x40023800);
 
     /// General purpose I/O
     pub const GPIO = enum(u32) {
@@ -147,12 +147,12 @@ pub const peripherals = struct {
             return @intFromEnum(self);
         }
 
-        pub inline fn get(self: GPIO) *volatile types.GPIO {
-            return types.GPIO.from(self.addr());
+        pub inline fn get(self: GPIO) *volatile registers.GPIO {
+            return registers.GPIO.from(self.addr());
         }
 
-        pub inline fn from(address: u32) GPIO {
-            return types.GPIO.from(address);
+        pub inline fn from(address: u32) *volatile registers.GPIO {
+            return registers.GPIO.from(address);
         }
     };
     /// General purpose I/O
@@ -163,19 +163,19 @@ pub const peripherals = struct {
     pub const GPIOD = GPIO.GPIOD.get();
 
     /// Alternate function I/O
-    pub const AFIO = types.AFIO.from(0x40010000);
+    pub const AFIO = registers.AFIO.from(0x40010000);
 
     /// EXTI
-    pub const EXTI = types.EXTI.from(0x40010400);
+    pub const EXTI = registers.EXTI.from(0x40010400);
 
     /// DMA1 controller
-    pub const DMA1 = types.DMA1.from(0x40020000);
+    pub const DMA1 = registers.DMA1.from(0x40020000);
 
     /// Independent watchdog
-    pub const IWDG = types.IWDG.from(0x40003000);
+    pub const IWDG = registers.IWDG.from(0x40003000);
 
     /// Window watchdog
-    pub const WWDG = types.WWDG.from(0x40002c00);
+    pub const WWDG = registers.WWDG.from(0x40002c00);
 
     /// Advanced timer
     pub const AdvancedTimer = enum(u32) {
@@ -185,12 +185,12 @@ pub const peripherals = struct {
             return @intFromEnum(self);
         }
 
-        pub inline fn get(self: AdvancedTimer) *volatile types.AdvancedTimer {
-            return types.AdvancedTimer.from(self.addr());
+        pub inline fn get(self: AdvancedTimer) *volatile registers.AdvancedTimer {
+            return registers.AdvancedTimer.from(self.addr());
         }
 
-        pub inline fn from(address: u32) AdvancedTimer {
-            return types.AdvancedTimer.from(address);
+        pub inline fn from(address: u32) *volatile registers.AdvancedTimer {
+            return registers.AdvancedTimer.from(address);
         }
     };
     /// Advanced timer
@@ -204,12 +204,12 @@ pub const peripherals = struct {
             return @intFromEnum(self);
         }
 
-        pub inline fn get(self: GeneralPurposeTimer) *volatile types.GeneralPurposeTimer {
-            return types.GeneralPurposeTimer.from(self.addr());
+        pub inline fn get(self: GeneralPurposeTimer) *volatile registers.GeneralPurposeTimer {
+            return registers.GeneralPurposeTimer.from(self.addr());
         }
 
-        pub inline fn from(address: u32) GeneralPurposeTimer {
-            return types.GeneralPurposeTimer.from(address);
+        pub inline fn from(address: u32) *volatile registers.GeneralPurposeTimer {
+            return registers.GeneralPurposeTimer.from(address);
         }
     };
     /// General purpose timer
@@ -223,12 +223,12 @@ pub const peripherals = struct {
             return @intFromEnum(self);
         }
 
-        pub inline fn get(self: I2C) *volatile types.I2C {
-            return types.I2C.from(self.addr());
+        pub inline fn get(self: I2C) *volatile registers.I2C {
+            return registers.I2C.from(self.addr());
         }
 
-        pub inline fn from(address: u32) I2C {
-            return types.I2C.from(address);
+        pub inline fn from(address: u32) *volatile registers.I2C {
+            return registers.I2C.from(address);
         }
     };
     /// Inter integrated circuit
@@ -242,12 +242,12 @@ pub const peripherals = struct {
             return @intFromEnum(self);
         }
 
-        pub inline fn get(self: SPI) *volatile types.SPI {
-            return types.SPI.from(self.addr());
+        pub inline fn get(self: SPI) *volatile registers.SPI {
+            return registers.SPI.from(self.addr());
         }
 
-        pub inline fn from(address: u32) SPI {
-            return types.SPI.from(address);
+        pub inline fn from(address: u32) *volatile registers.SPI {
+            return registers.SPI.from(address);
         }
     };
     /// Serial peripheral interface
@@ -261,46 +261,846 @@ pub const peripherals = struct {
             return @intFromEnum(self);
         }
 
-        pub inline fn get(self: USART) *volatile types.USART {
-            return types.USART.from(self.addr());
+        pub inline fn get(self: USART) *volatile registers.USART {
+            return registers.USART.from(self.addr());
         }
 
-        pub inline fn from(address: u32) USART {
-            return types.USART.from(address);
+        pub inline fn from(address: u32) *volatile registers.USART {
+            return registers.USART.from(address);
         }
     };
     /// Universal synchronous asynchronous receiver transmitter
     pub const USART1 = USART.USART1.get();
 
     /// Analog to digital converter
-    pub const ADC1 = types.ADC1.from(0x40012400);
+    pub const ADC1 = registers.ADC1.from(0x40012400);
 
     /// Debug support
-    pub const DBG = types.DBG.from(0xe000d000);
+    pub const DBG = registers.DBG.from(0xe000d000);
 
     /// Device electronic signature
-    pub const ESIG = types.ESIG.from(0x1ffff7e0);
+    pub const ESIG = registers.ESIG.from(0x1ffff7e0);
 
     /// FLASH
-    pub const FLASH = types.FLASH.from(0x40022000);
+    pub const FLASH = registers.FLASH.from(0x40022000);
 
     /// Programmable Fast Interrupt Controller
-    pub const PFIC = types.PFIC.from(0xe000e000);
+    pub const PFIC = registers.PFIC.from(0xe000e000);
 };
 
-pub const types = struct {
+pub const registers = struct {
     /// Power control
     pub const PWR = extern struct {
-        pub inline fn from(base: u32) *volatile types.PWR {
+        pub inline fn from(base: u32) *volatile registers.PWR {
             return @ptrFromInt(base);
         }
 
-        pub inline fn addr(self: *volatile types.PWR) u32 {
+        pub inline fn addr(self: *volatile registers.PWR) u32 {
             return @intFromPtr(self);
         }
 
         /// Power control register (PWR_CTRL)
-        CTLR: RegisterRW(packed struct(u32) {
+        CTLR: RegisterRW(types.PWR.CTLR, nullable_types.PWR.CTLR),
+        /// Power control state register (PWR_CSR)
+        CSR: RegisterRW(types.PWR.CSR, nullable_types.PWR.CSR),
+        /// Automatic wake-up control state register (PWR_AWUCSR)
+        AWUCSR: RegisterRW(types.PWR.AWUCSR, nullable_types.PWR.AWUCSR),
+        /// Automatic wake window comparison value register (PWR_AWUWR)
+        AWUWR: RegisterRW(types.PWR.AWUWR, nullable_types.PWR.AWUWR),
+        /// Automatic wake-up prescaler register (PWR_AWUPSC)
+        AWUPSC: RegisterRW(types.PWR.AWUPSC, nullable_types.PWR.AWUPSC),
+    };
+
+    /// Reset and clock control
+    pub const RCC = extern struct {
+        pub inline fn from(base: u32) *volatile registers.RCC {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.RCC) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// Clock control register
+        CTLR: RegisterRW(types.RCC.CTLR, nullable_types.RCC.CTLR),
+        /// Clock configuration register (RCC_CFGR0)
+        CFGR0: RegisterRW(types.RCC.CFGR0, nullable_types.RCC.CFGR0),
+        /// Clock interrupt register (RCC_INTR)
+        INTR: RegisterRW(types.RCC.INTR, nullable_types.RCC.INTR),
+        /// PB2 peripheral reset register (RCC_APB2PRSTR)
+        APB2PRSTR: RegisterRW(types.RCC.APB2PRSTR, nullable_types.RCC.APB2PRSTR),
+        /// PB1 peripheral reset register (RCC_APB1PRSTR)
+        APB1PRSTR: RegisterRW(types.RCC.APB1PRSTR, nullable_types.RCC.APB1PRSTR),
+        /// HB Peripheral Clock enable register (RCC_AHBPCENR)
+        AHBPCENR: RegisterRW(types.RCC.AHBPCENR, nullable_types.RCC.AHBPCENR),
+        /// PB2 peripheral clock enable register (RCC_APB2PCENR)
+        APB2PCENR: RegisterRW(types.RCC.APB2PCENR, nullable_types.RCC.APB2PCENR),
+        /// PB1 peripheral clock enable register (RCC_APB1PCENR)
+        APB1PCENR: RegisterRW(types.RCC.APB1PCENR, nullable_types.RCC.APB1PCENR),
+        /// offset 0x4
+        _offset8: [4]u8,
+        /// Control/status register (RCC_RSTSCKR)
+        RSTSCKR: RegisterRW(types.RCC.RSTSCKR, nullable_types.RCC.RSTSCKR),
+    };
+
+    /// Extend configuration
+    pub const EXTEN = extern struct {
+        pub inline fn from(base: u32) *volatile registers.EXTEN {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.EXTEN) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// Configure the extended control register
+        EXTEN_CTR: RegisterRW(types.EXTEN.EXTEN_CTR, nullable_types.EXTEN.EXTEN_CTR),
+    };
+
+    /// General purpose I/O
+    /// Type for: GPIOA GPIOC GPIOD
+    pub const GPIO = extern struct {
+        pub const GPIOA = registers.GPIO.from(0x40010800);
+        pub const GPIOC = registers.GPIO.from(0x40011000);
+        pub const GPIOD = registers.GPIO.from(0x40011400);
+
+        pub inline fn from(base: u32) *volatile registers.GPIO {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.GPIO) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// Port configuration register low (GPIOn_CFGLR)
+        CFGLR: RegisterRW(types.GPIO.CFGLR, nullable_types.GPIO.CFGLR),
+        /// offset 0x4
+        _offset1: [4]u8,
+        /// Port input data register (GPIOn_INDR)
+        INDR: RegisterRW(types.GPIO.INDR, nullable_types.GPIO.INDR),
+        /// Port output data register (GPIOn_OUTDR)
+        OUTDR: RegisterRW(types.GPIO.OUTDR, nullable_types.GPIO.OUTDR),
+        /// Port bit set/reset register (GPIOn_BSHR)
+        BSHR: RegisterRW(types.GPIO.BSHR, nullable_types.GPIO.BSHR),
+        /// Port bit reset register (GPIOn_BCR)
+        BCR: RegisterRW(types.GPIO.BCR, nullable_types.GPIO.BCR),
+        /// Port configuration lock register
+        LCKR: RegisterRW(types.GPIO.LCKR, nullable_types.GPIO.LCKR),
+    };
+
+    /// Alternate function I/O
+    pub const AFIO = extern struct {
+        pub inline fn from(base: u32) *volatile registers.AFIO {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.AFIO) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// offset 0x4
+        _offset0: [4]u8,
+        /// AF remap and debug I/O configuration register (AFIO_PCFR1)
+        PCFR1: RegisterRW(types.AFIO.PCFR1, nullable_types.AFIO.PCFR1),
+        /// External interrupt configuration register (AFIO_EXTICR)
+        EXTICR: RegisterRW(types.AFIO.EXTICR, nullable_types.AFIO.EXTICR),
+    };
+
+    /// EXTI
+    pub const EXTI = extern struct {
+        pub inline fn from(base: u32) *volatile registers.EXTI {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.EXTI) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// Interrupt mask register (EXTI_INTENR)
+        INTENR: RegisterRW(types.EXTI.INTENR, nullable_types.EXTI.INTENR),
+        /// Event mask register (EXTI_EVENR)
+        EVENR: RegisterRW(types.EXTI.EVENR, nullable_types.EXTI.EVENR),
+        /// Rising Trigger selection register (EXTI_RTENR)
+        RTENR: RegisterRW(types.EXTI.RTENR, nullable_types.EXTI.RTENR),
+        /// Falling Trigger selection register (EXTI_FTENR)
+        FTENR: RegisterRW(types.EXTI.FTENR, nullable_types.EXTI.FTENR),
+        /// Software interrupt event register (EXTI_SWIEVR)
+        SWIEVR: RegisterRW(types.EXTI.SWIEVR, nullable_types.EXTI.SWIEVR),
+        /// Pending register (EXTI_INTFR)
+        INTFR: RegisterRW(types.EXTI.INTFR, nullable_types.EXTI.INTFR),
+    };
+
+    /// DMA1 controller
+    pub const DMA1 = extern struct {
+        pub inline fn from(base: u32) *volatile registers.DMA1 {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.DMA1) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// DMA interrupt status register (DMA_INTFR)
+        INTFR: RegisterRW(types.DMA1.INTFR, nullable_types.DMA1.INTFR),
+        /// DMA interrupt flag clear register (DMA_INTFCR)
+        INTFCR: RegisterRW(types.DMA1.INTFCR, nullable_types.DMA1.INTFCR),
+        /// DMA channel configuration register (DMA_CFGR)
+        CFGR1: RegisterRW(types.DMA1.CFGR1, nullable_types.DMA1.CFGR1),
+        /// DMA channel 1 number of data register
+        CNTR1: RegisterRW(types.DMA1.CNTR1, nullable_types.DMA1.CNTR1),
+        /// DMA channel 1 peripheral address register
+        PADDR1: RegisterRW(types.DMA1.PADDR1, nullable_types.DMA1.PADDR1),
+        /// DMA channel 1 memory address register
+        MADDR1: RegisterRW(types.DMA1.MADDR1, nullable_types.DMA1.MADDR1),
+        /// offset 0x4
+        _offset6: [4]u8,
+        /// DMA channel configuration register (DMA_CFGR)
+        CFGR2: RegisterRW(types.DMA1.CFGR2, nullable_types.DMA1.CFGR2),
+        /// DMA channel 2 number of data register
+        CNTR2: RegisterRW(types.DMA1.CNTR2, nullable_types.DMA1.CNTR2),
+        /// DMA channel 2 peripheral address register
+        PADDR2: RegisterRW(types.DMA1.PADDR2, nullable_types.DMA1.PADDR2),
+        /// DMA channel 2 memory address register
+        MADDR2: RegisterRW(types.DMA1.MADDR2, nullable_types.DMA1.MADDR2),
+        /// offset 0x4
+        _offset10: [4]u8,
+        /// DMA channel configuration register (DMA_CFGR)
+        CFGR3: RegisterRW(types.DMA1.CFGR3, nullable_types.DMA1.CFGR3),
+        /// DMA channel 3 number of data register
+        CNTR3: RegisterRW(types.DMA1.CNTR3, nullable_types.DMA1.CNTR3),
+        /// DMA channel 3 peripheral address register
+        PADDR3: RegisterRW(types.DMA1.PADDR3, nullable_types.DMA1.PADDR3),
+        /// DMA channel 3 memory address register
+        MADDR3: RegisterRW(types.DMA1.MADDR3, nullable_types.DMA1.MADDR3),
+        /// offset 0x4
+        _offset14: [4]u8,
+        /// DMA channel configuration register (DMA_CFGR)
+        CFGR4: RegisterRW(types.DMA1.CFGR4, nullable_types.DMA1.CFGR4),
+        /// DMA channel 4 number of data register
+        CNTR4: RegisterRW(types.DMA1.CNTR4, nullable_types.DMA1.CNTR4),
+        /// DMA channel 4 peripheral address register
+        PADDR4: RegisterRW(types.DMA1.PADDR4, nullable_types.DMA1.PADDR4),
+        /// DMA channel 4 memory address register
+        MADDR4: RegisterRW(types.DMA1.MADDR4, nullable_types.DMA1.MADDR4),
+        /// offset 0x4
+        _offset18: [4]u8,
+        /// DMA channel configuration register (DMA_CFGR)
+        CFGR5: RegisterRW(types.DMA1.CFGR5, nullable_types.DMA1.CFGR5),
+        /// DMA channel 5 number of data register
+        CNTR5: RegisterRW(types.DMA1.CNTR5, nullable_types.DMA1.CNTR5),
+        /// DMA channel 5 peripheral address register
+        PADDR5: RegisterRW(types.DMA1.PADDR5, nullable_types.DMA1.PADDR5),
+        /// DMA channel 5 memory address register
+        MADDR5: RegisterRW(types.DMA1.MADDR5, nullable_types.DMA1.MADDR5),
+        /// offset 0x4
+        _offset22: [4]u8,
+        /// DMA channel configuration register (DMA_CFGR)
+        CFGR6: RegisterRW(types.DMA1.CFGR6, nullable_types.DMA1.CFGR6),
+        /// DMA channel 6 number of data register
+        CNTR6: RegisterRW(types.DMA1.CNTR6, nullable_types.DMA1.CNTR6),
+        /// DMA channel 6 peripheral address register
+        PADDR6: RegisterRW(types.DMA1.PADDR6, nullable_types.DMA1.PADDR6),
+        /// DMA channel 6 memory address register
+        MADDR6: RegisterRW(types.DMA1.MADDR6, nullable_types.DMA1.MADDR6),
+        /// offset 0x4
+        _offset26: [4]u8,
+        /// DMA channel configuration register (DMA_CFGR)
+        CFGR7: RegisterRW(types.DMA1.CFGR7, nullable_types.DMA1.CFGR7),
+        /// DMA channel 7 number of data register
+        CNTR7: RegisterRW(types.DMA1.CNTR7, nullable_types.DMA1.CNTR7),
+        /// DMA channel 7 peripheral address register
+        PADDR7: RegisterRW(types.DMA1.PADDR7, nullable_types.DMA1.PADDR7),
+        /// DMA channel 7 memory address register
+        MADDR7: RegisterRW(types.DMA1.MADDR7, nullable_types.DMA1.MADDR7),
+    };
+
+    /// Independent watchdog
+    pub const IWDG = extern struct {
+        pub inline fn from(base: u32) *volatile registers.IWDG {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.IWDG) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// Key register (IWDG_CTLR)
+        CTLR: RegisterRW(types.IWDG.CTLR, nullable_types.IWDG.CTLR),
+        /// Prescaler register (IWDG_PSCR)
+        PSCR: RegisterRW(types.IWDG.PSCR, nullable_types.IWDG.PSCR),
+        /// Reload register (IWDG_RLDR)
+        RLDR: RegisterRW(types.IWDG.RLDR, nullable_types.IWDG.RLDR),
+        /// Status register (IWDG_SR)
+        STATR: RegisterRW(types.IWDG.STATR, nullable_types.IWDG.STATR),
+    };
+
+    /// Window watchdog
+    pub const WWDG = extern struct {
+        pub inline fn from(base: u32) *volatile registers.WWDG {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.WWDG) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// Control register (WWDG_CR)
+        CTLR: RegisterRW(types.WWDG.CTLR, nullable_types.WWDG.CTLR),
+        /// Configuration register (WWDG_CFR)
+        CFGR: RegisterRW(types.WWDG.CFGR, nullable_types.WWDG.CFGR),
+        /// Status register (WWDG_SR)
+        STATR: RegisterRW(types.WWDG.STATR, nullable_types.WWDG.STATR),
+    };
+
+    /// Advanced timer
+    /// Type for: TIM1
+    pub const AdvancedTimer = extern struct {
+        pub const TIM1 = registers.AdvancedTimer.from(0x40012c00);
+
+        pub inline fn from(base: u32) *volatile registers.AdvancedTimer {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.AdvancedTimer) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// control register 1
+        CTLR1: RegisterRW(types.AdvancedTimer.CTLR1, nullable_types.AdvancedTimer.CTLR1),
+        /// control register 2
+        CTLR2: RegisterRW(types.AdvancedTimer.CTLR2, nullable_types.AdvancedTimer.CTLR2),
+        /// slave mode control register
+        SMCFGR: RegisterRW(types.AdvancedTimer.SMCFGR, nullable_types.AdvancedTimer.SMCFGR),
+        /// DMA/Interrupt enable register
+        DMAINTENR: RegisterRW(types.AdvancedTimer.DMAINTENR, nullable_types.AdvancedTimer.DMAINTENR),
+        /// status register
+        INTFR: RegisterRW(types.AdvancedTimer.INTFR, nullable_types.AdvancedTimer.INTFR),
+        /// event generation register
+        SWEVGR: RegisterRW(types.AdvancedTimer.SWEVGR, nullable_types.AdvancedTimer.SWEVGR),
+        /// capture/compare mode register (output mode)
+        CHCTLR1_Output: RegisterRW(types.AdvancedTimer.CHCTLR1_Output, nullable_types.AdvancedTimer.CHCTLR1_Output),
+        /// capture/compare mode register (output mode)
+        CHCTLR2_Output: RegisterRW(types.AdvancedTimer.CHCTLR2_Output, nullable_types.AdvancedTimer.CHCTLR2_Output),
+        /// capture/compare enable register
+        CCER: RegisterRW(types.AdvancedTimer.CCER, nullable_types.AdvancedTimer.CCER),
+        /// counter
+        CNT: RegisterRW(types.AdvancedTimer.CNT, nullable_types.AdvancedTimer.CNT),
+        /// prescaler
+        PSC: RegisterRW(types.AdvancedTimer.PSC, nullable_types.AdvancedTimer.PSC),
+        /// auto-reload register
+        ATRLR: RegisterRW(types.AdvancedTimer.ATRLR, nullable_types.AdvancedTimer.ATRLR),
+        /// repetition counter register
+        RPTCR: RegisterRW(types.AdvancedTimer.RPTCR, nullable_types.AdvancedTimer.RPTCR),
+        /// capture/compare register 1
+        CH1CVR: RegisterRW(types.AdvancedTimer.CH1CVR, nullable_types.AdvancedTimer.CH1CVR),
+        /// capture/compare register 2
+        CH2CVR: RegisterRW(types.AdvancedTimer.CH2CVR, nullable_types.AdvancedTimer.CH2CVR),
+        /// capture/compare register 3
+        CH3CVR: RegisterRW(types.AdvancedTimer.CH3CVR, nullable_types.AdvancedTimer.CH3CVR),
+        /// capture/compare register 4
+        CH4CVR: RegisterRW(types.AdvancedTimer.CH4CVR, nullable_types.AdvancedTimer.CH4CVR),
+        /// break and dead-time register
+        BDTR: RegisterRW(types.AdvancedTimer.BDTR, nullable_types.AdvancedTimer.BDTR),
+        /// DMA control register
+        DMACFGR: RegisterRW(types.AdvancedTimer.DMACFGR, nullable_types.AdvancedTimer.DMACFGR),
+        /// DMA address for full transfer
+        DMAADR: RegisterRW(types.AdvancedTimer.DMAADR, nullable_types.AdvancedTimer.DMAADR),
+    };
+
+    /// General purpose timer
+    /// Type for: TIM2
+    pub const GeneralPurposeTimer = extern struct {
+        pub const TIM2 = registers.GeneralPurposeTimer.from(0x40000000);
+
+        pub inline fn from(base: u32) *volatile registers.GeneralPurposeTimer {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.GeneralPurposeTimer) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// control register 1
+        CTLR1: RegisterRW(types.GeneralPurposeTimer.CTLR1, nullable_types.GeneralPurposeTimer.CTLR1),
+        /// control register 2
+        CTLR2: RegisterRW(types.GeneralPurposeTimer.CTLR2, nullable_types.GeneralPurposeTimer.CTLR2),
+        /// slave mode control register
+        SMCFGR: RegisterRW(types.GeneralPurposeTimer.SMCFGR, nullable_types.GeneralPurposeTimer.SMCFGR),
+        /// DMA/Interrupt enable register
+        DMAINTENR: RegisterRW(types.GeneralPurposeTimer.DMAINTENR, nullable_types.GeneralPurposeTimer.DMAINTENR),
+        /// status register
+        INTFR: RegisterRW(types.GeneralPurposeTimer.INTFR, nullable_types.GeneralPurposeTimer.INTFR),
+        /// event generation register
+        SWEVGR: RegisterRW(types.GeneralPurposeTimer.SWEVGR, nullable_types.GeneralPurposeTimer.SWEVGR),
+        /// capture/compare mode register 1 (output mode)
+        CHCTLR1_Output: RegisterRW(types.GeneralPurposeTimer.CHCTLR1_Output, nullable_types.GeneralPurposeTimer.CHCTLR1_Output),
+        /// capture/compare mode register 2 (output mode)
+        CHCTLR2_Output: RegisterRW(types.GeneralPurposeTimer.CHCTLR2_Output, nullable_types.GeneralPurposeTimer.CHCTLR2_Output),
+        /// capture/compare enable register
+        CCER: RegisterRW(types.GeneralPurposeTimer.CCER, nullable_types.GeneralPurposeTimer.CCER),
+        /// counter
+        CNT: RegisterRW(types.GeneralPurposeTimer.CNT, nullable_types.GeneralPurposeTimer.CNT),
+        /// prescaler
+        PSC: RegisterRW(types.GeneralPurposeTimer.PSC, nullable_types.GeneralPurposeTimer.PSC),
+        /// auto-reload register
+        ATRLR: RegisterRW(types.GeneralPurposeTimer.ATRLR, nullable_types.GeneralPurposeTimer.ATRLR),
+        /// offset 0x4
+        _offset14: [4]u8,
+        /// capture/compare register 1
+        CH1CVR: RegisterRW(types.GeneralPurposeTimer.CH1CVR, nullable_types.GeneralPurposeTimer.CH1CVR),
+        /// capture/compare register 2
+        CH2CVR: RegisterRW(types.GeneralPurposeTimer.CH2CVR, nullable_types.GeneralPurposeTimer.CH2CVR),
+        /// capture/compare register 3
+        CH3CVR: RegisterRW(types.GeneralPurposeTimer.CH3CVR, nullable_types.GeneralPurposeTimer.CH3CVR),
+        /// capture/compare register 4
+        CH4CVR: RegisterRW(types.GeneralPurposeTimer.CH4CVR, nullable_types.GeneralPurposeTimer.CH4CVR),
+        /// offset 0x4
+        _offset18: [4]u8,
+        /// DMA control register
+        DMACFGR: RegisterRW(types.GeneralPurposeTimer.DMACFGR, nullable_types.GeneralPurposeTimer.DMACFGR),
+        /// DMA address for full transfer
+        DMAADR: RegisterRW(types.GeneralPurposeTimer.DMAADR, nullable_types.GeneralPurposeTimer.DMAADR),
+    };
+
+    /// Inter integrated circuit
+    /// Type for: I2C1
+    pub const I2C = extern struct {
+        pub const I2C1 = registers.I2C.from(0x40005400);
+
+        pub inline fn from(base: u32) *volatile registers.I2C {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.I2C) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// Control register 1
+        CTLR1: RegisterRW(types.I2C.CTLR1, nullable_types.I2C.CTLR1),
+        /// Control register 2
+        CTLR2: RegisterRW(types.I2C.CTLR2, nullable_types.I2C.CTLR2),
+        /// Own address register 1
+        OADDR1: RegisterRW(types.I2C.OADDR1, nullable_types.I2C.OADDR1),
+        /// Own address register 2
+        OADDR2: RegisterRW(types.I2C.OADDR2, nullable_types.I2C.OADDR2),
+        /// Data register
+        DATAR: RegisterRW(types.I2C.DATAR, nullable_types.I2C.DATAR),
+        /// Status register 1
+        STAR1: RegisterRW(types.I2C.STAR1, nullable_types.I2C.STAR1),
+        /// Status register 2
+        STAR2: RegisterRW(types.I2C.STAR2, nullable_types.I2C.STAR2),
+        /// Clock control register
+        CKCFGR: RegisterRW(types.I2C.CKCFGR, nullable_types.I2C.CKCFGR),
+    };
+
+    /// Serial peripheral interface
+    /// Type for: SPI1
+    pub const SPI = extern struct {
+        pub const SPI1 = registers.SPI.from(0x40013000);
+
+        pub inline fn from(base: u32) *volatile registers.SPI {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.SPI) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// control register 1
+        CTLR1: RegisterRW(types.SPI.CTLR1, nullable_types.SPI.CTLR1),
+        /// control register 2
+        CTLR2: RegisterRW(types.SPI.CTLR2, nullable_types.SPI.CTLR2),
+        /// status register
+        STATR: RegisterRW(types.SPI.STATR, nullable_types.SPI.STATR),
+        /// data register
+        DATAR: RegisterRW(types.SPI.DATAR, nullable_types.SPI.DATAR),
+        /// CRCR polynomial register
+        CRCR: RegisterRW(types.SPI.CRCR, nullable_types.SPI.CRCR),
+        /// RX CRC register
+        RCRCR: RegisterRW(types.SPI.RCRCR, nullable_types.SPI.RCRCR),
+        /// send CRC register
+        TCRCR: RegisterRW(types.SPI.TCRCR, nullable_types.SPI.TCRCR),
+        /// offset 0x8
+        _offset7: [8]u8,
+        /// high speed control register
+        HSCR: RegisterRW(types.SPI.HSCR, nullable_types.SPI.HSCR),
+    };
+
+    /// Universal synchronous asynchronous receiver transmitter
+    /// Type for: USART1
+    pub const USART = extern struct {
+        pub const USART1 = registers.USART.from(0x40013800);
+
+        pub inline fn from(base: u32) *volatile registers.USART {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.USART) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// Status register
+        STATR: RegisterRW(types.USART.STATR, nullable_types.USART.STATR),
+        /// Data register
+        DATAR: RegisterRW(types.USART.DATAR, nullable_types.USART.DATAR),
+        /// Baud rate register
+        BRR: RegisterRW(types.USART.BRR, nullable_types.USART.BRR),
+        /// Control register 1
+        CTLR1: RegisterRW(types.USART.CTLR1, nullable_types.USART.CTLR1),
+        /// Control register 2
+        CTLR2: RegisterRW(types.USART.CTLR2, nullable_types.USART.CTLR2),
+        /// Control register 3
+        CTLR3: RegisterRW(types.USART.CTLR3, nullable_types.USART.CTLR3),
+        /// Guard time and prescaler register
+        GPR: RegisterRW(types.USART.GPR, nullable_types.USART.GPR),
+    };
+
+    /// Analog to digital converter
+    pub const ADC1 = extern struct {
+        pub inline fn from(base: u32) *volatile registers.ADC1 {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.ADC1) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// status register
+        STATR: RegisterRW(types.ADC1.STATR, nullable_types.ADC1.STATR),
+        /// control register 1/TKEY_V_CTLR
+        CTLR1: RegisterRW(types.ADC1.CTLR1, nullable_types.ADC1.CTLR1),
+        /// control register 2
+        CTLR2: RegisterRW(types.ADC1.CTLR2, nullable_types.ADC1.CTLR2),
+        /// sample time register 1
+        SAMPTR1: RegisterRW(types.ADC1.SAMPTR1, nullable_types.ADC1.SAMPTR1),
+        /// sample time register 2
+        SAMPTR2: RegisterRW(types.ADC1.SAMPTR2, nullable_types.ADC1.SAMPTR2),
+        /// injected channel data offset register x
+        IOFR1: RegisterRW(types.ADC1.IOFR1, nullable_types.ADC1.IOFR1),
+        /// injected channel data offset register x
+        IOFR2: RegisterRW(types.ADC1.IOFR2, nullable_types.ADC1.IOFR2),
+        /// injected channel data offset register x
+        IOFR3: RegisterRW(types.ADC1.IOFR3, nullable_types.ADC1.IOFR3),
+        /// injected channel data offset register x
+        IOFR4: RegisterRW(types.ADC1.IOFR4, nullable_types.ADC1.IOFR4),
+        /// watchdog higher threshold register
+        WDHTR: RegisterRW(types.ADC1.WDHTR, nullable_types.ADC1.WDHTR),
+        /// watchdog lower threshold register
+        WDLTR: RegisterRW(types.ADC1.WDLTR, nullable_types.ADC1.WDLTR),
+        /// regular sequence register 1
+        RSQR1: RegisterRW(types.ADC1.RSQR1, nullable_types.ADC1.RSQR1),
+        /// regular sequence register 2
+        RSQR2: RegisterRW(types.ADC1.RSQR2, nullable_types.ADC1.RSQR2),
+        /// regular sequence register 3
+        RSQR3: RegisterRW(types.ADC1.RSQR3, nullable_types.ADC1.RSQR3),
+        /// injected sequence register
+        ISQR: RegisterRW(types.ADC1.ISQR, nullable_types.ADC1.ISQR),
+        /// injected data register 1
+        IDATAR1: RegisterRW(types.ADC1.IDATAR1, nullable_types.ADC1.IDATAR1),
+        /// injected data register 2
+        IDATAR2: RegisterRW(types.ADC1.IDATAR2, nullable_types.ADC1.IDATAR2),
+        /// injected data register 3
+        IDATAR3: RegisterRW(types.ADC1.IDATAR3, nullable_types.ADC1.IDATAR3),
+        /// injected data register 4
+        IDATAR4: RegisterRW(types.ADC1.IDATAR4, nullable_types.ADC1.IDATAR4),
+        /// regular data register
+        RDATAR: RegisterRW(types.ADC1.RDATAR, nullable_types.ADC1.RDATAR),
+        /// delay data register
+        DLYR: RegisterRW(types.ADC1.DLYR, nullable_types.ADC1.DLYR),
+    };
+
+    /// Debug support
+    pub const DBG = extern struct {
+        pub inline fn from(base: u32) *volatile registers.DBG {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.DBG) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// DBGMCU_CFGR1
+        CR: RegisterRW(types.DBG.CR, nullable_types.DBG.CR),
+    };
+
+    /// Device electronic signature
+    pub const ESIG = extern struct {
+        pub inline fn from(base: u32) *volatile registers.ESIG {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.ESIG) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// Flash capacity register
+        FLACAP: RegisterRW(types.ESIG.FLACAP, nullable_types.ESIG.FLACAP),
+        /// offset 0x6
+        _offset1: [6]u8,
+        /// Unique identity 1
+        UNIID1: RegisterRW(types.ESIG.UNIID1, nullable_types.ESIG.UNIID1),
+        /// Unique identity 2
+        UNIID2: RegisterRW(types.ESIG.UNIID2, nullable_types.ESIG.UNIID2),
+        /// Unique identity 3
+        UNIID3: RegisterRW(types.ESIG.UNIID3, nullable_types.ESIG.UNIID3),
+    };
+
+    /// FLASH
+    pub const FLASH = extern struct {
+        pub inline fn from(base: u32) *volatile registers.FLASH {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.FLASH) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// Flash key register
+        ACTLR: RegisterRW(types.FLASH.ACTLR, nullable_types.FLASH.ACTLR),
+        /// Flash key register
+        KEYR: RegisterRW(types.FLASH.KEYR, nullable_types.FLASH.KEYR),
+        /// Flash option key register
+        OBKEYR: RegisterRW(types.FLASH.OBKEYR, nullable_types.FLASH.OBKEYR),
+        /// Status register
+        STATR: RegisterRW(types.FLASH.STATR, nullable_types.FLASH.STATR),
+        /// Control register
+        CTLR: RegisterRW(types.FLASH.CTLR, nullable_types.FLASH.CTLR),
+        /// Flash address register
+        ADDR: RegisterRW(types.FLASH.ADDR, nullable_types.FLASH.ADDR),
+        /// offset 0x4
+        _offset6: [4]u8,
+        /// Option byte register
+        OBR: RegisterRW(types.FLASH.OBR, nullable_types.FLASH.OBR),
+        /// Write protection register
+        WPR: RegisterRW(types.FLASH.WPR, nullable_types.FLASH.WPR),
+        /// Mode select register
+        MODEKEYR: RegisterRW(types.FLASH.MODEKEYR, nullable_types.FLASH.MODEKEYR),
+        /// Boot mode key register
+        BOOT_MODEKEYP: RegisterRW(types.FLASH.BOOT_MODEKEYP, nullable_types.FLASH.BOOT_MODEKEYP),
+    };
+
+    /// Programmable Fast Interrupt Controller
+    pub const PFIC = extern struct {
+        pub inline fn from(base: u32) *volatile registers.PFIC {
+            return @ptrFromInt(base);
+        }
+
+        pub inline fn addr(self: *volatile registers.PFIC) u32 {
+            return @intFromPtr(self);
+        }
+
+        /// Interrupt Status Register
+        ISR1: RegisterRW(types.PFIC.ISR1, nullable_types.PFIC.ISR1),
+        /// Interrupt Status Register
+        ISR2: RegisterRW(types.PFIC.ISR2, nullable_types.PFIC.ISR2),
+        /// offset 0x18
+        _offset2: [24]u8,
+        /// Interrupt Pending Register
+        IPR1: RegisterRW(types.PFIC.IPR1, nullable_types.PFIC.IPR1),
+        /// Interrupt Pending Register
+        IPR2: RegisterRW(types.PFIC.IPR2, nullable_types.PFIC.IPR2),
+        /// offset 0x18
+        _offset4: [24]u8,
+        /// Interrupt Priority Register
+        ITHRESDR: RegisterRW(types.PFIC.ITHRESDR, nullable_types.PFIC.ITHRESDR),
+        /// offset 0x4
+        _offset5: [4]u8,
+        /// Interrupt Config Register
+        CFGR: RegisterRW(types.PFIC.CFGR, nullable_types.PFIC.CFGR),
+        /// Interrupt Global Register
+        GISR: RegisterRW(types.PFIC.GISR, nullable_types.PFIC.GISR),
+        /// ID Config Register
+        VTFIDR: RegisterRW(types.PFIC.VTFIDR, nullable_types.PFIC.VTFIDR),
+        /// offset 0xc
+        _offset8: [12]u8,
+        /// Interrupt 0 address Register
+        VTFADDRR0: RegisterRW(types.PFIC.VTFADDRR0, nullable_types.PFIC.VTFADDRR0),
+        /// Interrupt 1 address Register
+        VTFADDRR1: RegisterRW(types.PFIC.VTFADDRR1, nullable_types.PFIC.VTFADDRR1),
+        /// offset 0x98
+        _offset10: [152]u8,
+        /// Interrupt Setting Register
+        IENR1: RegisterRW(types.PFIC.IENR1, nullable_types.PFIC.IENR1),
+        /// Interrupt Setting Register
+        IENR2: RegisterRW(types.PFIC.IENR2, nullable_types.PFIC.IENR2),
+        /// offset 0x78
+        _offset12: [120]u8,
+        /// Interrupt Clear Register
+        IRER1: RegisterRW(types.PFIC.IRER1, nullable_types.PFIC.IRER1),
+        /// Interrupt Clear Register
+        IRER2: RegisterRW(types.PFIC.IRER2, nullable_types.PFIC.IRER2),
+        /// offset 0x78
+        _offset14: [120]u8,
+        /// Interrupt Pending Register
+        IPSR1: RegisterRW(types.PFIC.IPSR1, nullable_types.PFIC.IPSR1),
+        /// Interrupt Pending Register
+        IPSR2: RegisterRW(types.PFIC.IPSR2, nullable_types.PFIC.IPSR2),
+        /// offset 0x78
+        _offset16: [120]u8,
+        /// Interrupt Pending Clear Register
+        IPRR1: RegisterRW(types.PFIC.IPRR1, nullable_types.PFIC.IPRR1),
+        /// Interrupt Pending Clear Register
+        IPRR2: RegisterRW(types.PFIC.IPRR2, nullable_types.PFIC.IPRR2),
+        /// offset 0x78
+        _offset18: [120]u8,
+        /// Interrupt ACTIVE Register
+        IACTR1: RegisterRW(types.PFIC.IACTR1, nullable_types.PFIC.IACTR1),
+        /// Interrupt ACTIVE Register
+        IACTR2: RegisterRW(types.PFIC.IACTR2, nullable_types.PFIC.IACTR2),
+        /// offset 0xf8
+        _offset20: [248]u8,
+        /// Interrupt Priority Register
+        IPRIOR0: RegisterRW(types.PFIC.IPRIOR0, nullable_types.PFIC.IPRIOR0),
+        /// Interrupt Priority Register
+        IPRIOR1: RegisterRW(types.PFIC.IPRIOR1, nullable_types.PFIC.IPRIOR1),
+        /// Interrupt Priority Register
+        IPRIOR2: RegisterRW(types.PFIC.IPRIOR2, nullable_types.PFIC.IPRIOR2),
+        /// Interrupt Priority Register
+        IPRIOR3: RegisterRW(types.PFIC.IPRIOR3, nullable_types.PFIC.IPRIOR3),
+        /// Interrupt Priority Register
+        IPRIOR4: RegisterRW(types.PFIC.IPRIOR4, nullable_types.PFIC.IPRIOR4),
+        /// Interrupt Priority Register
+        IPRIOR5: RegisterRW(types.PFIC.IPRIOR5, nullable_types.PFIC.IPRIOR5),
+        /// Interrupt Priority Register
+        IPRIOR6: RegisterRW(types.PFIC.IPRIOR6, nullable_types.PFIC.IPRIOR6),
+        /// Interrupt Priority Register
+        IPRIOR7: RegisterRW(types.PFIC.IPRIOR7, nullable_types.PFIC.IPRIOR7),
+        /// Interrupt Priority Register
+        IPRIOR8: RegisterRW(types.PFIC.IPRIOR8, nullable_types.PFIC.IPRIOR8),
+        /// Interrupt Priority Register
+        IPRIOR9: RegisterRW(types.PFIC.IPRIOR9, nullable_types.PFIC.IPRIOR9),
+        /// Interrupt Priority Register
+        IPRIOR10: RegisterRW(types.PFIC.IPRIOR10, nullable_types.PFIC.IPRIOR10),
+        /// Interrupt Priority Register
+        IPRIOR11: RegisterRW(types.PFIC.IPRIOR11, nullable_types.PFIC.IPRIOR11),
+        /// Interrupt Priority Register
+        IPRIOR12: RegisterRW(types.PFIC.IPRIOR12, nullable_types.PFIC.IPRIOR12),
+        /// Interrupt Priority Register
+        IPRIOR13: RegisterRW(types.PFIC.IPRIOR13, nullable_types.PFIC.IPRIOR13),
+        /// Interrupt Priority Register
+        IPRIOR14: RegisterRW(types.PFIC.IPRIOR14, nullable_types.PFIC.IPRIOR14),
+        /// Interrupt Priority Register
+        IPRIOR15: RegisterRW(types.PFIC.IPRIOR15, nullable_types.PFIC.IPRIOR15),
+        /// Interrupt Priority Register
+        IPRIOR16: RegisterRW(types.PFIC.IPRIOR16, nullable_types.PFIC.IPRIOR16),
+        /// Interrupt Priority Register
+        IPRIOR17: RegisterRW(types.PFIC.IPRIOR17, nullable_types.PFIC.IPRIOR17),
+        /// Interrupt Priority Register
+        IPRIOR18: RegisterRW(types.PFIC.IPRIOR18, nullable_types.PFIC.IPRIOR18),
+        /// Interrupt Priority Register
+        IPRIOR19: RegisterRW(types.PFIC.IPRIOR19, nullable_types.PFIC.IPRIOR19),
+        /// Interrupt Priority Register
+        IPRIOR20: RegisterRW(types.PFIC.IPRIOR20, nullable_types.PFIC.IPRIOR20),
+        /// Interrupt Priority Register
+        IPRIOR21: RegisterRW(types.PFIC.IPRIOR21, nullable_types.PFIC.IPRIOR21),
+        /// Interrupt Priority Register
+        IPRIOR22: RegisterRW(types.PFIC.IPRIOR22, nullable_types.PFIC.IPRIOR22),
+        /// Interrupt Priority Register
+        IPRIOR23: RegisterRW(types.PFIC.IPRIOR23, nullable_types.PFIC.IPRIOR23),
+        /// Interrupt Priority Register
+        IPRIOR24: RegisterRW(types.PFIC.IPRIOR24, nullable_types.PFIC.IPRIOR24),
+        /// Interrupt Priority Register
+        IPRIOR25: RegisterRW(types.PFIC.IPRIOR25, nullable_types.PFIC.IPRIOR25),
+        /// Interrupt Priority Register
+        IPRIOR26: RegisterRW(types.PFIC.IPRIOR26, nullable_types.PFIC.IPRIOR26),
+        /// Interrupt Priority Register
+        IPRIOR27: RegisterRW(types.PFIC.IPRIOR27, nullable_types.PFIC.IPRIOR27),
+        /// Interrupt Priority Register
+        IPRIOR28: RegisterRW(types.PFIC.IPRIOR28, nullable_types.PFIC.IPRIOR28),
+        /// Interrupt Priority Register
+        IPRIOR29: RegisterRW(types.PFIC.IPRIOR29, nullable_types.PFIC.IPRIOR29),
+        /// Interrupt Priority Register
+        IPRIOR30: RegisterRW(types.PFIC.IPRIOR30, nullable_types.PFIC.IPRIOR30),
+        /// Interrupt Priority Register
+        IPRIOR31: RegisterRW(types.PFIC.IPRIOR31, nullable_types.PFIC.IPRIOR31),
+        /// Interrupt Priority Register
+        IPRIOR32: RegisterRW(types.PFIC.IPRIOR32, nullable_types.PFIC.IPRIOR32),
+        /// Interrupt Priority Register
+        IPRIOR33: RegisterRW(types.PFIC.IPRIOR33, nullable_types.PFIC.IPRIOR33),
+        /// Interrupt Priority Register
+        IPRIOR34: RegisterRW(types.PFIC.IPRIOR34, nullable_types.PFIC.IPRIOR34),
+        /// Interrupt Priority Register
+        IPRIOR35: RegisterRW(types.PFIC.IPRIOR35, nullable_types.PFIC.IPRIOR35),
+        /// Interrupt Priority Register
+        IPRIOR36: RegisterRW(types.PFIC.IPRIOR36, nullable_types.PFIC.IPRIOR36),
+        /// Interrupt Priority Register
+        IPRIOR37: RegisterRW(types.PFIC.IPRIOR37, nullable_types.PFIC.IPRIOR37),
+        /// Interrupt Priority Register
+        IPRIOR38: RegisterRW(types.PFIC.IPRIOR38, nullable_types.PFIC.IPRIOR38),
+        /// Interrupt Priority Register
+        IPRIOR39: RegisterRW(types.PFIC.IPRIOR39, nullable_types.PFIC.IPRIOR39),
+        /// Interrupt Priority Register
+        IPRIOR40: RegisterRW(types.PFIC.IPRIOR40, nullable_types.PFIC.IPRIOR40),
+        /// Interrupt Priority Register
+        IPRIOR41: RegisterRW(types.PFIC.IPRIOR41, nullable_types.PFIC.IPRIOR41),
+        /// Interrupt Priority Register
+        IPRIOR42: RegisterRW(types.PFIC.IPRIOR42, nullable_types.PFIC.IPRIOR42),
+        /// Interrupt Priority Register
+        IPRIOR43: RegisterRW(types.PFIC.IPRIOR43, nullable_types.PFIC.IPRIOR43),
+        /// Interrupt Priority Register
+        IPRIOR44: RegisterRW(types.PFIC.IPRIOR44, nullable_types.PFIC.IPRIOR44),
+        /// Interrupt Priority Register
+        IPRIOR45: RegisterRW(types.PFIC.IPRIOR45, nullable_types.PFIC.IPRIOR45),
+        /// Interrupt Priority Register
+        IPRIOR46: RegisterRW(types.PFIC.IPRIOR46, nullable_types.PFIC.IPRIOR46),
+        /// Interrupt Priority Register
+        IPRIOR47: RegisterRW(types.PFIC.IPRIOR47, nullable_types.PFIC.IPRIOR47),
+        /// Interrupt Priority Register
+        IPRIOR48: RegisterRW(types.PFIC.IPRIOR48, nullable_types.PFIC.IPRIOR48),
+        /// Interrupt Priority Register
+        IPRIOR49: RegisterRW(types.PFIC.IPRIOR49, nullable_types.PFIC.IPRIOR49),
+        /// Interrupt Priority Register
+        IPRIOR50: RegisterRW(types.PFIC.IPRIOR50, nullable_types.PFIC.IPRIOR50),
+        /// Interrupt Priority Register
+        IPRIOR51: RegisterRW(types.PFIC.IPRIOR51, nullable_types.PFIC.IPRIOR51),
+        /// Interrupt Priority Register
+        IPRIOR52: RegisterRW(types.PFIC.IPRIOR52, nullable_types.PFIC.IPRIOR52),
+        /// Interrupt Priority Register
+        IPRIOR53: RegisterRW(types.PFIC.IPRIOR53, nullable_types.PFIC.IPRIOR53),
+        /// Interrupt Priority Register
+        IPRIOR54: RegisterRW(types.PFIC.IPRIOR54, nullable_types.PFIC.IPRIOR54),
+        /// Interrupt Priority Register
+        IPRIOR55: RegisterRW(types.PFIC.IPRIOR55, nullable_types.PFIC.IPRIOR55),
+        /// Interrupt Priority Register
+        IPRIOR56: RegisterRW(types.PFIC.IPRIOR56, nullable_types.PFIC.IPRIOR56),
+        /// Interrupt Priority Register
+        IPRIOR57: RegisterRW(types.PFIC.IPRIOR57, nullable_types.PFIC.IPRIOR57),
+        /// Interrupt Priority Register
+        IPRIOR58: RegisterRW(types.PFIC.IPRIOR58, nullable_types.PFIC.IPRIOR58),
+        /// Interrupt Priority Register
+        IPRIOR59: RegisterRW(types.PFIC.IPRIOR59, nullable_types.PFIC.IPRIOR59),
+        /// Interrupt Priority Register
+        IPRIOR60: RegisterRW(types.PFIC.IPRIOR60, nullable_types.PFIC.IPRIOR60),
+        /// Interrupt Priority Register
+        IPRIOR61: RegisterRW(types.PFIC.IPRIOR61, nullable_types.PFIC.IPRIOR61),
+        /// Interrupt Priority Register
+        IPRIOR62: RegisterRW(types.PFIC.IPRIOR62, nullable_types.PFIC.IPRIOR62),
+        /// Interrupt Priority Register
+        IPRIOR63: RegisterRW(types.PFIC.IPRIOR63, nullable_types.PFIC.IPRIOR63),
+        /// offset 0x8d0
+        _offset84: [2256]u8,
+        /// System Control Register
+        SCTLR: RegisterRW(types.PFIC.SCTLR, nullable_types.PFIC.SCTLR),
+        /// offset 0x2ec
+        _offset85: [748]u8,
+        /// System counter control register
+        STK_CTLR: RegisterRW(types.PFIC.STK_CTLR, nullable_types.PFIC.STK_CTLR),
+        /// System START
+        STK_SR: RegisterRW(types.PFIC.STK_SR, nullable_types.PFIC.STK_SR),
+        /// System counter low register
+        STK_CNTL: RegisterRW(types.PFIC.STK_CNTL, nullable_types.PFIC.STK_CNTL),
+        /// offset 0x4
+        _offset88: [4]u8,
+        /// System compare low register
+        STK_CMPLR: RegisterRW(types.PFIC.STK_CMPLR, nullable_types.PFIC.STK_CMPLR),
+    };
+};
+
+pub const types = struct {
+    /// Power control
+    pub const PWR = struct {
+        /// Power control register (PWR_CTRL)
+        pub const CTLR = packed struct(u32) {
             /// unused [0:0]
             _unused0: u1 = 0,
             /// PDDS [1:1]
@@ -316,10 +1116,10 @@ pub const types = struct {
             PLS: u3 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.PWR.CTLR),
+        };
 
         /// Power control state register (PWR_CSR)
-        CSR: RegisterRW(packed struct(u32) {
+        pub const CSR = packed struct(u32) {
             /// unused [0:1]
             _unused0: u2 = 0,
             /// PVDO [2:2]
@@ -327,10 +1127,10 @@ pub const types = struct {
             PVDO: u1 = 0,
             /// padding [3:31]
             _padding: u29 = 0,
-        }, nullable_types.PWR.CSR),
+        };
 
         /// Automatic wake-up control state register (PWR_AWUCSR)
-        AWUCSR: RegisterRW(packed struct(u32) {
+        pub const AWUCSR = packed struct(u32) {
             /// unused [0:0]
             _unused0: u1 = 0,
             /// AWUEN [1:1]
@@ -338,39 +1138,31 @@ pub const types = struct {
             AWUEN: u1 = 0,
             /// padding [2:31]
             _padding: u30 = 0,
-        }, nullable_types.PWR.AWUCSR),
+        };
 
         /// Automatic wake window comparison value register (PWR_AWUWR)
-        AWUWR: RegisterRW(packed struct(u32) {
+        pub const AWUWR = packed struct(u32) {
             /// AWUWR [0:5]
             /// AWU window value
             AWUWR: u6 = 63,
             /// padding [6:31]
             _padding: u26 = 0,
-        }, nullable_types.PWR.AWUWR),
+        };
 
         /// Automatic wake-up prescaler register (PWR_AWUPSC)
-        AWUPSC: RegisterRW(packed struct(u32) {
+        pub const AWUPSC = packed struct(u32) {
             /// AWUPSC [0:3]
             /// Wake-up prescaler
             AWUPSC: u4 = 0,
             /// padding [4:31]
             _padding: u28 = 0,
-        }, nullable_types.PWR.AWUPSC),
+        };
     };
 
     /// Reset and clock control
-    pub const RCC = extern struct {
-        pub inline fn from(base: u32) *volatile types.RCC {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.RCC) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const RCC = struct {
         /// Clock control register
-        CTLR: RegisterRW(packed struct(u32) {
+        pub const CTLR = packed struct(u32) {
             /// HSION [0:0]
             /// Internal High Speed clock enable
             HSION: u1 = 1,
@@ -407,10 +1199,10 @@ pub const types = struct {
             PLLRDY: u1 = 0,
             /// padding [26:31]
             _padding: u6 = 0,
-        }, nullable_types.RCC.CTLR),
+        };
 
         /// Clock configuration register (RCC_CFGR0)
-        CFGR0: RegisterRW(packed struct(u32) {
+        pub const CFGR0 = packed struct(u32) {
             /// SW [0:1]
             /// System clock Switch
             SW: u2 = 0,
@@ -435,10 +1227,10 @@ pub const types = struct {
             MCO: u3 = 0,
             /// padding [27:31]
             _padding: u5 = 0,
-        }, nullable_types.RCC.CFGR0),
+        };
 
         /// Clock interrupt register (RCC_INTR)
-        INTR: RegisterRW(packed struct(u32) {
+        pub const INTR = packed struct(u32) {
             /// LSIRDYF [0:0]
             /// LSI Ready Interrupt flag
             LSIRDYF: u1 = 0,
@@ -495,10 +1287,10 @@ pub const types = struct {
             CSSC: u1 = 0,
             /// padding [24:31]
             _padding: u8 = 0,
-        }, nullable_types.RCC.INTR),
+        };
 
         /// PB2 peripheral reset register (RCC_APB2PRSTR)
-        APB2PRSTR: RegisterRW(packed struct(u32) {
+        pub const APB2PRSTR = packed struct(u32) {
             /// AFIORST [0:0]
             /// Alternate function I/O reset
             AFIORST: u1 = 0,
@@ -536,10 +1328,10 @@ pub const types = struct {
             USART1RST: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.RCC.APB2PRSTR),
+        };
 
         /// PB1 peripheral reset register (RCC_APB1PRSTR)
-        APB1PRSTR: RegisterRW(packed struct(u32) {
+        pub const APB1PRSTR = packed struct(u32) {
             /// TIM2RST [0:0]
             /// TIM2 reset
             TIM2RST: u1 = 0,
@@ -563,10 +1355,10 @@ pub const types = struct {
             PWRRST: u1 = 0,
             /// padding [29:31]
             _padding: u3 = 0,
-        }, nullable_types.RCC.APB1PRSTR),
+        };
 
         /// HB Peripheral Clock enable register (RCC_AHBPCENR)
-        AHBPCENR: RegisterRW(packed struct(u32) {
+        pub const AHBPCENR = packed struct(u32) {
             /// DMA1EN [0:0]
             /// DMA clock enable
             DMA1EN: u1 = 0,
@@ -577,10 +1369,10 @@ pub const types = struct {
             SRAMEN: u1 = 1,
             /// padding [3:31]
             _padding: u29 = 0,
-        }, nullable_types.RCC.AHBPCENR),
+        };
 
         /// PB2 peripheral clock enable register (RCC_APB2PCENR)
-        APB2PCENR: RegisterRW(packed struct(u32) {
+        pub const APB2PCENR = packed struct(u32) {
             /// AFIOEN [0:0]
             /// Alternate function I/O clock enable
             AFIOEN: u1 = 0,
@@ -618,10 +1410,10 @@ pub const types = struct {
             USART1EN: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.RCC.APB2PCENR),
+        };
 
         /// PB1 peripheral clock enable register (RCC_APB1PCENR)
-        APB1PCENR: RegisterRW(packed struct(u32) {
+        pub const APB1PCENR = packed struct(u32) {
             /// TIM2EN [0:0]
             /// Timer 2 clock enable
             TIM2EN: u1 = 0,
@@ -645,13 +1437,10 @@ pub const types = struct {
             PWREN: u1 = 0,
             /// padding [29:31]
             _padding: u3 = 0,
-        }, nullable_types.RCC.APB1PCENR),
-
-        /// offset 0x4
-        _offset8: [4]u8,
+        };
 
         /// Control/status register (RCC_RSTSCKR)
-        RSTSCKR: RegisterRW(packed struct(u32) {
+        pub const RSTSCKR = packed struct(u32) {
             /// LSION [0:0]
             /// Internal low speed oscillator enable
             LSION: u1 = 0,
@@ -685,21 +1474,13 @@ pub const types = struct {
             /// LPWRRSTF [31:31]
             /// Low-power reset flag
             LPWRRSTF: u1 = 0,
-        }, nullable_types.RCC.RSTSCKR),
+        };
     };
 
     /// Extend configuration
-    pub const EXTEN = extern struct {
-        pub inline fn from(base: u32) *volatile types.EXTEN {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.EXTEN) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const EXTEN = struct {
         /// Configure the extended control register
-        EXTEN_CTR: RegisterRW(packed struct(u32) {
+        pub const EXTEN_CTR = packed struct(u32) {
             /// unused [0:5]
             _unused0: u6 = 0,
             /// LKUPEN [6:6]
@@ -726,26 +1507,14 @@ pub const types = struct {
             OPAPSEL: u1 = 0,
             /// padding [19:31]
             _padding: u13 = 0,
-        }, nullable_types.EXTEN.EXTEN_CTR),
+        };
     };
 
     /// General purpose I/O
     /// Type for: GPIOA GPIOC GPIOD
-    pub const GPIO = extern struct {
-        pub const GPIOA = types.GPIO.from(0x40010800);
-        pub const GPIOC = types.GPIO.from(0x40011000);
-        pub const GPIOD = types.GPIO.from(0x40011400);
-
-        pub inline fn from(base: u32) *volatile types.GPIO {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.GPIO) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const GPIO = struct {
         /// Port configuration register low (GPIOn_CFGLR)
-        CFGLR: RegisterRW(packed struct(u32) {
+        pub const CFGLR = packed struct(u32) {
             /// MODE0 [0:1]
             /// Port n.0 mode bits
             MODE0: u2 = 0,
@@ -794,13 +1563,10 @@ pub const types = struct {
             /// CNF7 [30:31]
             /// Port n.7 configuration bits
             CNF7: u2 = 1,
-        }, nullable_types.GPIO.CFGLR),
-
-        /// offset 0x4
-        _offset1: [4]u8,
+        };
 
         /// Port input data register (GPIOn_INDR)
-        INDR: RegisterRW(packed struct(u32) {
+        pub const INDR = packed struct(u32) {
             /// IDR0 [0:0]
             /// Port input data
             IDR0: u1 = 0,
@@ -827,10 +1593,10 @@ pub const types = struct {
             IDR7: u1 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.GPIO.INDR),
+        };
 
         /// Port output data register (GPIOn_OUTDR)
-        OUTDR: RegisterRW(packed struct(u32) {
+        pub const OUTDR = packed struct(u32) {
             /// ODR0 [0:0]
             /// Port output data
             ODR0: u1 = 0,
@@ -857,10 +1623,10 @@ pub const types = struct {
             ODR7: u1 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.GPIO.OUTDR),
+        };
 
         /// Port bit set/reset register (GPIOn_BSHR)
-        BSHR: RegisterRW(packed struct(u32) {
+        pub const BSHR = packed struct(u32) {
             /// BS0 [0:0]
             /// Set bit 0
             BS0: u1 = 0,
@@ -913,10 +1679,10 @@ pub const types = struct {
             BR7: u1 = 0,
             /// padding [24:31]
             _padding: u8 = 0,
-        }, nullable_types.GPIO.BSHR),
+        };
 
         /// Port bit reset register (GPIOn_BCR)
-        BCR: RegisterRW(packed struct(u32) {
+        pub const BCR = packed struct(u32) {
             /// BR0 [0:0]
             /// Reset bit 0
             BR0: u1 = 0,
@@ -943,10 +1709,10 @@ pub const types = struct {
             BR7: u1 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.GPIO.BCR),
+        };
 
         /// Port configuration lock register
-        LCKR: RegisterRW(packed struct(u32) {
+        pub const LCKR = packed struct(u32) {
             /// LCK0 [0:0]
             /// Port A Lock bit 0
             LCK0: u1 = 0,
@@ -976,24 +1742,13 @@ pub const types = struct {
             LCKK: u1 = 0,
             /// padding [9:31]
             _padding: u23 = 0,
-        }, nullable_types.GPIO.LCKR),
+        };
     };
 
     /// Alternate function I/O
-    pub const AFIO = extern struct {
-        pub inline fn from(base: u32) *volatile types.AFIO {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.AFIO) u32 {
-            return @intFromPtr(self);
-        }
-
-        /// offset 0x4
-        _offset0: [4]u8,
-
+    pub const AFIO = struct {
         /// AF remap and debug I/O configuration register (AFIO_PCFR1)
-        PCFR1: RegisterRW(packed struct(u32) {
+        pub const PCFR1 = packed struct(u32) {
             /// SPI1_RM [0:0]
             /// SPI1 remapping
             SPI1_RM: u1 = 0,
@@ -1040,10 +1795,10 @@ pub const types = struct {
             SWCFG: u3 = 0,
             /// padding [27:31]
             _padding: u5 = 0,
-        }, nullable_types.AFIO.PCFR1),
+        };
 
         /// External interrupt configuration register (AFIO_EXTICR)
-        EXTICR: RegisterRW(packed struct(u32) {
+        pub const EXTICR = packed struct(u32) {
             /// EXTI0 [0:1]
             /// EXTI0 configuration
             EXTI0: u2 = 0,
@@ -1070,21 +1825,13 @@ pub const types = struct {
             EXTI7: u2 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AFIO.EXTICR),
+        };
     };
 
     /// EXTI
-    pub const EXTI = extern struct {
-        pub inline fn from(base: u32) *volatile types.EXTI {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.EXTI) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const EXTI = struct {
         /// Interrupt mask register (EXTI_INTENR)
-        INTENR: RegisterRW(packed struct(u32) {
+        pub const INTENR = packed struct(u32) {
             /// MR0 [0:0]
             /// Interrupt Mask on line 0
             MR0: u1 = 0,
@@ -1117,10 +1864,10 @@ pub const types = struct {
             MR9: u1 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.EXTI.INTENR),
+        };
 
         /// Event mask register (EXTI_EVENR)
-        EVENR: RegisterRW(packed struct(u32) {
+        pub const EVENR = packed struct(u32) {
             /// MR0 [0:0]
             /// Event Mask on line 0
             MR0: u1 = 0,
@@ -1153,10 +1900,10 @@ pub const types = struct {
             MR9: u1 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.EXTI.EVENR),
+        };
 
         /// Rising Trigger selection register (EXTI_RTENR)
-        RTENR: RegisterRW(packed struct(u32) {
+        pub const RTENR = packed struct(u32) {
             /// TR0 [0:0]
             /// Rising trigger event configuration of line 0
             TR0: u1 = 0,
@@ -1189,10 +1936,10 @@ pub const types = struct {
             TR9: u1 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.EXTI.RTENR),
+        };
 
         /// Falling Trigger selection register (EXTI_FTENR)
-        FTENR: RegisterRW(packed struct(u32) {
+        pub const FTENR = packed struct(u32) {
             /// TR0 [0:0]
             /// Falling trigger event configuration of line 0
             TR0: u1 = 0,
@@ -1225,10 +1972,10 @@ pub const types = struct {
             TR9: u1 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.EXTI.FTENR),
+        };
 
         /// Software interrupt event register (EXTI_SWIEVR)
-        SWIEVR: RegisterRW(packed struct(u32) {
+        pub const SWIEVR = packed struct(u32) {
             /// SWIER0 [0:0]
             /// Software Interrupt on line 0
             SWIER0: u1 = 0,
@@ -1261,10 +2008,10 @@ pub const types = struct {
             SWIER9: u1 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.EXTI.SWIEVR),
+        };
 
         /// Pending register (EXTI_INTFR)
-        INTFR: RegisterRW(packed struct(u32) {
+        pub const INTFR = packed struct(u32) {
             /// IF0 [0:0]
             /// Pending bit 0
             IF0: u1 = 0,
@@ -1297,21 +2044,13 @@ pub const types = struct {
             IF9: u1 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.EXTI.INTFR),
+        };
     };
 
     /// DMA1 controller
-    pub const DMA1 = extern struct {
-        pub inline fn from(base: u32) *volatile types.DMA1 {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.DMA1) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const DMA1 = struct {
         /// DMA interrupt status register (DMA_INTFR)
-        INTFR: RegisterRW(packed struct(u32) {
+        pub const INTFR = packed struct(u32) {
             /// GIF1 [0:0]
             /// Channel 1 Global interrupt flag
             GIF1: u1 = 0,
@@ -1398,10 +2137,10 @@ pub const types = struct {
             TEIF7: u1 = 0,
             /// padding [28:31]
             _padding: u4 = 0,
-        }, nullable_types.DMA1.INTFR),
+        };
 
         /// DMA interrupt flag clear register (DMA_INTFCR)
-        INTFCR: RegisterRW(packed struct(u32) {
+        pub const INTFCR = packed struct(u32) {
             /// CGIF1 [0:0]
             /// Channel 1 Global interrupt clear
             CGIF1: u1 = 0,
@@ -1488,10 +2227,10 @@ pub const types = struct {
             CTEIF7: u1 = 0,
             /// padding [28:31]
             _padding: u4 = 0,
-        }, nullable_types.DMA1.INTFCR),
+        };
 
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR1: RegisterRW(packed struct(u32) {
+        pub const CFGR1 = packed struct(u32) {
             /// EN [0:0]
             /// Channel enable
             EN: u1 = 0,
@@ -1530,36 +2269,33 @@ pub const types = struct {
             MEM2MEM: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.DMA1.CFGR1),
+        };
 
         /// DMA channel 1 number of data register
-        CNTR1: RegisterRW(packed struct(u32) {
+        pub const CNTR1 = packed struct(u32) {
             /// NDT [0:15]
             /// Number of data to transfer
             NDT: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.DMA1.CNTR1),
+        };
 
         /// DMA channel 1 peripheral address register
-        PADDR1: RegisterRW(packed struct(u32) {
+        pub const PADDR1 = packed struct(u32) {
             /// PA [0:31]
             /// Peripheral address
             PA: u32 = 0,
-        }, nullable_types.DMA1.PADDR1),
+        };
 
         /// DMA channel 1 memory address register
-        MADDR1: RegisterRW(packed struct(u32) {
+        pub const MADDR1 = packed struct(u32) {
             /// MA [0:31]
             /// Memory address
             MA: u32 = 0,
-        }, nullable_types.DMA1.MADDR1),
-
-        /// offset 0x4
-        _offset6: [4]u8,
+        };
 
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR2: RegisterRW(packed struct(u32) {
+        pub const CFGR2 = packed struct(u32) {
             /// EN [0:0]
             /// Channel enable
             EN: u1 = 0,
@@ -1598,36 +2334,33 @@ pub const types = struct {
             MEM2MEM: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.DMA1.CFGR2),
+        };
 
         /// DMA channel 2 number of data register
-        CNTR2: RegisterRW(packed struct(u32) {
+        pub const CNTR2 = packed struct(u32) {
             /// NDT [0:15]
             /// Number of data to transfer
             NDT: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.DMA1.CNTR2),
+        };
 
         /// DMA channel 2 peripheral address register
-        PADDR2: RegisterRW(packed struct(u32) {
+        pub const PADDR2 = packed struct(u32) {
             /// PA [0:31]
             /// Peripheral address
             PA: u32 = 0,
-        }, nullable_types.DMA1.PADDR2),
+        };
 
         /// DMA channel 2 memory address register
-        MADDR2: RegisterRW(packed struct(u32) {
+        pub const MADDR2 = packed struct(u32) {
             /// MA [0:31]
             /// Memory address
             MA: u32 = 0,
-        }, nullable_types.DMA1.MADDR2),
-
-        /// offset 0x4
-        _offset10: [4]u8,
+        };
 
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR3: RegisterRW(packed struct(u32) {
+        pub const CFGR3 = packed struct(u32) {
             /// EN [0:0]
             /// Channel enable
             EN: u1 = 0,
@@ -1666,36 +2399,33 @@ pub const types = struct {
             MEM2MEM: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.DMA1.CFGR3),
+        };
 
         /// DMA channel 3 number of data register
-        CNTR3: RegisterRW(packed struct(u32) {
+        pub const CNTR3 = packed struct(u32) {
             /// NDT [0:15]
             /// Number of data to transfer
             NDT: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.DMA1.CNTR3),
+        };
 
         /// DMA channel 3 peripheral address register
-        PADDR3: RegisterRW(packed struct(u32) {
+        pub const PADDR3 = packed struct(u32) {
             /// PA [0:31]
             /// Peripheral address
             PA: u32 = 0,
-        }, nullable_types.DMA1.PADDR3),
+        };
 
         /// DMA channel 3 memory address register
-        MADDR3: RegisterRW(packed struct(u32) {
+        pub const MADDR3 = packed struct(u32) {
             /// MA [0:31]
             /// Memory address
             MA: u32 = 0,
-        }, nullable_types.DMA1.MADDR3),
-
-        /// offset 0x4
-        _offset14: [4]u8,
+        };
 
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR4: RegisterRW(packed struct(u32) {
+        pub const CFGR4 = packed struct(u32) {
             /// EN [0:0]
             /// Channel enable
             EN: u1 = 0,
@@ -1734,36 +2464,33 @@ pub const types = struct {
             MEM2MEM: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.DMA1.CFGR4),
+        };
 
         /// DMA channel 4 number of data register
-        CNTR4: RegisterRW(packed struct(u32) {
+        pub const CNTR4 = packed struct(u32) {
             /// NDT [0:15]
             /// Number of data to transfer
             NDT: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.DMA1.CNTR4),
+        };
 
         /// DMA channel 4 peripheral address register
-        PADDR4: RegisterRW(packed struct(u32) {
+        pub const PADDR4 = packed struct(u32) {
             /// PA [0:31]
             /// Peripheral address
             PA: u32 = 0,
-        }, nullable_types.DMA1.PADDR4),
+        };
 
         /// DMA channel 4 memory address register
-        MADDR4: RegisterRW(packed struct(u32) {
+        pub const MADDR4 = packed struct(u32) {
             /// MA [0:31]
             /// Memory address
             MA: u32 = 0,
-        }, nullable_types.DMA1.MADDR4),
-
-        /// offset 0x4
-        _offset18: [4]u8,
+        };
 
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR5: RegisterRW(packed struct(u32) {
+        pub const CFGR5 = packed struct(u32) {
             /// EN [0:0]
             /// Channel enable
             EN: u1 = 0,
@@ -1802,36 +2529,33 @@ pub const types = struct {
             MEM2MEM: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.DMA1.CFGR5),
+        };
 
         /// DMA channel 5 number of data register
-        CNTR5: RegisterRW(packed struct(u32) {
+        pub const CNTR5 = packed struct(u32) {
             /// NDT [0:15]
             /// Number of data to transfer
             NDT: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.DMA1.CNTR5),
+        };
 
         /// DMA channel 5 peripheral address register
-        PADDR5: RegisterRW(packed struct(u32) {
+        pub const PADDR5 = packed struct(u32) {
             /// PA [0:31]
             /// Peripheral address
             PA: u32 = 0,
-        }, nullable_types.DMA1.PADDR5),
+        };
 
         /// DMA channel 5 memory address register
-        MADDR5: RegisterRW(packed struct(u32) {
+        pub const MADDR5 = packed struct(u32) {
             /// MA [0:31]
             /// Memory address
             MA: u32 = 0,
-        }, nullable_types.DMA1.MADDR5),
-
-        /// offset 0x4
-        _offset22: [4]u8,
+        };
 
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR6: RegisterRW(packed struct(u32) {
+        pub const CFGR6 = packed struct(u32) {
             /// EN [0:0]
             /// Channel enable
             EN: u1 = 0,
@@ -1870,36 +2594,33 @@ pub const types = struct {
             MEM2MEM: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.DMA1.CFGR6),
+        };
 
         /// DMA channel 6 number of data register
-        CNTR6: RegisterRW(packed struct(u32) {
+        pub const CNTR6 = packed struct(u32) {
             /// NDT [0:15]
             /// Number of data to transfer
             NDT: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.DMA1.CNTR6),
+        };
 
         /// DMA channel 6 peripheral address register
-        PADDR6: RegisterRW(packed struct(u32) {
+        pub const PADDR6 = packed struct(u32) {
             /// PA [0:31]
             /// Peripheral address
             PA: u32 = 0,
-        }, nullable_types.DMA1.PADDR6),
+        };
 
         /// DMA channel 6 memory address register
-        MADDR6: RegisterRW(packed struct(u32) {
+        pub const MADDR6 = packed struct(u32) {
             /// MA [0:31]
             /// Memory address
             MA: u32 = 0,
-        }, nullable_types.DMA1.MADDR6),
-
-        /// offset 0x4
-        _offset26: [4]u8,
+        };
 
         /// DMA channel configuration register (DMA_CFGR)
-        CFGR7: RegisterRW(packed struct(u32) {
+        pub const CFGR7 = packed struct(u32) {
             /// EN [0:0]
             /// Channel enable
             EN: u1 = 0,
@@ -1938,71 +2659,63 @@ pub const types = struct {
             MEM2MEM: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.DMA1.CFGR7),
+        };
 
         /// DMA channel 7 number of data register
-        CNTR7: RegisterRW(packed struct(u32) {
+        pub const CNTR7 = packed struct(u32) {
             /// NDT [0:15]
             /// Number of data to transfer
             NDT: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.DMA1.CNTR7),
+        };
 
         /// DMA channel 7 peripheral address register
-        PADDR7: RegisterRW(packed struct(u32) {
+        pub const PADDR7 = packed struct(u32) {
             /// PA [0:31]
             /// Peripheral address
             PA: u32 = 0,
-        }, nullable_types.DMA1.PADDR7),
+        };
 
         /// DMA channel 7 memory address register
-        MADDR7: RegisterRW(packed struct(u32) {
+        pub const MADDR7 = packed struct(u32) {
             /// MA [0:31]
             /// Memory address
             MA: u32 = 0,
-        }, nullable_types.DMA1.MADDR7),
+        };
     };
 
     /// Independent watchdog
-    pub const IWDG = extern struct {
-        pub inline fn from(base: u32) *volatile types.IWDG {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.IWDG) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const IWDG = struct {
         /// Key register (IWDG_CTLR)
-        CTLR: RegisterRW(packed struct(u32) {
+        pub const CTLR = packed struct(u32) {
             /// KEY [0:15]
             /// Key value
             KEY: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.IWDG.CTLR),
+        };
 
         /// Prescaler register (IWDG_PSCR)
-        PSCR: RegisterRW(packed struct(u32) {
+        pub const PSCR = packed struct(u32) {
             /// PR [0:2]
             /// Prescaler divider
             PR: u3 = 0,
             /// padding [3:31]
             _padding: u29 = 0,
-        }, nullable_types.IWDG.PSCR),
+        };
 
         /// Reload register (IWDG_RLDR)
-        RLDR: RegisterRW(packed struct(u32) {
+        pub const RLDR = packed struct(u32) {
             /// RL [0:11]
             /// Watchdog counter reload value
             RL: u12 = 4095,
             /// padding [12:31]
             _padding: u20 = 0,
-        }, nullable_types.IWDG.RLDR),
+        };
 
         /// Status register (IWDG_SR)
-        STATR: RegisterRW(packed struct(u32) {
+        pub const STATR = packed struct(u32) {
             /// PVU [0:0]
             /// Watchdog prescaler value update
             PVU: u1 = 0,
@@ -2011,21 +2724,13 @@ pub const types = struct {
             RVU: u1 = 0,
             /// padding [2:31]
             _padding: u30 = 0,
-        }, nullable_types.IWDG.STATR),
+        };
     };
 
     /// Window watchdog
-    pub const WWDG = extern struct {
-        pub inline fn from(base: u32) *volatile types.WWDG {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.WWDG) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const WWDG = struct {
         /// Control register (WWDG_CR)
-        CTLR: RegisterRW(packed struct(u32) {
+        pub const CTLR = packed struct(u32) {
             /// T [0:6]
             /// 7-bit counter (MSB to LSB)
             T: u7 = 127,
@@ -2034,10 +2739,10 @@ pub const types = struct {
             WDGA: u1 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.WWDG.CTLR),
+        };
 
         /// Configuration register (WWDG_CFR)
-        CFGR: RegisterRW(packed struct(u32) {
+        pub const CFGR = packed struct(u32) {
             /// W [0:6]
             /// 7-bit window value
             W: u7 = 127,
@@ -2049,33 +2754,23 @@ pub const types = struct {
             EWI: u1 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.WWDG.CFGR),
+        };
 
         /// Status register (WWDG_SR)
-        STATR: RegisterRW(packed struct(u32) {
+        pub const STATR = packed struct(u32) {
             /// EWIF [0:0]
             /// Early Wakeup Interrupt Flag
             EWIF: u1 = 0,
             /// padding [1:31]
             _padding: u31 = 0,
-        }, nullable_types.WWDG.STATR),
+        };
     };
 
     /// Advanced timer
     /// Type for: TIM1
-    pub const AdvancedTimer = extern struct {
-        pub const TIM1 = types.AdvancedTimer.from(0x40012c00);
-
-        pub inline fn from(base: u32) *volatile types.AdvancedTimer {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.AdvancedTimer) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const AdvancedTimer = struct {
         /// control register 1
-        CTLR1: RegisterRW(packed struct(u32) {
+        pub const CTLR1 = packed struct(u32) {
             /// CEN [0:0]
             /// Counter enable
             CEN: u1 = 0,
@@ -2110,10 +2805,10 @@ pub const types = struct {
             CAPLVL: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.CTLR1),
+        };
 
         /// control register 2
-        CTLR2: RegisterRW(packed struct(u32) {
+        pub const CTLR2 = packed struct(u32) {
             /// CCPC [0:0]
             /// Capture/compare preloaded control
             CCPC: u1 = 0,
@@ -2154,10 +2849,10 @@ pub const types = struct {
             OIS4: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.AdvancedTimer.CTLR2),
+        };
 
         /// slave mode control register
-        SMCFGR: RegisterRW(packed struct(u32) {
+        pub const SMCFGR = packed struct(u32) {
             /// SMS [0:2]
             /// Slave mode selection
             SMS: u3 = 0,
@@ -2183,10 +2878,10 @@ pub const types = struct {
             ETP: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.SMCFGR),
+        };
 
         /// DMA/Interrupt enable register
-        DMAINTENR: RegisterRW(packed struct(u32) {
+        pub const DMAINTENR = packed struct(u32) {
             /// UIE [0:0]
             /// Update interrupt enable
             UIE: u1 = 0,
@@ -2234,10 +2929,10 @@ pub const types = struct {
             TDE: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.AdvancedTimer.DMAINTENR),
+        };
 
         /// status register
-        INTFR: RegisterRW(packed struct(u32) {
+        pub const INTFR = packed struct(u32) {
             /// UIF [0:0]
             /// Update interrupt flag
             UIF: u1 = 0,
@@ -2278,10 +2973,10 @@ pub const types = struct {
             CC4OF: u1 = 0,
             /// padding [13:31]
             _padding: u19 = 0,
-        }, nullable_types.AdvancedTimer.INTFR),
+        };
 
         /// event generation register
-        SWEVGR: RegisterRW(packed struct(u32) {
+        pub const SWEVGR = packed struct(u32) {
             /// UG [0:0]
             /// Update generation
             UG: u1 = 0,
@@ -2308,10 +3003,10 @@ pub const types = struct {
             BG: u1 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.AdvancedTimer.SWEVGR),
+        };
 
         /// capture/compare mode register (output mode)
-        CHCTLR1_Output: RegisterRW(packed struct(u32) {
+        pub const CHCTLR1_Output = packed struct(u32) {
             /// CC1S [0:1]
             /// Capture/Compare 1 selection
             CC1S: u2 = 0,
@@ -2344,10 +3039,10 @@ pub const types = struct {
             OC2CE: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.CHCTLR1_Output),
+        };
 
         /// capture/compare mode register (output mode)
-        CHCTLR2_Output: RegisterRW(packed struct(u32) {
+        pub const CHCTLR2_Output = packed struct(u32) {
             /// CC3S [0:1]
             /// Capture/Compare 3 selection
             CC3S: u2 = 0,
@@ -2380,10 +3075,10 @@ pub const types = struct {
             OC4CE: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.CHCTLR2_Output),
+        };
 
         /// capture/compare enable register
-        CCER: RegisterRW(packed struct(u32) {
+        pub const CCER = packed struct(u32) {
             /// CC1E [0:0]
             /// Capture/Compare 1 output enable
             CC1E: u1 = 0,
@@ -2428,82 +3123,82 @@ pub const types = struct {
             CC4P: u1 = 0,
             /// padding [14:31]
             _padding: u18 = 0,
-        }, nullable_types.AdvancedTimer.CCER),
+        };
 
         /// counter
-        CNT: RegisterRW(packed struct(u32) {
+        pub const CNT = packed struct(u32) {
             /// CNT [0:15]
             /// counter value
             CNT: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.CNT),
+        };
 
         /// prescaler
-        PSC: RegisterRW(packed struct(u32) {
+        pub const PSC = packed struct(u32) {
             /// PSC [0:15]
             /// Prescaler value
             PSC: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.PSC),
+        };
 
         /// auto-reload register
-        ATRLR: RegisterRW(packed struct(u32) {
+        pub const ATRLR = packed struct(u32) {
             /// ATRLR [0:15]
             /// Auto-reload value
             ATRLR: u16 = 65535,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.ATRLR),
+        };
 
         /// repetition counter register
-        RPTCR: RegisterRW(packed struct(u32) {
+        pub const RPTCR = packed struct(u32) {
             /// RPTCR [0:7]
             /// Repetition counter value
             RPTCR: u8 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.AdvancedTimer.RPTCR),
+        };
 
         /// capture/compare register 1
-        CH1CVR: RegisterRW(packed struct(u32) {
+        pub const CH1CVR = packed struct(u32) {
             /// CH1CVR [0:15]
             /// Capture/Compare 1 value
             CH1CVR: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.CH1CVR),
+        };
 
         /// capture/compare register 2
-        CH2CVR: RegisterRW(packed struct(u32) {
+        pub const CH2CVR = packed struct(u32) {
             /// CH2CVR [0:15]
             /// Capture/Compare 2 value
             CH2CVR: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.CH2CVR),
+        };
 
         /// capture/compare register 3
-        CH3CVR: RegisterRW(packed struct(u32) {
+        pub const CH3CVR = packed struct(u32) {
             /// CH3CVR [0:15]
             /// Capture/Compare value
             CH3CVR: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.CH3CVR),
+        };
 
         /// capture/compare register 4
-        CH4CVR: RegisterRW(packed struct(u32) {
+        pub const CH4CVR = packed struct(u32) {
             /// CH4CVR [0:15]
             /// Capture/Compare value
             CH4CVR: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.CH4CVR),
+        };
 
         /// break and dead-time register
-        BDTR: RegisterRW(packed struct(u32) {
+        pub const BDTR = packed struct(u32) {
             /// DTG [0:7]
             /// Dead-time generator setup
             DTG: u8 = 0,
@@ -2530,10 +3225,10 @@ pub const types = struct {
             MOE: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.BDTR),
+        };
 
         /// DMA control register
-        DMACFGR: RegisterRW(packed struct(u32) {
+        pub const DMACFGR = packed struct(u32) {
             /// DBA [0:4]
             /// DMA base address
             DBA: u5 = 0,
@@ -2544,33 +3239,23 @@ pub const types = struct {
             DBL: u5 = 0,
             /// padding [13:31]
             _padding: u19 = 0,
-        }, nullable_types.AdvancedTimer.DMACFGR),
+        };
 
         /// DMA address for full transfer
-        DMAADR: RegisterRW(packed struct(u32) {
+        pub const DMAADR = packed struct(u32) {
             /// DMAB [0:15]
             /// DMA register for burst accesses
             DMAB: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.AdvancedTimer.DMAADR),
+        };
     };
 
     /// General purpose timer
     /// Type for: TIM2
-    pub const GeneralPurposeTimer = extern struct {
-        pub const TIM2 = types.GeneralPurposeTimer.from(0x40000000);
-
-        pub inline fn from(base: u32) *volatile types.GeneralPurposeTimer {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.GeneralPurposeTimer) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const GeneralPurposeTimer = struct {
         /// control register 1
-        CTLR1: RegisterRW(packed struct(u32) {
+        pub const CTLR1 = packed struct(u32) {
             /// CEN [0:0]
             /// Counter enable
             CEN: u1 = 0,
@@ -2605,10 +3290,10 @@ pub const types = struct {
             CAPLVL: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.CTLR1),
+        };
 
         /// control register 2
-        CTLR2: RegisterRW(packed struct(u32) {
+        pub const CTLR2 = packed struct(u32) {
             /// unused [0:2]
             _unused0: u3 = 0,
             /// CCDS [3:3]
@@ -2622,10 +3307,10 @@ pub const types = struct {
             TI1S: u1 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.GeneralPurposeTimer.CTLR2),
+        };
 
         /// slave mode control register
-        SMCFGR: RegisterRW(packed struct(u32) {
+        pub const SMCFGR = packed struct(u32) {
             /// SMS [0:2]
             /// Slave mode selection
             SMS: u3 = 0,
@@ -2651,10 +3336,10 @@ pub const types = struct {
             ETP: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.SMCFGR),
+        };
 
         /// DMA/Interrupt enable register
-        DMAINTENR: RegisterRW(packed struct(u32) {
+        pub const DMAINTENR = packed struct(u32) {
             /// UIE [0:0]
             /// Update interrupt enable
             UIE: u1 = 0,
@@ -2699,10 +3384,10 @@ pub const types = struct {
             TDE: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.GeneralPurposeTimer.DMAINTENR),
+        };
 
         /// status register
-        INTFR: RegisterRW(packed struct(u32) {
+        pub const INTFR = packed struct(u32) {
             /// UIF [0:0]
             /// Update interrupt flag
             UIF: u1 = 0,
@@ -2740,10 +3425,10 @@ pub const types = struct {
             CC4OF: u1 = 0,
             /// padding [13:31]
             _padding: u19 = 0,
-        }, nullable_types.GeneralPurposeTimer.INTFR),
+        };
 
         /// event generation register
-        SWEVGR: RegisterRW(packed struct(u32) {
+        pub const SWEVGR = packed struct(u32) {
             /// UG [0:0]
             /// Update generation
             UG: u1 = 0,
@@ -2766,10 +3451,10 @@ pub const types = struct {
             TG: u1 = 0,
             /// padding [7:31]
             _padding: u25 = 0,
-        }, nullable_types.GeneralPurposeTimer.SWEVGR),
+        };
 
         /// capture/compare mode register 1 (output mode)
-        CHCTLR1_Output: RegisterRW(packed struct(u32) {
+        pub const CHCTLR1_Output = packed struct(u32) {
             /// CC1S [0:1]
             /// Capture/Compare 1 selection
             CC1S: u2 = 0,
@@ -2802,10 +3487,10 @@ pub const types = struct {
             OC2CE: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.CHCTLR1_Output),
+        };
 
         /// capture/compare mode register 2 (output mode)
-        CHCTLR2_Output: RegisterRW(packed struct(u32) {
+        pub const CHCTLR2_Output = packed struct(u32) {
             /// CC3S [0:1]
             /// Capture/Compare 3 selection
             CC3S: u2 = 0,
@@ -2838,10 +3523,10 @@ pub const types = struct {
             OC4CE: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.CHCTLR2_Output),
+        };
 
         /// capture/compare enable register
-        CCER: RegisterRW(packed struct(u32) {
+        pub const CCER = packed struct(u32) {
             /// CC1E [0:0]
             /// Capture/Compare channel 1 output enable
             CC1E: u1 = 0,
@@ -2874,79 +3559,73 @@ pub const types = struct {
             CC4P: u1 = 0,
             /// padding [14:31]
             _padding: u18 = 0,
-        }, nullable_types.GeneralPurposeTimer.CCER),
+        };
 
         /// counter
-        CNT: RegisterRW(packed struct(u32) {
+        pub const CNT = packed struct(u32) {
             /// CNT [0:15]
             /// counter value
             CNT: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.CNT),
+        };
 
         /// prescaler
-        PSC: RegisterRW(packed struct(u32) {
+        pub const PSC = packed struct(u32) {
             /// PSC [0:15]
             /// Prescaler value
             PSC: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.PSC),
+        };
 
         /// auto-reload register
-        ATRLR: RegisterRW(packed struct(u32) {
+        pub const ATRLR = packed struct(u32) {
             /// ATRLR [0:15]
             /// Auto-reload value
             ATRLR: u16 = 65535,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.ATRLR),
-
-        /// offset 0x4
-        _offset14: [4]u8,
+        };
 
         /// capture/compare register 1
-        CH1CVR: RegisterRW(packed struct(u32) {
+        pub const CH1CVR = packed struct(u32) {
             /// CH1CVR [0:15]
             /// Capture/Compare 1 value
             CH1CVR: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.CH1CVR),
+        };
 
         /// capture/compare register 2
-        CH2CVR: RegisterRW(packed struct(u32) {
+        pub const CH2CVR = packed struct(u32) {
             /// CH2CVR [0:15]
             /// Capture/Compare 2 value
             CH2CVR: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.CH2CVR),
+        };
 
         /// capture/compare register 3
-        CH3CVR: RegisterRW(packed struct(u32) {
+        pub const CH3CVR = packed struct(u32) {
             /// CH3CVR [0:15]
             /// Capture/Compare 3 value
             CH3CVR: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.CH3CVR),
+        };
 
         /// capture/compare register 4
-        CH4CVR: RegisterRW(packed struct(u32) {
+        pub const CH4CVR = packed struct(u32) {
             /// CH4CVR [0:15]
             /// Capture/Compare 4 value
             CH4CVR: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.CH4CVR),
-
-        /// offset 0x4
-        _offset18: [4]u8,
+        };
 
         /// DMA control register
-        DMACFGR: RegisterRW(packed struct(u32) {
+        pub const DMACFGR = packed struct(u32) {
             /// DBA [0:4]
             /// DMA base address
             DBA: u5 = 0,
@@ -2957,33 +3636,23 @@ pub const types = struct {
             DBL: u5 = 0,
             /// padding [13:31]
             _padding: u19 = 0,
-        }, nullable_types.GeneralPurposeTimer.DMACFGR),
+        };
 
         /// DMA address for full transfer
-        DMAADR: RegisterRW(packed struct(u32) {
+        pub const DMAADR = packed struct(u32) {
             /// DMAADR [0:15]
             /// DMA register for burst accesses
             DMAADR: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.GeneralPurposeTimer.DMAADR),
+        };
     };
 
     /// Inter integrated circuit
     /// Type for: I2C1
-    pub const I2C = extern struct {
-        pub const I2C1 = types.I2C.from(0x40005400);
-
-        pub inline fn from(base: u32) *volatile types.I2C {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.I2C) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const I2C = struct {
         /// Control register 1
-        CTLR1: RegisterRW(packed struct(u32) {
+        pub const CTLR1 = packed struct(u32) {
             /// PE [0:0]
             /// Peripheral enable
             PE: u1 = 0,
@@ -3020,10 +3689,10 @@ pub const types = struct {
             SWRST: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.I2C.CTLR1),
+        };
 
         /// Control register 2
-        CTLR2: RegisterRW(packed struct(u32) {
+        pub const CTLR2 = packed struct(u32) {
             /// FREQ [0:5]
             /// Peripheral clock frequency
             FREQ: u6 = 0,
@@ -3046,10 +3715,10 @@ pub const types = struct {
             LAST: u1 = 0,
             /// padding [13:31]
             _padding: u19 = 0,
-        }, nullable_types.I2C.CTLR2),
+        };
 
         /// Own address register 1
-        OADDR1: RegisterRW(packed struct(u32) {
+        pub const OADDR1 = packed struct(u32) {
             /// ADD0 [0:0]
             /// Interface address
             ADD0: u1 = 0,
@@ -3066,10 +3735,10 @@ pub const types = struct {
             ADDMODE: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.I2C.OADDR1),
+        };
 
         /// Own address register 2
-        OADDR2: RegisterRW(packed struct(u32) {
+        pub const OADDR2 = packed struct(u32) {
             /// ENDUAL [0:0]
             /// Dual addressing mode enable
             ENDUAL: u1 = 0,
@@ -3078,19 +3747,19 @@ pub const types = struct {
             ADD2: u7 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.I2C.OADDR2),
+        };
 
         /// Data register
-        DATAR: RegisterRW(packed struct(u32) {
+        pub const DATAR = packed struct(u32) {
             /// DATAR [0:7]
             /// 8-bit data register
             DATAR: u8 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.I2C.DATAR),
+        };
 
         /// Status register 1
-        STAR1: RegisterRW(packed struct(u32) {
+        pub const STAR1 = packed struct(u32) {
             /// SB [0:0]
             /// Start bit (Master mode)
             SB: u1 = 0,
@@ -3131,10 +3800,10 @@ pub const types = struct {
             PECERR: u1 = 0,
             /// padding [13:31]
             _padding: u19 = 0,
-        }, nullable_types.I2C.STAR1),
+        };
 
         /// Status register 2
-        STAR2: RegisterRW(packed struct(u32) {
+        pub const STAR2 = packed struct(u32) {
             /// MSL [0:0]
             /// Master/slave
             MSL: u1 = 0,
@@ -3159,10 +3828,10 @@ pub const types = struct {
             PEC: u8 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.I2C.STAR2),
+        };
 
         /// Clock control register
-        CKCFGR: RegisterRW(packed struct(u32) {
+        pub const CKCFGR = packed struct(u32) {
             /// CCR [0:11]
             /// Clock control register in Fast/Standard mode (Master mode)
             CCR: u12 = 0,
@@ -3176,24 +3845,14 @@ pub const types = struct {
             F_S: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.I2C.CKCFGR),
+        };
     };
 
     /// Serial peripheral interface
     /// Type for: SPI1
-    pub const SPI = extern struct {
-        pub const SPI1 = types.SPI.from(0x40013000);
-
-        pub inline fn from(base: u32) *volatile types.SPI {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.SPI) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const SPI = struct {
         /// control register 1
-        CTLR1: RegisterRW(packed struct(u32) {
+        pub const CTLR1 = packed struct(u32) {
             /// CPHA [0:0]
             /// Clock phase
             CPHA: u1 = 0,
@@ -3238,10 +3897,10 @@ pub const types = struct {
             BIDIMODE: u1 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.SPI.CTLR1),
+        };
 
         /// control register 2
-        CTLR2: RegisterRW(packed struct(u32) {
+        pub const CTLR2 = packed struct(u32) {
             /// RXDMAEN [0:0]
             /// Rx buffer DMA enable
             RXDMAEN: u1 = 0,
@@ -3264,10 +3923,10 @@ pub const types = struct {
             TXEIE: u1 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.SPI.CTLR2),
+        };
 
         /// status register
-        STATR: RegisterRW(packed struct(u32) {
+        pub const STATR = packed struct(u32) {
             /// RXNE [0:0]
             /// Receive buffer not empty
             RXNE: u1 = 0,
@@ -3294,72 +3953,59 @@ pub const types = struct {
             BSY: u1 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.SPI.STATR),
+        };
 
         /// data register
-        DATAR: RegisterRW(packed struct(u32) {
+        pub const DATAR = packed struct(u32) {
             /// DATAR [0:15]
             /// Data register
             DATAR: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.SPI.DATAR),
+        };
 
         /// CRCR polynomial register
-        CRCR: RegisterRW(packed struct(u32) {
+        pub const CRCR = packed struct(u32) {
             /// CRCPOLY [0:15]
             /// CRC polynomial register
             CRCPOLY: u16 = 7,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.SPI.CRCR),
+        };
 
         /// RX CRC register
-        RCRCR: RegisterRW(packed struct(u32) {
+        pub const RCRCR = packed struct(u32) {
             /// RXCRC [0:15]
             /// Rx CRC register
             RXCRC: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.SPI.RCRCR),
+        };
 
         /// send CRC register
-        TCRCR: RegisterRW(packed struct(u32) {
+        pub const TCRCR = packed struct(u32) {
             /// TXCRC [0:15]
             /// Tx CRC register
             TXCRC: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.SPI.TCRCR),
-
-        /// offset 0x8
-        _offset7: [8]u8,
+        };
 
         /// high speed control register
-        HSCR: RegisterRW(packed struct(u32) {
+        pub const HSCR = packed struct(u32) {
             /// HSRXEN [0:0]
             /// High speed mode read enable
             HSRXEN: u1 = 0,
             /// padding [1:31]
             _padding: u31 = 0,
-        }, nullable_types.SPI.HSCR),
+        };
     };
 
     /// Universal synchronous asynchronous receiver transmitter
     /// Type for: USART1
-    pub const USART = extern struct {
-        pub const USART1 = types.USART.from(0x40013800);
-
-        pub inline fn from(base: u32) *volatile types.USART {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.USART) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const USART = struct {
         /// Status register
-        STATR: RegisterRW(packed struct(u32) {
+        pub const STATR = packed struct(u32) {
             /// PE [0:0]
             /// Parity error
             PE: u1 = 0,
@@ -3392,19 +4038,19 @@ pub const types = struct {
             CTS: u1 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.USART.STATR),
+        };
 
         /// Data register
-        DATAR: RegisterRW(packed struct(u32) {
+        pub const DATAR = packed struct(u32) {
             /// DR [0:8]
             /// Data value
             DR: u9 = 0,
             /// padding [9:31]
             _padding: u23 = 0,
-        }, nullable_types.USART.DATAR),
+        };
 
         /// Baud rate register
-        BRR: RegisterRW(packed struct(u32) {
+        pub const BRR = packed struct(u32) {
             /// DIV_Fraction [0:3]
             /// fraction of USARTDIV
             DIV_Fraction: u4 = 0,
@@ -3413,10 +4059,10 @@ pub const types = struct {
             DIV_Mantissa: u12 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.USART.BRR),
+        };
 
         /// Control register 1
-        CTLR1: RegisterRW(packed struct(u32) {
+        pub const CTLR1 = packed struct(u32) {
             /// SBK [0:0]
             /// Send break
             SBK: u1 = 0,
@@ -3461,10 +4107,10 @@ pub const types = struct {
             UE: u1 = 0,
             /// padding [14:31]
             _padding: u18 = 0,
-        }, nullable_types.USART.CTLR1),
+        };
 
         /// Control register 2
-        CTLR2: RegisterRW(packed struct(u32) {
+        pub const CTLR2 = packed struct(u32) {
             /// ADD [0:3]
             /// Address of the USART node
             ADD: u4 = 0,
@@ -3498,10 +4144,10 @@ pub const types = struct {
             LINEN: u1 = 0,
             /// padding [15:31]
             _padding: u17 = 0,
-        }, nullable_types.USART.CTLR2),
+        };
 
         /// Control register 3
-        CTLR3: RegisterRW(packed struct(u32) {
+        pub const CTLR3 = packed struct(u32) {
             /// EIE [0:0]
             /// Error interrupt enable
             EIE: u1 = 0,
@@ -3537,10 +4183,10 @@ pub const types = struct {
             CTSIE: u1 = 0,
             /// padding [11:31]
             _padding: u21 = 0,
-        }, nullable_types.USART.CTLR3),
+        };
 
         /// Guard time and prescaler register
-        GPR: RegisterRW(packed struct(u32) {
+        pub const GPR = packed struct(u32) {
             /// PSC [0:7]
             /// Prescaler value
             PSC: u8 = 0,
@@ -3549,21 +4195,13 @@ pub const types = struct {
             GT: u8 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.USART.GPR),
+        };
     };
 
     /// Analog to digital converter
-    pub const ADC1 = extern struct {
-        pub inline fn from(base: u32) *volatile types.ADC1 {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.ADC1) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const ADC1 = struct {
         /// status register
-        STATR: RegisterRW(packed struct(u32) {
+        pub const STATR = packed struct(u32) {
             /// AWD [0:0]
             /// Analog watchdog flag
             AWD: u1 = 0,
@@ -3581,10 +4219,10 @@ pub const types = struct {
             STRT: u1 = 0,
             /// padding [5:31]
             _padding: u27 = 0,
-        }, nullable_types.ADC1.STATR),
+        };
 
         /// control register 1/TKEY_V_CTLR
-        CTLR1: RegisterRW(packed struct(u32) {
+        pub const CTLR1 = packed struct(u32) {
             /// AWDCH [0:4]
             /// Analog watchdog channel select bits
             AWDCH: u5 = 0,
@@ -3630,10 +4268,10 @@ pub const types = struct {
             CALVOL: u2 = 0,
             /// padding [27:31]
             _padding: u5 = 0,
-        }, nullable_types.ADC1.CTLR1),
+        };
 
         /// control register 2
-        CTLR2: RegisterRW(packed struct(u32) {
+        pub const CTLR2 = packed struct(u32) {
             /// ADON [0:0]
             /// A/D converter ON / OFF
             ADON: u1 = 0,
@@ -3678,10 +4316,10 @@ pub const types = struct {
             SWSTART: u1 = 0,
             /// padding [23:31]
             _padding: u9 = 0,
-        }, nullable_types.ADC1.CTLR2),
+        };
 
         /// sample time register 1
-        SAMPTR1: RegisterRW(packed struct(u32) {
+        pub const SAMPTR1 = packed struct(u32) {
             /// SMP10 [0:2]
             /// Channel 10 sample time selection
             SMP10: u3 = 0,
@@ -3702,10 +4340,10 @@ pub const types = struct {
             SMP15: u3 = 0,
             /// padding [18:31]
             _padding: u14 = 0,
-        }, nullable_types.ADC1.SAMPTR1),
+        };
 
         /// sample time register 2
-        SAMPTR2: RegisterRW(packed struct(u32) {
+        pub const SAMPTR2 = packed struct(u32) {
             /// SMP0 [0:2]
             /// Channel 0 sample time selection
             SMP0: u3 = 0,
@@ -3738,64 +4376,64 @@ pub const types = struct {
             SMP9: u3 = 0,
             /// padding [30:31]
             _padding: u2 = 0,
-        }, nullable_types.ADC1.SAMPTR2),
+        };
 
         /// injected channel data offset register x
-        IOFR1: RegisterRW(packed struct(u32) {
+        pub const IOFR1 = packed struct(u32) {
             /// JOFFSET1 [0:9]
             /// Data offset for injected channel x
             JOFFSET1: u10 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.ADC1.IOFR1),
+        };
 
         /// injected channel data offset register x
-        IOFR2: RegisterRW(packed struct(u32) {
+        pub const IOFR2 = packed struct(u32) {
             /// JOFFSET2 [0:9]
             /// Data offset for injected channel x
             JOFFSET2: u10 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.ADC1.IOFR2),
+        };
 
         /// injected channel data offset register x
-        IOFR3: RegisterRW(packed struct(u32) {
+        pub const IOFR3 = packed struct(u32) {
             /// JOFFSET3 [0:9]
             /// Data offset for injected channel x
             JOFFSET3: u10 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.ADC1.IOFR3),
+        };
 
         /// injected channel data offset register x
-        IOFR4: RegisterRW(packed struct(u32) {
+        pub const IOFR4 = packed struct(u32) {
             /// JOFFSET4 [0:9]
             /// Data offset for injected channel x
             JOFFSET4: u10 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.ADC1.IOFR4),
+        };
 
         /// watchdog higher threshold register
-        WDHTR: RegisterRW(packed struct(u32) {
+        pub const WDHTR = packed struct(u32) {
             /// HT [0:9]
             /// Analog watchdog higher threshold
             HT: u10 = 1023,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.ADC1.WDHTR),
+        };
 
         /// watchdog lower threshold register
-        WDLTR: RegisterRW(packed struct(u32) {
+        pub const WDLTR = packed struct(u32) {
             /// LT [0:9]
             /// Analog watchdog lower threshold
             LT: u10 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.ADC1.WDLTR),
+        };
 
         /// regular sequence register 1
-        RSQR1: RegisterRW(packed struct(u32) {
+        pub const RSQR1 = packed struct(u32) {
             /// SQ13 [0:4]
             /// 13th conversion in regular sequence
             SQ13: u5 = 0,
@@ -3813,10 +4451,10 @@ pub const types = struct {
             L: u4 = 0,
             /// padding [24:31]
             _padding: u8 = 0,
-        }, nullable_types.ADC1.RSQR1),
+        };
 
         /// regular sequence register 2
-        RSQR2: RegisterRW(packed struct(u32) {
+        pub const RSQR2 = packed struct(u32) {
             /// SQ7 [0:4]
             /// 7th conversion in regular sequence
             SQ7: u5 = 0,
@@ -3837,10 +4475,10 @@ pub const types = struct {
             SQ12: u5 = 0,
             /// padding [30:31]
             _padding: u2 = 0,
-        }, nullable_types.ADC1.RSQR2),
+        };
 
         /// regular sequence register 3
-        RSQR3: RegisterRW(packed struct(u32) {
+        pub const RSQR3 = packed struct(u32) {
             /// SQ1 [0:4]
             /// 1st conversion in regular sequence
             SQ1: u5 = 0,
@@ -3861,10 +4499,10 @@ pub const types = struct {
             SQ6: u5 = 0,
             /// padding [30:31]
             _padding: u2 = 0,
-        }, nullable_types.ADC1.RSQR3),
+        };
 
         /// injected sequence register
-        ISQR: RegisterRW(packed struct(u32) {
+        pub const ISQR = packed struct(u32) {
             /// JSQ1 [0:4]
             /// 1st conversion in injected sequence
             JSQ1: u5 = 0,
@@ -3882,53 +4520,53 @@ pub const types = struct {
             JL: u2 = 0,
             /// padding [22:31]
             _padding: u10 = 0,
-        }, nullable_types.ADC1.ISQR),
+        };
 
         /// injected data register 1
-        IDATAR1: RegisterRW(packed struct(u32) {
+        pub const IDATAR1 = packed struct(u32) {
             /// IDATA [0:15]
             /// Injected data
             IDATA: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.ADC1.IDATAR1),
+        };
 
         /// injected data register 2
-        IDATAR2: RegisterRW(packed struct(u32) {
+        pub const IDATAR2 = packed struct(u32) {
             /// IDATA [0:15]
             /// Injected data
             IDATA: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.ADC1.IDATAR2),
+        };
 
         /// injected data register 3
-        IDATAR3: RegisterRW(packed struct(u32) {
+        pub const IDATAR3 = packed struct(u32) {
             /// IDATA [0:15]
             /// Injected data
             IDATA: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.ADC1.IDATAR3),
+        };
 
         /// injected data register 4
-        IDATAR4: RegisterRW(packed struct(u32) {
+        pub const IDATAR4 = packed struct(u32) {
             /// IDATA [0:15]
             /// Injected data
             IDATA: u16 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.ADC1.IDATAR4),
+        };
 
         /// regular data register
-        RDATAR: RegisterRW(packed struct(u32) {
+        pub const RDATAR = packed struct(u32) {
             /// DATA [0:31]
             /// Regular data
             DATA: u32 = 0,
-        }, nullable_types.ADC1.RDATAR),
+        };
 
         /// delay data register
-        DLYR: RegisterRW(packed struct(u32) {
+        pub const DLYR = packed struct(u32) {
             /// DLYVLU [0:8]
             /// External trigger data delay time configuration
             DLYVLU: u9 = 0,
@@ -3937,21 +4575,13 @@ pub const types = struct {
             DLYSRC: u1 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.ADC1.DLYR),
+        };
     };
 
     /// Debug support
-    pub const DBG = extern struct {
-        pub inline fn from(base: u32) *volatile types.DBG {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.DBG) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const DBG = struct {
         /// DBGMCU_CFGR1
-        CR: RegisterRW(packed struct(u32) {
+        pub const CR = packed struct(u32) {
             /// SLEEP [0:0]
             /// Debug Sleep mode
             SLEEP: u1 = 0,
@@ -3979,86 +4609,67 @@ pub const types = struct {
             TIM2_STOP: u1 = 0,
             /// padding [14:31]
             _padding: u18 = 0,
-        }, nullable_types.DBG.CR),
+        };
     };
 
     /// Device electronic signature
-    pub const ESIG = extern struct {
-        pub inline fn from(base: u32) *volatile types.ESIG {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.ESIG) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const ESIG = struct {
         /// Flash capacity register
-        FLACAP: RegisterRW(packed struct(u16) {
+        pub const FLACAP = packed struct(u16) {
             /// F_SIZE_15_0 [0:15]
             /// Flash size
             F_SIZE_15_0: u16 = 0,
-        }, nullable_types.ESIG.FLACAP),
-
-        /// offset 0x6
-        _offset1: [6]u8,
+        };
 
         /// Unique identity 1
-        UNIID1: RegisterRW(packed struct(u32) {
+        pub const UNIID1 = packed struct(u32) {
             /// U_ID [0:31]
             /// Unique identity[31:0]
             U_ID: u32 = 0,
-        }, nullable_types.ESIG.UNIID1),
+        };
 
         /// Unique identity 2
-        UNIID2: RegisterRW(packed struct(u32) {
+        pub const UNIID2 = packed struct(u32) {
             /// U_ID [0:31]
             /// Unique identity[63:32]
             U_ID: u32 = 0,
-        }, nullable_types.ESIG.UNIID2),
+        };
 
         /// Unique identity 3
-        UNIID3: RegisterRW(packed struct(u32) {
+        pub const UNIID3 = packed struct(u32) {
             /// U_ID [0:31]
             /// Unique identity[95:64]
             U_ID: u32 = 0,
-        }, nullable_types.ESIG.UNIID3),
+        };
     };
 
     /// FLASH
-    pub const FLASH = extern struct {
-        pub inline fn from(base: u32) *volatile types.FLASH {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.FLASH) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const FLASH = struct {
         /// Flash key register
-        ACTLR: RegisterRW(packed struct(u32) {
+        pub const ACTLR = packed struct(u32) {
             /// LATENCY [0:1]
             /// Number of FLASH wait states
             LATENCY: u2 = 0,
             /// padding [2:31]
             _padding: u30 = 0,
-        }, nullable_types.FLASH.ACTLR),
+        };
 
         /// Flash key register
-        KEYR: RegisterRW(packed struct(u32) {
+        pub const KEYR = packed struct(u32) {
             /// KEYR [0:31]
             /// FPEC key
             KEYR: u32 = 0,
-        }, nullable_types.FLASH.KEYR),
+        };
 
         /// Flash option key register
-        OBKEYR: RegisterRW(packed struct(u32) {
+        pub const OBKEYR = packed struct(u32) {
             /// OPTKEY [0:31]
             /// Option byte key
             OPTKEY: u32 = 0,
-        }, nullable_types.FLASH.OBKEYR),
+        };
 
         /// Status register
-        STATR: RegisterRW(packed struct(u32) {
+        pub const STATR = packed struct(u32) {
             /// BSY [0:0]
             /// Busy
             BSY: u1 = 0,
@@ -4081,10 +4692,10 @@ pub const types = struct {
             BOOT_LOCK: u1 = 1,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.FLASH.STATR),
+        };
 
         /// Control register
-        CTLR: RegisterRW(packed struct(u32) {
+        pub const CTLR = packed struct(u32) {
             /// PG [0:0]
             /// Programming
             PG: u1 = 0,
@@ -4140,20 +4751,17 @@ pub const types = struct {
             BUFRST: u1 = 0,
             /// padding [20:31]
             _padding: u12 = 0,
-        }, nullable_types.FLASH.CTLR),
+        };
 
         /// Flash address register
-        ADDR: RegisterRW(packed struct(u32) {
+        pub const ADDR = packed struct(u32) {
             /// FAR [0:31]
             /// Flash Address
             FAR: u32 = 0,
-        }, nullable_types.FLASH.ADDR),
-
-        /// offset 0x4
-        _offset6: [4]u8,
+        };
 
         /// Option byte register
-        OBR: RegisterRW(packed struct(u32) {
+        pub const OBR = packed struct(u32) {
             /// OBERR [0:0]
             /// Option byte error
             OBERR: u1 = 0,
@@ -4184,44 +4792,36 @@ pub const types = struct {
             DATA1: u8 = 0,
             /// padding [26:31]
             _padding: u6 = 0,
-        }, nullable_types.FLASH.OBR),
+        };
 
         /// Write protection register
-        WPR: RegisterRW(packed struct(u32) {
+        pub const WPR = packed struct(u32) {
             /// WRP [0:15]
             /// Write protect
             WRP: u16 = 65535,
             /// padding [16:31]
             _padding: u16 = 65535,
-        }, nullable_types.FLASH.WPR),
+        };
 
         /// Mode select register
-        MODEKEYR: RegisterRW(packed struct(u32) {
+        pub const MODEKEYR = packed struct(u32) {
             /// MODEKEYR [0:31]
             /// Mode select
             MODEKEYR: u32 = 0,
-        }, nullable_types.FLASH.MODEKEYR),
+        };
 
         /// Boot mode key register
-        BOOT_MODEKEYP: RegisterRW(packed struct(u32) {
+        pub const BOOT_MODEKEYP = packed struct(u32) {
             /// MODEKEYR [0:31]
             /// Boot mode key
             MODEKEYR: u32 = 0,
-        }, nullable_types.FLASH.BOOT_MODEKEYP),
+        };
     };
 
     /// Programmable Fast Interrupt Controller
-    pub const PFIC = extern struct {
-        pub inline fn from(base: u32) *volatile types.PFIC {
-            return @ptrFromInt(base);
-        }
-
-        pub inline fn addr(self: *volatile types.PFIC) u32 {
-            return @intFromPtr(self);
-        }
-
+    pub const PFIC = struct {
         /// Interrupt Status Register
-        ISR1: RegisterRW(packed struct(u32) {
+        pub const ISR1 = packed struct(u32) {
             /// unused [0:1]
             _unused0: u2 = 0,
             /// INTENSTA2_3 [2:3]
@@ -4243,22 +4843,19 @@ pub const types = struct {
             /// INTENSTA16_31 [16:31]
             /// Interrupt ID Status
             INTENSTA16_31: u16 = 0,
-        }, nullable_types.PFIC.ISR1),
+        };
 
         /// Interrupt Status Register
-        ISR2: RegisterRW(packed struct(u32) {
+        pub const ISR2 = packed struct(u32) {
             /// INTENSTA [0:6]
             /// Interrupt ID Status
             INTENSTA: u7 = 0,
             /// padding [7:31]
             _padding: u25 = 0,
-        }, nullable_types.PFIC.ISR2),
-
-        /// offset 0x18
-        _offset2: [24]u8,
+        };
 
         /// Interrupt Pending Register
-        IPR1: RegisterRW(packed struct(u32) {
+        pub const IPR1 = packed struct(u32) {
             /// unused [0:1]
             _unused0: u2 = 0,
             /// PENDSTA2_3 [2:3]
@@ -4280,34 +4877,28 @@ pub const types = struct {
             /// INTENSTA16_31 [16:31]
             /// PENDSTA
             INTENSTA16_31: u16 = 0,
-        }, nullable_types.PFIC.IPR1),
+        };
 
         /// Interrupt Pending Register
-        IPR2: RegisterRW(packed struct(u32) {
+        pub const IPR2 = packed struct(u32) {
             /// PENDSTA32_38 [0:6]
             /// PENDSTA
             PENDSTA32_38: u7 = 0,
             /// padding [7:31]
             _padding: u25 = 0,
-        }, nullable_types.PFIC.IPR2),
-
-        /// offset 0x18
-        _offset4: [24]u8,
+        };
 
         /// Interrupt Priority Register
-        ITHRESDR: RegisterRW(packed struct(u32) {
+        pub const ITHRESDR = packed struct(u32) {
             /// THRESHOLD [0:7]
             /// THRESHOLD
             THRESHOLD: u8 = 0,
             /// padding [8:31]
             _padding: u24 = 0,
-        }, nullable_types.PFIC.ITHRESDR),
-
-        /// offset 0x4
-        _offset5: [4]u8,
+        };
 
         /// Interrupt Config Register
-        CFGR: RegisterRW(packed struct(u32) {
+        pub const CFGR = packed struct(u32) {
             /// unused [0:6]
             _unused0: u7 = 0,
             /// RSTSYS [7:7]
@@ -4318,10 +4909,10 @@ pub const types = struct {
             /// KEYCODE [16:31]
             /// KEYCODE
             KEYCODE: u16 = 0,
-        }, nullable_types.PFIC.CFGR),
+        };
 
         /// Interrupt Global Register
-        GISR: RegisterRW(packed struct(u32) {
+        pub const GISR = packed struct(u32) {
             /// NESTSTA [0:7]
             /// NESTSTA
             NESTSTA: u8 = 0,
@@ -4333,10 +4924,10 @@ pub const types = struct {
             GPENDSTA: u1 = 0,
             /// padding [10:31]
             _padding: u22 = 0,
-        }, nullable_types.PFIC.GISR),
+        };
 
         /// ID Config Register
-        VTFIDR: RegisterRW(packed struct(u32) {
+        pub const VTFIDR = packed struct(u32) {
             /// VTFID0 [0:7]
             /// VTFID0
             VTFID0: u8 = 0,
@@ -4345,36 +4936,30 @@ pub const types = struct {
             VTFID1: u8 = 0,
             /// padding [16:31]
             _padding: u16 = 0,
-        }, nullable_types.PFIC.VTFIDR),
-
-        /// offset 0xc
-        _offset8: [12]u8,
+        };
 
         /// Interrupt 0 address Register
-        VTFADDRR0: RegisterRW(packed struct(u32) {
+        pub const VTFADDRR0 = packed struct(u32) {
             /// VTF0EN [0:0]
             /// VTF0EN
             VTF0EN: u1 = 0,
             /// ADDR0 [1:31]
             /// ADDR0
             ADDR0: u31 = 0,
-        }, nullable_types.PFIC.VTFADDRR0),
+        };
 
         /// Interrupt 1 address Register
-        VTFADDRR1: RegisterRW(packed struct(u32) {
+        pub const VTFADDRR1 = packed struct(u32) {
             /// VTF1EN [0:0]
             /// VTF1EN
             VTF1EN: u1 = 0,
             /// ADDR1 [1:31]
             /// ADDR1
             ADDR1: u31 = 0,
-        }, nullable_types.PFIC.VTFADDRR1),
-
-        /// offset 0x98
-        _offset10: [152]u8,
+        };
 
         /// Interrupt Setting Register
-        IENR1: RegisterRW(packed struct(u32) {
+        pub const IENR1 = packed struct(u32) {
             /// unused [0:11]
             _unused0: u8 = 0,
             _unused8: u4 = 0,
@@ -4391,22 +4976,19 @@ pub const types = struct {
             /// INTEN16_31 [16:31]
             /// INTEN16_31
             INTEN16_31: u16 = 0,
-        }, nullable_types.PFIC.IENR1),
+        };
 
         /// Interrupt Setting Register
-        IENR2: RegisterRW(packed struct(u32) {
+        pub const IENR2 = packed struct(u32) {
             /// INTEN [0:6]
             /// INTEN32_38
             INTEN: u7 = 0,
             /// padding [7:31]
             _padding: u25 = 0,
-        }, nullable_types.PFIC.IENR2),
-
-        /// offset 0x78
-        _offset12: [120]u8,
+        };
 
         /// Interrupt Clear Register
-        IRER1: RegisterRW(packed struct(u32) {
+        pub const IRER1 = packed struct(u32) {
             /// unused [0:11]
             _unused0: u8 = 0,
             _unused8: u4 = 0,
@@ -4423,22 +5005,19 @@ pub const types = struct {
             /// INTRSET16_31 [16:31]
             /// INTRSET16_31
             INTRSET16_31: u16 = 0,
-        }, nullable_types.PFIC.IRER1),
+        };
 
         /// Interrupt Clear Register
-        IRER2: RegisterRW(packed struct(u32) {
+        pub const IRER2 = packed struct(u32) {
             /// INTRSET38_32 [0:6]
             /// INTRSET38_32
             INTRSET38_32: u7 = 0,
             /// padding [7:31]
             _padding: u25 = 0,
-        }, nullable_types.PFIC.IRER2),
-
-        /// offset 0x78
-        _offset14: [120]u8,
+        };
 
         /// Interrupt Pending Register
-        IPSR1: RegisterRW(packed struct(u32) {
+        pub const IPSR1 = packed struct(u32) {
             /// unused [0:1]
             _unused0: u2 = 0,
             /// PENDSET2_3 [2:3]
@@ -4460,22 +5039,19 @@ pub const types = struct {
             /// PENDSET16_31 [16:31]
             /// PENDSET
             PENDSET16_31: u16 = 0,
-        }, nullable_types.PFIC.IPSR1),
+        };
 
         /// Interrupt Pending Register
-        IPSR2: RegisterRW(packed struct(u32) {
+        pub const IPSR2 = packed struct(u32) {
             /// PENDSET32_38 [0:6]
             /// PENDSET32_38
             PENDSET32_38: u7 = 0,
             /// padding [7:31]
             _padding: u25 = 0,
-        }, nullable_types.PFIC.IPSR2),
-
-        /// offset 0x78
-        _offset16: [120]u8,
+        };
 
         /// Interrupt Pending Clear Register
-        IPRR1: RegisterRW(packed struct(u32) {
+        pub const IPRR1 = packed struct(u32) {
             /// unused [0:1]
             _unused0: u2 = 0,
             /// PENDRST2_3 [2:3]
@@ -4497,22 +5073,19 @@ pub const types = struct {
             /// PENDRST16_31 [16:31]
             /// PENDRESET
             PENDRST16_31: u16 = 0,
-        }, nullable_types.PFIC.IPRR1),
+        };
 
         /// Interrupt Pending Clear Register
-        IPRR2: RegisterRW(packed struct(u32) {
+        pub const IPRR2 = packed struct(u32) {
             /// PENDRST32_38 [0:6]
             /// PENDRESET32_38
             PENDRST32_38: u7 = 0,
             /// padding [7:31]
             _padding: u25 = 0,
-        }, nullable_types.PFIC.IPRR2),
-
-        /// offset 0x78
-        _offset18: [120]u8,
+        };
 
         /// Interrupt ACTIVE Register
-        IACTR1: RegisterRW(packed struct(u32) {
+        pub const IACTR1 = packed struct(u32) {
             /// unused [0:1]
             _unused0: u2 = 0,
             /// IACTS2_3 [2:3]
@@ -4534,409 +5107,403 @@ pub const types = struct {
             /// IACTS16_31 [16:31]
             /// IACTS
             IACTS16_31: u16 = 0,
-        }, nullable_types.PFIC.IACTR1),
+        };
 
         /// Interrupt ACTIVE Register
-        IACTR2: RegisterRW(packed struct(u32) {
+        pub const IACTR2 = packed struct(u32) {
             /// IACTS [0:6]
             /// IACTS
             IACTS: u7 = 0,
             /// padding [7:31]
             _padding: u25 = 0,
-        }, nullable_types.PFIC.IACTR2),
+        };
 
-        /// offset 0xf8
-        _offset20: [248]u8,
-
         /// Interrupt Priority Register
-        IPRIOR0: RegisterRW(packed struct(u8) {
+        pub const IPRIOR0 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR0),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR1: RegisterRW(packed struct(u8) {
+        pub const IPRIOR1 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR1),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR2: RegisterRW(packed struct(u8) {
+        pub const IPRIOR2 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR2),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR3: RegisterRW(packed struct(u8) {
+        pub const IPRIOR3 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR3),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR4: RegisterRW(packed struct(u8) {
+        pub const IPRIOR4 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR4),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR5: RegisterRW(packed struct(u8) {
+        pub const IPRIOR5 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR5),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR6: RegisterRW(packed struct(u8) {
+        pub const IPRIOR6 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR6),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR7: RegisterRW(packed struct(u8) {
+        pub const IPRIOR7 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR7),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR8: RegisterRW(packed struct(u8) {
+        pub const IPRIOR8 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR8),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR9: RegisterRW(packed struct(u8) {
+        pub const IPRIOR9 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR9),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR10: RegisterRW(packed struct(u8) {
+        pub const IPRIOR10 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR10),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR11: RegisterRW(packed struct(u8) {
+        pub const IPRIOR11 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR11),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR12: RegisterRW(packed struct(u8) {
+        pub const IPRIOR12 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR12),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR13: RegisterRW(packed struct(u8) {
+        pub const IPRIOR13 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR13),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR14: RegisterRW(packed struct(u8) {
+        pub const IPRIOR14 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR14),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR15: RegisterRW(packed struct(u8) {
+        pub const IPRIOR15 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR15),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR16: RegisterRW(packed struct(u8) {
+        pub const IPRIOR16 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR16),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR17: RegisterRW(packed struct(u8) {
+        pub const IPRIOR17 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR17),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR18: RegisterRW(packed struct(u8) {
+        pub const IPRIOR18 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR18),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR19: RegisterRW(packed struct(u8) {
+        pub const IPRIOR19 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR19),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR20: RegisterRW(packed struct(u8) {
+        pub const IPRIOR20 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR20),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR21: RegisterRW(packed struct(u8) {
+        pub const IPRIOR21 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR21),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR22: RegisterRW(packed struct(u8) {
+        pub const IPRIOR22 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR22),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR23: RegisterRW(packed struct(u8) {
+        pub const IPRIOR23 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR23),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR24: RegisterRW(packed struct(u8) {
+        pub const IPRIOR24 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR24),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR25: RegisterRW(packed struct(u8) {
+        pub const IPRIOR25 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR25),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR26: RegisterRW(packed struct(u8) {
+        pub const IPRIOR26 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR26),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR27: RegisterRW(packed struct(u8) {
+        pub const IPRIOR27 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR27),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR28: RegisterRW(packed struct(u8) {
+        pub const IPRIOR28 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR28),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR29: RegisterRW(packed struct(u8) {
+        pub const IPRIOR29 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR29),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR30: RegisterRW(packed struct(u8) {
+        pub const IPRIOR30 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR30),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR31: RegisterRW(packed struct(u8) {
+        pub const IPRIOR31 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR31),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR32: RegisterRW(packed struct(u8) {
+        pub const IPRIOR32 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR32),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR33: RegisterRW(packed struct(u8) {
+        pub const IPRIOR33 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR33),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR34: RegisterRW(packed struct(u8) {
+        pub const IPRIOR34 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR34),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR35: RegisterRW(packed struct(u8) {
+        pub const IPRIOR35 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR35),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR36: RegisterRW(packed struct(u8) {
+        pub const IPRIOR36 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR36),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR37: RegisterRW(packed struct(u8) {
+        pub const IPRIOR37 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR37),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR38: RegisterRW(packed struct(u8) {
+        pub const IPRIOR38 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR38),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR39: RegisterRW(packed struct(u8) {
+        pub const IPRIOR39 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR39),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR40: RegisterRW(packed struct(u8) {
+        pub const IPRIOR40 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR40),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR41: RegisterRW(packed struct(u8) {
+        pub const IPRIOR41 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR41),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR42: RegisterRW(packed struct(u8) {
+        pub const IPRIOR42 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR42),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR43: RegisterRW(packed struct(u8) {
+        pub const IPRIOR43 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR43),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR44: RegisterRW(packed struct(u8) {
+        pub const IPRIOR44 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR44),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR45: RegisterRW(packed struct(u8) {
+        pub const IPRIOR45 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR45),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR46: RegisterRW(packed struct(u8) {
+        pub const IPRIOR46 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR46),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR47: RegisterRW(packed struct(u8) {
+        pub const IPRIOR47 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR47),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR48: RegisterRW(packed struct(u8) {
+        pub const IPRIOR48 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR48),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR49: RegisterRW(packed struct(u8) {
+        pub const IPRIOR49 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR49),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR50: RegisterRW(packed struct(u8) {
+        pub const IPRIOR50 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR50),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR51: RegisterRW(packed struct(u8) {
+        pub const IPRIOR51 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR51),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR52: RegisterRW(packed struct(u8) {
+        pub const IPRIOR52 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR52),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR53: RegisterRW(packed struct(u8) {
+        pub const IPRIOR53 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR53),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR54: RegisterRW(packed struct(u8) {
+        pub const IPRIOR54 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR54),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR55: RegisterRW(packed struct(u8) {
+        pub const IPRIOR55 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR55),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR56: RegisterRW(packed struct(u8) {
+        pub const IPRIOR56 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR56),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR57: RegisterRW(packed struct(u8) {
+        pub const IPRIOR57 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR57),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR58: RegisterRW(packed struct(u8) {
+        pub const IPRIOR58 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR58),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR59: RegisterRW(packed struct(u8) {
+        pub const IPRIOR59 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR59),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR60: RegisterRW(packed struct(u8) {
+        pub const IPRIOR60 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR60),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR61: RegisterRW(packed struct(u8) {
+        pub const IPRIOR61 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR61),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR62: RegisterRW(packed struct(u8) {
+        pub const IPRIOR62 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR62),
+        };
 
         /// Interrupt Priority Register
-        IPRIOR63: RegisterRW(packed struct(u8) {
+        pub const IPRIOR63 = packed struct(u8) {
             /// padding [0:7]
             _padding: u8 = 0,
-        }, nullable_types.PFIC.IPRIOR63),
-
-        /// offset 0x8d0
-        _offset84: [2256]u8,
+        };
 
         /// System Control Register
-        SCTLR: RegisterRW(packed struct(u32) {
+        pub const SCTLR = packed struct(u32) {
             /// unused [0:0]
             _unused0: u1 = 0,
             /// SLEEPONEXIT [1:1]
@@ -4962,13 +5529,10 @@ pub const types = struct {
             /// SYSRST [31:31]
             /// SYSRESET
             SYSRST: u1 = 0,
-        }, nullable_types.PFIC.SCTLR),
-
-        /// offset 0x2ec
-        _offset85: [748]u8,
+        };
 
         /// System counter control register
-        STK_CTLR: RegisterRW(packed struct(u32) {
+        pub const STK_CTLR = packed struct(u32) {
             /// STE [0:0]
             /// System counter enable
             STE: u1 = 0,
@@ -4995,33 +5559,30 @@ pub const types = struct {
             /// SWIE [31:31]
             /// System software triggered interrupts enable
             SWIE: u1 = 0,
-        }, nullable_types.PFIC.STK_CTLR),
+        };
 
         /// System START
-        STK_SR: RegisterRW(packed struct(u32) {
+        pub const STK_SR = packed struct(u32) {
             /// CNTIF [0:0]
             /// CNTIF
             CNTIF: u1 = 0,
             /// padding [1:31]
             _padding: u31 = 0,
-        }, nullable_types.PFIC.STK_SR),
+        };
 
         /// System counter low register
-        STK_CNTL: RegisterRW(packed struct(u32) {
+        pub const STK_CNTL = packed struct(u32) {
             /// CNT [0:31]
             /// CNT
             CNT: u32 = 0,
-        }, nullable_types.PFIC.STK_CNTL),
-
-        /// offset 0x4
-        _offset88: [4]u8,
+        };
 
         /// System compare low register
-        STK_CMPLR: RegisterRW(packed struct(u32) {
+        pub const STK_CMPLR = packed struct(u32) {
             /// CMP [0:31]
             /// CMP
             CMP: u32 = 0,
-        }, nullable_types.PFIC.STK_CMPLR),
+        };
     };
 };
 

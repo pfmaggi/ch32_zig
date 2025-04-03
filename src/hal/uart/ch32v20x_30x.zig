@@ -77,65 +77,65 @@ pub const Pins = struct {
 
     // TODO: add other USARTs
 
-    pub inline fn namespaceFor(comptime reg: *volatile svd.types.USART) type {
+    pub inline fn namespaceFor(comptime reg: *volatile svd.registers.USART) type {
         return switch (reg.addr()) {
-            svd.types.USART.USART1.addr() => return Pins.usart1,
-            // svd.types.USART.USART2.addr() => return Pins.usart2,
-            // svd.types.USART.USART3.addr() => return Pins.usart3,
-            // svd.types.USART.UART4.addr() => return Pins.uart4,
-            // svd.types.USART.UART5.addr() => return Pins.uart5,
-            // svd.types.USART.UART6.addr() => return Pins.uart6,
-            // svd.types.USART.UART7.addr() => return Pins.uart7,
-            // svd.types.USART.UART8.addr() => return Pins.uart8,
+            svd.registers.USART.USART1.addr() => return Pins.usart1,
+            // svd.registers.USART.USART2.addr() => return Pins.usart2,
+            // svd.registers.USART.USART3.addr() => return Pins.usart3,
+            // svd.registers.USART.UART4.addr() => return Pins.uart4,
+            // svd.registers.USART.UART5.addr() => return Pins.uart5,
+            // svd.registers.USART.UART6.addr() => return Pins.uart6,
+            // svd.registers.USART.UART7.addr() => return Pins.uart7,
+            // svd.registers.USART.UART8.addr() => return Pins.uart8,
             else => @compileError("Unsupported USART peripheral"),
         };
     }
 
-    pub inline fn defaultFor(comptime reg: *volatile svd.types.USART) Pins {
+    pub inline fn defaultFor(comptime reg: *volatile svd.registers.USART) Pins {
         return namespaceFor(reg).default;
     }
 };
 
 pub const rcc = struct {
-    pub inline fn enable(reg: *volatile svd.types.USART) void {
+    pub inline fn enable(reg: *volatile svd.registers.USART) void {
         set(reg, true);
     }
 
-    pub inline fn disable(reg: *volatile svd.types.USART) void {
+    pub inline fn disable(reg: *volatile svd.registers.USART) void {
         set(reg, false);
     }
 
-    pub inline fn reset(reg: *volatile svd.types.USART) void {
+    pub inline fn reset(reg: *volatile svd.registers.USART) void {
         switch (reg.addr()) {
-            svd.types.USART.USART1.addr() => {
+            svd.registers.USART.USART1.addr() => {
                 svd.peripherals.RCC.APB2PRSTR.modify(.{ .USART1RST = 1 });
                 svd.peripherals.RCC.APB2PRSTR.modify(.{ .USART1RST = 0 });
             },
-            svd.types.USART.USART2.addr() => {
+            svd.registers.USART.USART2.addr() => {
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .USART2RST = 1 });
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .USART2RST = 0 });
             },
-            svd.types.USART.USART3.addr() => {
+            svd.registers.USART.USART3.addr() => {
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .USART3RST = 1 });
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .USART3RST = 0 });
             },
-            svd.types.USART.UART4.addr() => {
+            svd.registers.USART.UART4.addr() => {
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .USART4RST = 1 });
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .USART4RST = 0 });
             },
-            svd.types.USART.UART5.addr() => {
+            svd.registers.USART.UART5.addr() => {
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .USART5RST = 1 });
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .USART5RST = 0 });
             },
-            svd.types.USART.UART6.addr() => {
+            svd.registers.USART.UART6.addr() => {
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .UART6RST = 1 });
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .UART6RST = 0 });
             },
-            svd.types.USART.UART7.addr() => {
+            svd.registers.USART.UART7.addr() => {
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .UART7RST = 1 });
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .UART7RST = 0 });
             },
-            svd.types.USART.UART8.addr() => {
+            svd.registers.USART.UART8.addr() => {
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .UART8RST = 1 });
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .UART8RST = 0 });
             },
@@ -143,31 +143,31 @@ pub const rcc = struct {
         }
     }
 
-    inline fn set(reg: *volatile svd.types.USART, en: bool) void {
+    inline fn set(reg: *volatile svd.registers.USART, en: bool) void {
         const en_value = if (en) 1 else 0;
         switch (reg.addr()) {
-            svd.types.USART.USART1.addr() => {
+            svd.registers.USART.USART1.addr() => {
                 svd.peripherals.RCC.APB2PCENR.modify(.{ .USART1EN = en_value });
             },
-            svd.types.USART.USART2.addr() => {
+            svd.registers.USART.USART2.addr() => {
                 svd.peripherals.RCC.APB1PCENR.modify(.{ .USART2EN = en_value });
             },
-            svd.types.USART.USART3.addr() => {
+            svd.registers.USART.USART3.addr() => {
                 svd.peripherals.RCC.APB1PCENR.modify(.{ .USART3EN = en_value });
             },
-            svd.types.USART.UART4.addr() => {
+            svd.registers.USART.UART4.addr() => {
                 svd.peripherals.RCC.APB1PCENR.modify(.{ .UART4EN = en_value });
             },
-            svd.types.USART.UART5.addr() => {
+            svd.registers.USART.UART5.addr() => {
                 svd.peripherals.RCC.APB1PCENR.modify(.{ .UART5EN = en_value });
             },
-            svd.types.USART.UART6.addr() => {
+            svd.registers.USART.UART6.addr() => {
                 svd.peripherals.RCC.APB1PCENR.modify(.{ .USART6_EN = en_value });
             },
-            svd.types.USART.UART7.addr() => {
+            svd.registers.USART.UART7.addr() => {
                 svd.peripherals.RCC.APB1PCENR.modify(.{ .USART7_EN = en_value });
             },
-            svd.types.USART.UART8.addr() => {
+            svd.registers.USART.UART8.addr() => {
                 svd.peripherals.RCC.APB1PCENR.modify(.{ .USART8_EN = en_value });
             },
             else => unreachable,

@@ -41,30 +41,30 @@ pub const Pins = struct {
         };
     };
 
-    pub inline fn namespaceFor(comptime reg: *volatile svd.types.I2C) type {
+    pub inline fn namespaceFor(comptime reg: *volatile svd.registers.I2C) type {
         return switch (reg.addr()) {
-            svd.types.I2C.I2C1.addr() => Pins.i2c1,
+            svd.registers.I2C.I2C1.addr() => Pins.i2c1,
             else => @compileError("Unsupported I2C peripheral"),
         };
     }
 
-    pub inline fn defaultFor(comptime reg: *volatile svd.types.I2C) Pins {
+    pub inline fn defaultFor(comptime reg: *volatile svd.registers.I2C) Pins {
         return namespaceFor(reg).default;
     }
 };
 
 pub const rcc = struct {
-    pub inline fn enable(reg: *volatile svd.types.I2C) void {
+    pub inline fn enable(reg: *volatile svd.registers.I2C) void {
         set(reg, true);
     }
 
-    pub inline fn disable(reg: *volatile svd.types.I2C) void {
+    pub inline fn disable(reg: *volatile svd.registers.I2C) void {
         set(reg, false);
     }
 
-    pub inline fn reset(reg: *volatile svd.types.I2C) void {
+    pub inline fn reset(reg: *volatile svd.registers.I2C) void {
         switch (reg.addr()) {
-            svd.types.I2C.I2C1.addr() => {
+            svd.registers.I2C.I2C1.addr() => {
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .I2C1RST = 1 });
                 svd.peripherals.RCC.APB1PRSTR.modify(.{ .I2C1RST = 0 });
             },
@@ -72,10 +72,10 @@ pub const rcc = struct {
         }
     }
 
-    inline fn set(reg: *volatile svd.types.I2C, en: bool) void {
+    inline fn set(reg: *volatile svd.registers.I2C, en: bool) void {
         const en_value = if (en) 1 else 0;
         switch (reg.addr()) {
-            svd.types.I2C.I2C1.addr() => {
+            svd.registers.I2C.I2C1.addr() => {
                 svd.peripherals.RCC.APB1PCENR.modify(.{ .I2C1EN = en_value });
             },
             else => unreachable,

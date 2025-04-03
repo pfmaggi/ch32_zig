@@ -294,7 +294,7 @@ inline fn enableInternal(comptime dma: Channel, comptime value: u1) void {
 inline fn configureInternal(comptime DMA: anytype, ch_num: u4, comptime cfg: Config) void {
     const ch_str = std.fmt.comptimePrint("{}", .{ch_num});
 
-    const pre_reg_cfg = .{ // TODO: replace to periph type.
+    const pre_reg_cfg = svd.types.DMA1.CFGR1{
         .DIR = @intFromEnum(cfg.direction),
         .CIRC = @intFromEnum(cfg.mode),
         .PINC = if (cfg.periph_inc) 1 else 0,

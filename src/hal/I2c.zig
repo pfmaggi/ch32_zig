@@ -78,7 +78,7 @@ pub const BaudRateError = error{
 
 const I2C = @This();
 
-reg: *volatile svd.types.I2C,
+reg: *volatile svd.registers.I2C,
 
 pub fn init(comptime i2c: svd.peripherals.I2C, comptime cfg: Config) I2C {
     const self = I2C{ .reg = i2c.get() };
@@ -452,7 +452,7 @@ fn wait(self: I2C, conditionFn: fn (self: I2C) bool, deadlineFn: ?DeadlineFn) Er
 }
 
 // Comptime pins checks.
-pub fn checkPins(comptime reg: *volatile svd.types.I2C, comptime pins: Pins) void {
+pub fn checkPins(comptime reg: *volatile svd.registers.I2C, comptime pins: Pins) void {
     const pins_namespace = Pins.namespaceFor(reg);
 
     // Find pins from namespace.

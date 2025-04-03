@@ -120,7 +120,7 @@ pub const ConfigureError = error{
 
 const SPI = @This();
 
-reg: *volatile svd.types.SPI,
+reg: *volatile svd.registers.SPI,
 sw_nss: ?Pin,
 has_hardware_nss: bool,
 
@@ -353,7 +353,7 @@ fn wait(self: SPI, conditionFn: fn (self: SPI) bool, deadlineFn: ?DeadlineFn) Ti
 }
 
 // Comptime pins checks.
-pub fn checkPins(comptime reg: *volatile svd.types.SPI, comptime pins: Pins) void {
+pub fn checkPins(comptime reg: *volatile svd.registers.SPI, comptime pins: Pins) void {
     const pins_namespace = Pins.namespaceFor(reg);
 
     // Find pins from namespace.

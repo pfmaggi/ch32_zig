@@ -62,30 +62,30 @@ pub const Pins = struct {
         };
     };
 
-    pub inline fn namespaceFor(comptime reg: *volatile svd.types.USART) type {
+    pub inline fn namespaceFor(comptime reg: *volatile svd.registers.USART) type {
         return switch (reg.addr()) {
-            svd.types.USART.USART1.addr() => Pins.usart1,
+            svd.registers.USART.USART1.addr() => Pins.usart1,
             else => @compileError("Unsupported USART peripheral"),
         };
     }
 
-    pub inline fn defaultFor(comptime reg: *volatile svd.types.USART) Pins {
+    pub inline fn defaultFor(comptime reg: *volatile svd.registers.USART) Pins {
         return namespaceFor(reg).default;
     }
 };
 
 pub const rcc = struct {
-    pub inline fn enable(reg: *volatile svd.types.USART) void {
+    pub inline fn enable(reg: *volatile svd.registers.USART) void {
         set(reg, true);
     }
 
-    pub inline fn disable(reg: *volatile svd.types.USART) void {
+    pub inline fn disable(reg: *volatile svd.registers.USART) void {
         set(reg, false);
     }
 
-    pub inline fn reset(reg: *volatile svd.types.USART) void {
+    pub inline fn reset(reg: *volatile svd.registers.USART) void {
         switch (reg.addr()) {
-            svd.types.USART.USART1.addr() => {
+            svd.registers.USART.USART1.addr() => {
                 svd.peripherals.RCC.APB2PRSTR.modify(.{ .USART1RST = 1 });
                 svd.peripherals.RCC.APB2PRSTR.modify(.{ .USART1RST = 0 });
             },
@@ -93,10 +93,10 @@ pub const rcc = struct {
         }
     }
 
-    inline fn set(reg: *volatile svd.types.USART, en: bool) void {
+    inline fn set(reg: *volatile svd.registers.USART, en: bool) void {
         const en_value = if (en) 1 else 0;
         switch (reg.addr()) {
-            svd.types.USART.USART1.addr() => {
+            svd.registers.USART.USART1.addr() => {
                 svd.peripherals.RCC.APB2PCENR.modify(.{ .USART1EN = en_value });
             },
             else => unreachable,

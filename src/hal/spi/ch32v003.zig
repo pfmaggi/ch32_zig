@@ -57,14 +57,14 @@ pub const Pins = struct {
         };
     }
 
-    pub inline fn namespaceFor(comptime reg: *volatile svd.types.SPI) type {
+    pub inline fn namespaceFor(comptime reg: *volatile svd.registers.SPI) type {
         return switch (reg.addr()) {
-            svd.types.SPI.SPI1.addr() => Pins.spi1,
+            svd.registers.SPI.SPI1.addr() => Pins.spi1,
             else => @compileError("Unsupported SPI peripheral"),
         };
     }
 
-    pub inline fn defaultFor(comptime reg: *volatile svd.types.SPI) Pins {
+    pub inline fn defaultFor(comptime reg: *volatile svd.registers.SPI) Pins {
         return namespaceFor(reg).default;
     }
 
@@ -82,17 +82,17 @@ pub const Pins = struct {
 };
 
 pub const rcc = struct {
-    pub inline fn enable(reg: *volatile svd.types.SPI) void {
+    pub inline fn enable(reg: *volatile svd.registers.SPI) void {
         set(reg, true);
     }
 
-    pub inline fn disable(reg: *volatile svd.types.SPI) void {
+    pub inline fn disable(reg: *volatile svd.registers.SPI) void {
         set(reg, false);
     }
 
-    pub inline fn reset(reg: *volatile svd.types.SPI) void {
+    pub inline fn reset(reg: *volatile svd.registers.SPI) void {
         switch (reg.addr()) {
-            svd.types.SPI.SPI1.addr() => {
+            svd.registers.SPI.SPI1.addr() => {
                 svd.peripherals.RCC.APB2PRSTR.modify(.{ .SPI1RST = 1 });
                 svd.peripherals.RCC.APB2PRSTR.modify(.{ .SPI1RST = 0 });
             },
@@ -100,10 +100,10 @@ pub const rcc = struct {
         }
     }
 
-    inline fn set(reg: *volatile svd.types.SPI, en: bool) void {
+    inline fn set(reg: *volatile svd.registers.SPI, en: bool) void {
         const en_value = if (en) 1 else 0;
         switch (reg.addr()) {
-            svd.types.SPI.SPI1.addr() => {
+            svd.registers.SPI.SPI1.addr() => {
                 svd.peripherals.RCC.APB2PCENR.modify(.{ .SPI1EN = en_value });
             },
             else => unreachable,
