@@ -20,8 +20,8 @@ pub fn init(clock: hal.clock.Clocks) void {
         }
     }
 
-    systicks_per.us = @truncate(div_optimized(clock.hb, 1_000_000));
-    systicks_per.ms = @truncate(div_optimized(clock.hb, 1_000));
+    systicks_per.us = @truncate(divOptimized(clock.hb, 1_000_000));
+    systicks_per.ms = @truncate(divOptimized(clock.hb, 1_000));
 
     PFIC.STK_CTLR.write(.{});
     // Reset the Count Register.
@@ -62,7 +62,7 @@ pub inline fn millis() u32 {
 
 // micros rolls over every ~89.5 seconds if cpu frequency is 48MHz.
 pub inline fn micros() u32 {
-    return div_optimized(ticks() / systicks_per.us);
+    return divOptimized(ticks() / systicks_per.us);
 }
 
 pub inline fn ticks() u32 {
@@ -106,7 +106,7 @@ inline fn diffTime(a: u32, b: u32) i32 {
     return @bitCast(a -% b);
 }
 
-fn div_optimized(n: u32, d: u32) u32 {
+fn divOptimized(n: u32, d: u32) u32 {
     var q: u32 = 0;
     var r: u32 = n;
 
@@ -118,7 +118,7 @@ fn div_optimized(n: u32, d: u32) u32 {
     return q;
 }
 
-test div_optimized {
+test divOptimized {
     const Test = struct {
         n: u32,
         d: u32,
@@ -144,7 +144,7 @@ test div_optimized {
     };
 
     for (tests) |t| {
-        const actual = div_optimized(t.n, t.d);
+        const actual = divOptimized(t.n, t.d);
         try std.testing.expectEqual(t.expected, actual);
     }
 }
