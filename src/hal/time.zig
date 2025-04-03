@@ -16,7 +16,13 @@ var systick_millis: u32 = 0;
 pub fn init(clock: hal.clock.Clocks) void {
     comptime {
         if (!isEnabledInterrupt()) {
-            @compileError("SysTick interrupt handler should be defined to `hal.time.sysTickHandler`");
+            @compileError(
+                \\SysTick interrupt handler should be defined to `hal.time.sysTickHandler`.
+                \\Add to your main file:
+                \\    pub const interrupts: hal.interrupts.VectorTable = .{
+                \\        .SysTick = hal.time.sysTickHandler,
+                \\    };
+            );
         }
     }
 
