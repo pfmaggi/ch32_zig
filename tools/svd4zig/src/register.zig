@@ -19,12 +19,67 @@ pub fn RegisterRW(comptime Register: type, comptime Nullable: type) type {
 
         pub inline fn modify(self: *volatile Self, new_value: Nullable) void {
             var old_value = self.read();
-            const info = @typeInfo(@TypeOf(new_value));
-            inline for (info.@"struct".fields) |field| {
+            inline for (@typeInfo(@TypeOf(new_value)).@"struct".fields) |field| {
                 if (@field(new_value, field.name)) |v| {
                     @field(old_value, field.name) = v;
                 }
             }
+            self.write(old_value);
+        }
+
+        /// Write any type to the register. Any unassigned fields will be set to default.
+        pub inline fn writeAny(self: *volatile Self, value: anytype) void {
+            var reg = self.default();
+
+            const reg_fields = @typeInfo(@TypeOf(value)).@"struct".fields;
+            inline for (reg_fields) |field| {
+                @field(reg, field.name) = @field(value, field.name);
+            }
+
+            self.write(reg);
+        }
+
+        /// Modify register with any type.
+        /// Fields can have types different from the register fields, such as optional or bool.
+        pub inline fn modifyAny(self: *volatile Self, new_value: anytype) void {
+            var old_value = self.read();
+
+            inline for (@typeInfo(@TypeOf(new_value)).@"struct".fields) |field| {
+                const old_field_value = @field(old_value, field.name);
+                const old_field_value_type_info = @typeInfo(@TypeOf(old_field_value));
+
+                const new_field_value = @field(new_value, field.name);
+                const new_field_value_type_info = @typeInfo(@TypeOf(new_field_value));
+                const is_new_value_optional = new_field_value_type_info == .optional;
+
+                // Unwrap optional type.
+                const new_field_value_unwrapped_type_info = if (is_new_value_optional)
+                    @typeInfo(new_field_value_type_info.optional.child)
+                else
+                    new_field_value_type_info;
+
+                // Null fields don't modify the value.
+                if (new_field_value_unwrapped_type_info == .null) {
+                    continue;
+                }
+
+                // Unwrap optional value.
+                const new_field_value_unwrapped: @Type(new_field_value_unwrapped_type_info) = if (is_new_value_optional)
+                    // Null values don't modify the field.
+                    if (new_field_value) |v| v else continue
+                else
+                    new_field_value;
+
+                // Allow set boolean values.
+                const is_u1_type = old_field_value_type_info.int.signedness == .unsigned and old_field_value_type_info.int.bits == 1;
+                if (is_u1_type and new_field_value_unwrapped_type_info == .bool) {
+                    @field(old_value, field.name) = if (new_field_value_unwrapped) 1 else 0;
+                    continue;
+                }
+
+                @field(old_value, field.name) = new_field_value_unwrapped;
+            }
+
             self.write(old_value);
         }
 
@@ -242,5 +297,35 @@ test RegisterRW {
         .field2 = 0b1,
         .field3 = 0b0101,
         .field4 = 0b00001,
+    }, value.read());
+
+    // Write any type struct.
+    value.writeAny(.{
+        .field0 = 0b1,
+        .field2 = 0b1,
+        .field4 = 4,
+    });
+    try std.testing.expectEqual(TestPeriferal{
+        .field0 = 0b1,
+        .field1 = 0b0,
+        .field2 = 0b1,
+        .field3 = 0b0,
+        .field4 = 4,
+    }, value.read());
+
+    // Modify with any type struct.
+    value.modifyAny(.{
+        .field0 = false,
+        .field1 = 1,
+        .field2 = 2,
+        .field3 = 3,
+        .field4 = null, // Should be not modified.
+    });
+    try std.testing.expectEqual(TestPeriferal{
+        .field0 = 0,
+        .field1 = 1,
+        .field2 = 2,
+        .field3 = 3,
+        .field4 = 4,
     }, value.read());
 }
