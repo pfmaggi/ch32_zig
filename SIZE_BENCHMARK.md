@@ -6,327 +6,327 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 ### blink_delay_ch32v003.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 562 | 0 | 4 | 566 | 
-| ReleaseFast | 560 | 0 | 4 | 564 | 
-| ReleaseSafe | 852 | 0 | 4 | 856 | 
-| Debug | 3092 | 0 | 12 | 3104 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 406 | 0 | 0 | 4 | 562 |
+| ReleaseFast | 156 | 404 | 0 | 0 | 4 | 560 |
+| ReleaseSafe | 156 | 696 | 0 | 0 | 4 | 852 |
+| Debug | 156 | 2704 | 232 | 0 | 12 | 3096 |
 
 ### blink_delay_ch32v20x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 826 | 0 | 4 | 830 | 
-| ReleaseFast | 804 | 0 | 4 | 808 | 
-| ReleaseSafe | 842 | 0 | 4 | 846 | 
-| Debug | 3360 | 0 | 12 | 3372 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 434 | 0 | 0 | 4 | 826 |
+| ReleaseFast | 392 | 412 | 0 | 0 | 4 | 804 |
+| ReleaseSafe | 392 | 450 | 0 | 0 | 4 | 842 |
+| Debug | 392 | 2728 | 240 | 0 | 12 | 3360 |
 
 ### blink_delay_ch32v30x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 868 | 0 | 4 | 872 | 
-| ReleaseFast | 846 | 0 | 4 | 850 | 
-| ReleaseSafe | 876 | 0 | 4 | 880 | 
-| Debug | 3468 | 0 | 12 | 3480 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 452 | 0 | 0 | 4 | 868 |
+| ReleaseFast | 416 | 430 | 0 | 0 | 4 | 846 |
+| ReleaseSafe | 416 | 460 | 0 | 0 | 4 | 876 |
+| Debug | 416 | 2812 | 240 | 0 | 12 | 3472 |
 
 
 ## [examples/blink_minimal](examples/blink_minimal)
 
 ### blink_minimal_ch32v003.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 428 | 0 | 0 | 428 | 
-| ReleaseFast | 462 | 0 | 0 | 462 | 
-| ReleaseSafe | 464 | 0 | 0 | 464 | 
-| Debug | 2362 | 0 | 0 | 2362 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 272 | 0 | 0 | 0 | 428 |
+| ReleaseFast | 156 | 306 | 0 | 0 | 0 | 462 |
+| ReleaseSafe | 156 | 308 | 0 | 0 | 0 | 464 |
+| Debug | 156 | 1982 | 224 | 0 | 0 | 2368 |
 
 ### blink_minimal_ch32v20x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 714 | 0 | 0 | 714 | 
-| ReleaseFast | 750 | 0 | 0 | 750 | 
-| ReleaseSafe | 752 | 0 | 0 | 752 | 
-| Debug | 2932 | 0 | 0 | 2932 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 322 | 0 | 0 | 0 | 714 |
+| ReleaseFast | 392 | 358 | 0 | 0 | 0 | 750 |
+| ReleaseSafe | 392 | 360 | 0 | 0 | 0 | 752 |
+| Debug | 392 | 2316 | 224 | 0 | 0 | 2936 |
 
 ### blink_minimal_ch32v30x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 748 | 0 | 0 | 748 | 
-| ReleaseFast | 784 | 0 | 0 | 784 | 
-| ReleaseSafe | 786 | 0 | 0 | 786 | 
-| Debug | 3040 | 0 | 0 | 3040 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 332 | 0 | 0 | 0 | 748 |
+| ReleaseFast | 416 | 368 | 0 | 0 | 0 | 784 |
+| ReleaseSafe | 416 | 370 | 0 | 0 | 0 | 786 |
+| Debug | 416 | 2400 | 224 | 0 | 0 | 3040 |
 
 
 ## [examples/blink_systick_interrupt](examples/blink_systick_interrupt)
 
 ### blink_systick_interrupt_ch32v003.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 544 | 0 | 0 | 544 | 
-| ReleaseFast | 594 | 0 | 0 | 594 | 
-| ReleaseSafe | 596 | 0 | 0 | 596 | 
-| Debug | 2582 | 0 | 0 | 2582 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 380 | 8 | 0 | 0 | 544 |
+| ReleaseFast | 156 | 430 | 8 | 0 | 0 | 596 |
+| ReleaseSafe | 156 | 432 | 8 | 0 | 0 | 596 |
+| Debug | 156 | 2194 | 232 | 0 | 0 | 2584 |
 
 ### blink_systick_interrupt_ch32v20x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 808 | 0 | 0 | 808 | 
-| ReleaseFast | 858 | 0 | 0 | 858 | 
-| ReleaseSafe | 860 | 0 | 0 | 860 | 
-| Debug | 3170 | 0 | 0 | 3170 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 408 | 8 | 0 | 0 | 808 |
+| ReleaseFast | 392 | 458 | 8 | 0 | 0 | 860 |
+| ReleaseSafe | 392 | 460 | 8 | 0 | 0 | 860 |
+| Debug | 392 | 2546 | 232 | 0 | 0 | 3176 |
 
 ### blink_systick_interrupt_ch32v30x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 854 | 0 | 0 | 854 | 
-| ReleaseFast | 904 | 0 | 0 | 904 | 
-| ReleaseSafe | 906 | 0 | 0 | 906 | 
-| Debug | 3432 | 0 | 0 | 3432 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 430 | 8 | 0 | 0 | 856 |
+| ReleaseFast | 416 | 480 | 8 | 0 | 0 | 904 |
+| ReleaseSafe | 416 | 482 | 8 | 0 | 0 | 908 |
+| Debug | 416 | 2784 | 232 | 0 | 0 | 3432 |
 
 
 ## [examples/blink_time_delay](examples/blink_time_delay)
 
 ### blink_time_delay_ch32v003.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 634 | 0 | 8 | 642 | 
-| ReleaseFast | 614 | 0 | 8 | 622 | 
-| ReleaseSafe | 626 | 0 | 8 | 634 | 
-| Debug | 3048 | 0 | 8 | 3056 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 478 | 0 | 0 | 8 | 634 |
+| ReleaseFast | 156 | 458 | 0 | 0 | 8 | 614 |
+| ReleaseSafe | 156 | 470 | 0 | 0 | 8 | 626 |
+| Debug | 156 | 2660 | 232 | 0 | 8 | 3048 |
 
 ### blink_time_delay_ch32v20x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 920 | 0 | 8 | 928 | 
-| ReleaseFast | 902 | 0 | 8 | 910 | 
-| ReleaseSafe | 914 | 0 | 8 | 922 | 
-| Debug | 3618 | 0 | 8 | 3626 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 528 | 0 | 0 | 8 | 920 |
+| ReleaseFast | 392 | 510 | 0 | 0 | 8 | 902 |
+| ReleaseSafe | 392 | 522 | 0 | 0 | 8 | 914 |
+| Debug | 392 | 2986 | 240 | 0 | 8 | 3624 |
 
 ### blink_time_delay_ch32v30x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 954 | 0 | 8 | 962 | 
-| ReleaseFast | 936 | 0 | 8 | 944 | 
-| ReleaseSafe | 948 | 0 | 8 | 956 | 
-| Debug | 3726 | 0 | 8 | 3734 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 538 | 0 | 0 | 8 | 954 |
+| ReleaseFast | 416 | 520 | 0 | 0 | 8 | 936 |
+| ReleaseSafe | 416 | 532 | 0 | 0 | 8 | 948 |
+| Debug | 416 | 3070 | 240 | 0 | 8 | 3728 |
 
 
 ## [examples/i2c_bmi160](examples/i2c_bmi160)
 
 ### i2c_bmi160_ch32v003.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 8090 | 4 | 16 | 8110 | 
-| ReleaseFast | 12174 | 4 | 16 | 12194 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 6710 | 1224 | 4 | 16 | 8096 |
+| ReleaseFast | 156 | 10602 | 1416 | 4 | 16 | 12180 |
 
 
 ## [examples/mco](examples/mco)
 
 ### mco_ch32v003.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 568 | 0 | 0 | 568 | 
-| ReleaseFast | 616 | 0 | 0 | 616 | 
-| ReleaseSafe | 848 | 0 | 0 | 848 | 
-| Debug | 5730 | 0 | 0 | 5730 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 410 | 2 | 0 | 0 | 568 |
+| ReleaseFast | 156 | 458 | 2 | 0 | 0 | 616 |
+| ReleaseSafe | 156 | 524 | 168 | 0 | 0 | 848 |
+| Debug | 156 | 5162 | 412 | 0 | 0 | 5732 |
 
 ### mco_ch32v20x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 842 | 0 | 0 | 842 | 
-| ReleaseFast | 890 | 0 | 0 | 890 | 
-| ReleaseSafe | 1422 | 0 | 0 | 1422 | 
-| Debug | 8270 | 0 | 0 | 8270 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 448 | 2 | 0 | 0 | 842 |
+| ReleaseFast | 392 | 496 | 2 | 0 | 0 | 890 |
+| ReleaseSafe | 392 | 730 | 300 | 0 | 0 | 1424 |
+| Debug | 392 | 7268 | 610 | 0 | 0 | 8274 |
 
 ### mco_ch32v30x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 882 | 0 | 0 | 882 | 
-| ReleaseFast | 928 | 0 | 0 | 928 | 
-| ReleaseSafe | 1460 | 0 | 0 | 1460 | 
-| Debug | 8356 | 0 | 0 | 8356 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 464 | 2 | 0 | 0 | 882 |
+| ReleaseFast | 416 | 510 | 2 | 0 | 0 | 928 |
+| ReleaseSafe | 416 | 744 | 300 | 0 | 0 | 1460 |
+| Debug | 416 | 7330 | 610 | 0 | 0 | 8362 |
 
 
 ## [examples/spi](examples/spi)
 
 ### spi_ch32v003_master.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2596 | 0 | 4 | 2600 | 
-| ReleaseFast | 3482 | 0 | 4 | 3486 | 
-| ReleaseSafe | 10730 | 0 | 4 | 10734 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 1940 | 500 | 0 | 4 | 2596 |
+| ReleaseFast | 156 | 2866 | 460 | 0 | 4 | 3484 |
+| ReleaseSafe | 156 | 9474 | 1100 | 0 | 4 | 10732 |
 
 ### spi_ch32v003_slave.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2596 | 0 | 4 | 2600 | 
-| ReleaseFast | 3392 | 0 | 4 | 3396 | 
-| ReleaseSafe | 10644 | 0 | 4 | 10648 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 1932 | 508 | 0 | 4 | 2596 |
+| ReleaseFast | 156 | 2788 | 448 | 0 | 4 | 3392 |
+| ReleaseSafe | 156 | 9396 | 1092 | 0 | 4 | 10644 |
 
 ### spi_ch32v20x_master.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2898 | 0 | 4 | 2902 | 
-| ReleaseFast | 3694 | 0 | 4 | 3698 | 
-| ReleaseSafe | 9726 | 0 | 4 | 9730 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 1814 | 692 | 0 | 4 | 2900 |
+| ReleaseFast | 392 | 2666 | 636 | 0 | 4 | 3700 |
+| ReleaseSafe | 392 | 8058 | 1276 | 0 | 4 | 9732 |
 
 ### spi_ch32v20x_slave.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2894 | 0 | 4 | 2898 | 
-| ReleaseFast | 3622 | 0 | 4 | 3626 | 
-| ReleaseSafe | 9652 | 0 | 4 | 9656 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 1810 | 692 | 0 | 4 | 2896 |
+| ReleaseFast | 392 | 2610 | 620 | 0 | 4 | 3628 |
+| ReleaseSafe | 392 | 8000 | 1260 | 0 | 4 | 9652 |
 
 ### spi_ch32v30x_master.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2936 | 0 | 4 | 2940 | 
-| ReleaseFast | 3732 | 0 | 4 | 3736 | 
-| ReleaseSafe | 9764 | 0 | 4 | 9768 | 
-| Debug | 37130 | 0 | 12 | 37142 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 1828 | 692 | 0 | 4 | 2940 |
+| ReleaseFast | 416 | 2680 | 636 | 0 | 4 | 3732 |
+| ReleaseSafe | 416 | 8072 | 1276 | 0 | 4 | 9764 |
+| Debug | 416 | 34662 | 2052 | 0 | 12 | 37132 |
 
 ### spi_ch32v30x_slave.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2932 | 0 | 4 | 2936 | 
-| ReleaseFast | 3660 | 0 | 4 | 3664 | 
-| ReleaseSafe | 9690 | 0 | 4 | 9694 | 
-| Debug | 36996 | 0 | 12 | 37008 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 1824 | 692 | 0 | 4 | 2932 |
+| ReleaseFast | 416 | 2624 | 620 | 0 | 4 | 3660 |
+| ReleaseSafe | 416 | 8014 | 1260 | 0 | 4 | 9692 |
+| Debug | 416 | 34552 | 2028 | 0 | 12 | 36996 |
 
 
 ## [examples/uart](examples/uart)
 
 ### uart_ch32v003.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2048 | 4 | 4 | 2056 | 
-| ReleaseFast | 2660 | 4 | 4 | 2668 | 
-| ReleaseSafe | 3472 | 4 | 4 | 3480 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 1540 | 352 | 4 | 4 | 2052 |
+| ReleaseFast | 156 | 2172 | 332 | 4 | 4 | 2664 |
+| ReleaseSafe | 156 | 3092 | 224 | 4 | 4 | 3476 |
 
 ### uart_ch32v20x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2314 | 4 | 4 | 2322 | 
-| ReleaseFast | 2826 | 4 | 4 | 2834 | 
-| ReleaseSafe | 3184 | 4 | 4 | 3192 | 
-| Debug | 31822 | 4 | 12 | 31838 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 1390 | 532 | 4 | 4 | 2320 |
+| ReleaseFast | 392 | 1938 | 496 | 4 | 4 | 2832 |
+| ReleaseSafe | 392 | 2404 | 388 | 4 | 4 | 3188 |
+| Debug | 392 | 29662 | 1768 | 4 | 12 | 31828 |
 
 ### uart_ch32v30x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2352 | 4 | 4 | 2360 | 
-| ReleaseFast | 2864 | 4 | 4 | 2872 | 
-| ReleaseSafe | 3222 | 4 | 4 | 3230 | 
-| Debug | 31908 | 4 | 12 | 31924 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 1404 | 532 | 4 | 4 | 2356 |
+| ReleaseFast | 416 | 1952 | 496 | 4 | 4 | 2868 |
+| ReleaseSafe | 416 | 2418 | 388 | 4 | 4 | 3228 |
+| Debug | 416 | 29724 | 1768 | 4 | 12 | 31916 |
 
 
 ## [examples/uart_dma_tx](examples/uart_dma_tx)
 
 ### uart_dma_tx_ch32v003.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 1702 | 0 | 4 | 1706 | 
-| ReleaseFast | 2174 | 0 | 4 | 2178 | 
-| ReleaseSafe | 3434 | 0 | 4 | 3438 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 1338 | 208 | 0 | 4 | 1704 |
+| ReleaseFast | 156 | 1810 | 208 | 0 | 4 | 2176 |
+| ReleaseSafe | 156 | 3054 | 224 | 0 | 4 | 3436 |
 
 ### uart_dma_tx_ch32v20x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 1988 | 0 | 4 | 1992 | 
-| ReleaseFast | 2342 | 0 | 4 | 2346 | 
-| ReleaseSafe | 3152 | 0 | 4 | 3156 | 
-| Debug | 31190 | 0 | 12 | 31202 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 1208 | 388 | 0 | 4 | 1988 |
+| ReleaseFast | 392 | 1578 | 372 | 0 | 4 | 2344 |
+| ReleaseSafe | 392 | 2372 | 388 | 0 | 4 | 3152 |
+| Debug | 392 | 29062 | 1736 | 0 | 12 | 31192 |
 
 ### uart_dma_tx_ch32v30x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2026 | 0 | 4 | 2030 | 
-| ReleaseFast | 2380 | 0 | 4 | 2384 | 
-| ReleaseSafe | 3190 | 0 | 4 | 3194 | 
-| Debug | 31276 | 0 | 12 | 31288 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 1222 | 388 | 0 | 4 | 2028 |
+| ReleaseFast | 416 | 1592 | 372 | 0 | 4 | 2380 |
+| ReleaseSafe | 416 | 2386 | 388 | 0 | 4 | 3192 |
+| Debug | 416 | 29124 | 1736 | 0 | 12 | 31280 |
 
 
 ## [examples/uart_dma_tx_irq](examples/uart_dma_tx_irq)
 
 ### uart_dma_tx_irq_ch32v003.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 1848 | 0 | 4 | 1852 | 
-| ReleaseFast | 2334 | 0 | 4 | 2338 | 
-| ReleaseSafe | 3592 | 0 | 4 | 3596 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 1476 | 216 | 0 | 4 | 1848 |
+| ReleaseFast | 156 | 1962 | 216 | 0 | 4 | 2336 |
+| ReleaseSafe | 156 | 3204 | 232 | 0 | 4 | 3592 |
 
 ### uart_dma_tx_irq_ch32v20x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2094 | 0 | 4 | 2098 | 
-| ReleaseFast | 2532 | 0 | 4 | 2536 | 
-| ReleaseSafe | 3342 | 0 | 4 | 3346 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 1306 | 396 | 0 | 4 | 2096 |
+| ReleaseFast | 392 | 1760 | 380 | 0 | 4 | 2532 |
+| ReleaseSafe | 392 | 2554 | 396 | 0 | 4 | 3344 |
 
 ### uart_dma_tx_irq_ch32v30x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2132 | 0 | 4 | 2136 | 
-| ReleaseFast | 2570 | 0 | 4 | 2574 | 
-| ReleaseSafe | 3380 | 0 | 4 | 3384 | 
-| Debug | 34420 | 0 | 12 | 34432 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 1320 | 396 | 0 | 4 | 2132 |
+| ReleaseFast | 416 | 1774 | 380 | 0 | 4 | 2572 |
+| ReleaseSafe | 416 | 2568 | 396 | 0 | 4 | 3380 |
+| Debug | 416 | 32236 | 1768 | 0 | 12 | 34424 |
 
 
 ## [examples/uart_echo](examples/uart_echo)
 
 ### uart_echo_ch32v003.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 1954 | 0 | 4 | 1958 | 
-| ReleaseFast | 2134 | 0 | 4 | 2138 | 
-| ReleaseSafe | 1826 | 0 | 4 | 1830 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 1382 | 416 | 0 | 4 | 1956 |
+| ReleaseFast | 156 | 1570 | 408 | 0 | 4 | 2136 |
+| ReleaseSafe | 156 | 1434 | 236 | 0 | 4 | 1828 |
 
 ### uart_echo_ch32v20x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2292 | 0 | 4 | 2296 | 
-| ReleaseFast | 2400 | 0 | 4 | 2404 | 
-| ReleaseSafe | 2106 | 0 | 4 | 2110 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 1304 | 596 | 0 | 4 | 2292 |
+| ReleaseFast | 392 | 1436 | 572 | 0 | 4 | 2400 |
+| ReleaseSafe | 392 | 1314 | 400 | 0 | 4 | 2108 |
 
 ### uart_echo_ch32v30x.elf 
 
-| Mode | Text | Data | Bss | Total |
-|--------|--------|--------|--------|--------|
-| ReleaseSmall | 2330 | 0 | 4 | 2334 | 
-| ReleaseFast | 2438 | 0 | 4 | 2442 | 
-| ReleaseSafe | 2144 | 0 | 4 | 2148 | 
-| Debug | 34516 | 0 | 12 | 34528 | 
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 1318 | 596 | 0 | 4 | 2332 |
+| ReleaseFast | 416 | 1450 | 572 | 0 | 4 | 2440 |
+| ReleaseSafe | 416 | 1328 | 400 | 0 | 4 | 2144 |
+| Debug | 416 | 32156 | 1944 | 0 | 12 | 34520 |
 
 
 

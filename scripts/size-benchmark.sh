@@ -6,7 +6,7 @@ set -euo pipefail
 base_dir=$(dirname "$0")
 root_dir=$(realpath "${base_dir}/..")
 
-columns=("Mode" "Text" "Data" "Bss" "Total")
+columns=("Mode" ".init" ".text" ".rodata" ".data" ".bss" "Total")
 modes=("ReleaseSmall" "ReleaseFast" "ReleaseSafe" "Debug")
 
 echo "# Size benchmark" >SIZE_BENCHMARK.md
@@ -32,9 +32,31 @@ write_size_per_fw() {
       continue
     fi
 
-    size=$(size "${file}" | tail -n1 | awk '{print $1 " | " $2 " | " $3 " | " ($1 + $2 + $3)}' || echo "- | - | - | Failed")
     file_name=$(basename "$file")
-    echo "| $optimize | $size | " >>"tmp_size_per_fw_${file_name}.md"
+
+    # bloaty output:
+    # sections,vmsize,filesize
+    # .text,1476,1476
+    # .rodata,216,216
+    # .init,156,156
+    # .bss,4,0
+    csv=$(bloaty --csv --domain=vm "${file}" || echo '')
+    if [ -z "$csv" ]; then
+      echo "Failed to get size for $file"
+      continue
+    fi
+
+    # get the size of each section
+    init=$(echo "$csv" | grep "\.init" | awk -F, '{print $2}' || echo 0)
+    text=$(echo "$csv" | grep "\.text" | awk -F, '{print $2}' || echo 0)
+    rodata=$(echo "$csv" | grep "\.rodata" | awk -F, '{print $2}' || echo 0)
+    data=$(echo "$csv" | grep "\.data" | awk -F, '{print $2}' || echo 0)
+    bss=$(echo "$csv" | grep "\.bss" | awk -F, '{print $2}' || echo 0)
+    # bin file size
+    total=$(stat -c %s "${file%.elf}.bin" || echo 0)
+
+    # write the sizes to the file
+    echo "| $optimize | $init | $text | $rodata | $data | $bss | $total |" >>"tmp_size_per_fw_${file_name}.md"
   done
 }
 
