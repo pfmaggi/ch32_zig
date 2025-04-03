@@ -184,9 +184,9 @@ pub fn generateExportedVectorTable(list: VectorTable, unhandledFn: Handler) Expo
     return vector_table;
 }
 
-const ExportedVectorTableType = createExportedVectorTableType();
+const ExportedVectorTableType = CreateExportedVectorTableType();
 
-fn createExportedVectorTableType() type {
+fn CreateExportedVectorTableType() type {
     @setEvalBranchQuota(100_000);
 
     const offset = 1;
@@ -211,13 +211,13 @@ fn createExportedVectorTableType() type {
         const l = std.fmt.formatIntBuf(&buf, idx, 10, .lower, .{});
         const idx_str = buf[0..l];
 
-        const field_type = if (name != null) Handler else std.meta.Int(.unsigned, @alignOf(Handler) * 8);
+        const FieldType = if (name != null) Handler else std.meta.Int(.unsigned, @alignOf(Handler) * 8);
         field.* = .{
             .name = name orelse "_reserved" ++ idx_str,
-            .type = field_type,
+            .type = FieldType,
             .default_value_ptr = null,
             .is_comptime = false,
-            .alignment = @alignOf(field_type),
+            .alignment = @alignOf(FieldType),
         };
     }
 
