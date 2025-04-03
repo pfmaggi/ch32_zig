@@ -35,7 +35,20 @@ pub inline fn wait() void {
 }
 
 /// Enable interrupt.
-pub inline fn enable(irq: svd.interrupts) void {
+pub inline fn enable(comptime irq: svd.interrupts) void {
+    comptime {
+        const irq_name = @tagName(irq);
+        if (@field(@import("root").interrupts, irq_name) == null) {
+            @compileError(
+                irq_name ++ " interrupt handler should be defined.\n" ++
+                    "Add to your main file:\n" ++
+                    "    pub const interrupts: hal.interrupts.VectorTable = .{\n" ++
+                    "        ." ++ irq_name ++ " = yourHandlerFor" ++ irq_name ++ ",\n" ++
+                    "    };\n",
+            );
+        }
+    }
+
     const irq_num = @intFromEnum(irq);
     const num = irq_num >> 5;
     const pos = irq_num & 0x1F;
