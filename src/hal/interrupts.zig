@@ -37,8 +37,9 @@ pub inline fn wait() void {
 /// Enable interrupt.
 pub inline fn enable(comptime irq: svd.interrupts) void {
     comptime {
+        const root = @import("root");
         const irq_name = @tagName(irq);
-        if (@field(@import("root").interrupts, irq_name) == null) {
+        if (!@hasDecl(root, "interrupts") or @field(root.interrupts, irq_name) == null) {
             @compileError(
                 irq_name ++ " interrupt handler should be defined.\n" ++
                     "Add to your main file:\n" ++
