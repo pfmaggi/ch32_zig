@@ -128,8 +128,8 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 6710 | 1224 | 4 | 16 | 8096 |
-| ReleaseFast | 156 | 10602 | 1416 | 4 | 16 | 12180 |
+| ReleaseSmall | 156 | 6710 | 1216 | 4 | 16 | 8088 |
+| ReleaseFast | 156 | 10602 | 1408 | 4 | 16 | 12172 |
 
 
 ## [examples/mco](examples/mco)
@@ -336,26 +336,54 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
 | ReleaseSmall | 156 | 1704 | 244 | 4 | 16 | 2108 |
-| ReleaseFast | 156 | 1992 | 448 | 4 | 16 | 2600 |
-| ReleaseSafe | 156 | 8886 | 1000 | 4 | 16 | 10048 |
+| ReleaseFast | 156 | 1992 | 444 | 4 | 16 | 2596 |
+| ReleaseSafe | 156 | 8876 | 1000 | 4 | 16 | 10036 |
 
 ### uart_logger_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 1484 | 428 | 4 | 16 | 2308 |
+| ReleaseSmall | 392 | 1484 | 424 | 4 | 16 | 2304 |
 | ReleaseFast | 392 | 1692 | 612 | 4 | 16 | 2700 |
-| ReleaseSafe | 392 | 7210 | 1164 | 4 | 16 | 8772 |
+| ReleaseSafe | 392 | 7208 | 1164 | 4 | 16 | 8768 |
 | Debug | 392 | 30200 | 1800 | 4 | 24 | 32396 |
 
 ### uart_logger_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 1498 | 428 | 4 | 16 | 2348 |
+| ReleaseSmall | 416 | 1498 | 424 | 4 | 16 | 2344 |
 | ReleaseFast | 416 | 1706 | 612 | 4 | 16 | 2740 |
-| ReleaseSafe | 416 | 7224 | 1164 | 4 | 16 | 8808 |
+| ReleaseSafe | 416 | 7222 | 1164 | 4 | 16 | 8808 |
 | Debug | 416 | 30262 | 1800 | 4 | 24 | 32484 |
+
+
+## [examples/uart_logger_panic](examples/uart_logger_panic)
+
+### uart_logger_panic_ch32v003.elf 
+
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 4092 | 504 | 4 | 16 | 4756 |
+| ReleaseFast | 156 | 5732 | 704 | 4 | 16 | 6596 |
+| ReleaseSafe | 156 | 10712 | 1420 | 4 | 16 | 12292 |
+
+### uart_logger_panic_ch32v20x.elf 
+
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 392 | 3860 | 688 | 4 | 16 | 4944 |
+| ReleaseFast | 392 | 5108 | 872 | 4 | 16 | 6376 |
+| ReleaseSafe | 392 | 9128 | 1584 | 4 | 16 | 11108 |
+
+### uart_logger_panic_ch32v30x.elf 
+
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 416 | 3914 | 688 | 4 | 16 | 5024 |
+| ReleaseFast | 416 | 5162 | 872 | 4 | 16 | 6456 |
+| ReleaseSafe | 416 | 9182 | 1584 | 4 | 16 | 11188 |
+| Debug | 416 | 36482 | 2060 | 4 | 24 | 38968 |
 
 
 
