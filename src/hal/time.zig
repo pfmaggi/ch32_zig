@@ -1,4 +1,5 @@
 const std = @import("std");
+const builtin = @import("builtin");
 const config = @import("config");
 const svd = @import("svd");
 
@@ -49,7 +50,12 @@ pub fn init(clock: hal.clock.Clocks) void {
 }
 
 pub fn isEnabledInterrupt() bool {
-    return @import("root").interrupts.SysTick == sysTickHandler;
+    const root = @import("root");
+    if (!@hasDecl(root, "interrupts")) {
+        return false;
+    }
+
+    return root.interrupts.SysTick == sysTickHandler;
 }
 
 pub fn sysTickHandler() callconv(hal.interrupts.call_conv) void {
