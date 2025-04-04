@@ -1,7 +1,7 @@
 .{
-    .name = .adc,
+    .name = .adc_polling,
     .version = "0.0.0",
-    .fingerprint = 0x637ee6445d96b0e6,
+    .fingerprint = 0x9c6ffd3b578bdde7,
     .minimum_zig_version = "0.14.0",
     .dependencies = .{
         .ch32 = .{

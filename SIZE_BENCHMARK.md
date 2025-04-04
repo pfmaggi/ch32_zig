@@ -2,6 +2,17 @@
 
 This document contains the size in bytes of the firmware for each optimize mode.
 
+## [examples/adc_polling](examples/adc_polling)
+
+### adc_polling_ch32v003.elf 
+
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 1782 | 348 | 0 | 4 | 2288 |
+| ReleaseFast | 156 | 2040 | 224 | 0 | 4 | 2420 |
+| ReleaseSafe | 156 | 2602 | 224 | 0 | 4 | 2984 |
+
+
 ## [examples/blink_delay](examples/blink_delay)
 
 ### blink_delay_ch32v003.elf 
