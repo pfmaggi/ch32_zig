@@ -261,7 +261,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 392 | 1208 | 388 | 0 | 4 | 1988 |
 | ReleaseFast | 392 | 1578 | 372 | 0 | 4 | 2344 |
 | ReleaseSafe | 392 | 2372 | 388 | 0 | 4 | 3152 |
-| Debug | 392 | 29188 | 1736 | 0 | 12 | 31320 |
+| Debug | 392 | 29022 | 1736 | 0 | 12 | 31152 |
 
 ### uart_dma_tx_ch32v30x.elf 
 
@@ -270,7 +270,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 416 | 1222 | 388 | 0 | 4 | 2028 |
 | ReleaseFast | 416 | 1592 | 372 | 0 | 4 | 2380 |
 | ReleaseSafe | 416 | 2386 | 388 | 0 | 4 | 3192 |
-| Debug | 416 | 29250 | 1736 | 0 | 12 | 31408 |
+| Debug | 416 | 29084 | 1736 | 0 | 12 | 31240 |
 
 
 ## [examples/uart_dma_tx_irq](examples/uart_dma_tx_irq)
@@ -298,7 +298,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 416 | 1320 | 396 | 0 | 4 | 2132 |
 | ReleaseFast | 416 | 1774 | 380 | 0 | 4 | 2572 |
 | ReleaseSafe | 416 | 2568 | 396 | 0 | 4 | 3380 |
-| Debug | 416 | 32362 | 1768 | 0 | 12 | 34552 |
+| Debug | 416 | 32196 | 1768 | 0 | 12 | 34384 |
 
 
 ## [examples/uart_echo](examples/uart_echo)
