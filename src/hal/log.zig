@@ -39,6 +39,6 @@ pub fn logFn(
     };
 
     if (writer) |w| {
-        w.print(prefix ++ format ++ "\r\n", args) catch {};
+        w.print(prefix ++ format ++ "\n", args) catch {};
     }
 }
