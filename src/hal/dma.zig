@@ -20,76 +20,52 @@ pub const Channel = union(enum) {
     }
 
     pub fn reset(comptime self: Channel) void {
-        const DMA, const ch = switch (self) {
-            .dma1 => |ch| .{ DMA1, ch },
-            .dma2 => |ch| .{ DMA2, ch },
-        };
-        const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
+        const DMA = ChannelRegister.from(self);
+        DMA.CFGR.modify(.{ .EN = 0 });
 
         // Zero out the registers.
-        @field(DMA, "CFGR" ++ ch_str).raw = 0;
-        @field(DMA, "CNTR" ++ ch_str).raw = 0;
-        @field(DMA, "PADDR" ++ ch_str).raw = 0;
-        @field(DMA, "MADDR" ++ ch_str).raw = 0;
+        DMA.CFGR.raw = 0;
+        DMA.CNTR.raw = 0;
+        DMA.PADDR.raw = 0;
+        DMA.MADDR.raw = 0;
 
         // Clear flags.
-        const flag_names = comptime &.{ "CGIF", "CTCIF", "CHTIF", "CTEIF" };
-        var flags = DMA.INTFCR.read();
-        inline for (flag_names) |flag| {
-            @field(flags, flag ++ ch_str) = 0;
-        }
-        DMA.INTFCR.write(flags);
+        Interrupts.clearAll(self);
     }
 
     pub fn configure(comptime dma: Channel, comptime cfg: Config) void {
         switch (dma) {
-            .dma1 => |ch| {
+            .dma1 => {
                 RCC.AHBPCENR.modify(.{ .DMA1EN = 1, .SRAMEN = 1 });
-                configureInternal(DMA1, @intFromEnum(ch), cfg);
             },
-            .dma2 => |ch| {
+            .dma2 => {
                 RCC.AHBPCENR.modify(.{ .DMA2EN = 1, .SRAMEN = 1 });
-                configureInternal(DMA2, @intFromEnum(ch), cfg);
             },
         }
+        configureInternal(dma, cfg);
     }
 
     /// Set the memory pointer. Length is optional.
     pub fn setMemoryPtr(comptime self: Channel, pointer: anytype, length: ?u32) void {
-        const DMA, const ch = switch (self) {
-            .dma1 => |ch| .{ DMA1, ch },
-            .dma2 => |ch| .{ DMA2, ch },
-        };
-        const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
-
-        @field(DMA, "MADDR" ++ ch_str).raw = @intFromPtr(pointer);
+        const DMA = ChannelRegister.from(self);
+        DMA.MADDR.raw = @intFromPtr(pointer);
         if (length) |len| {
-            @field(DMA, "CNTR" ++ ch_str).raw = len;
+            DMA.CNTR.raw = len;
         }
     }
 
     /// Set the peripheral pointer. Length is optional.
     pub fn setPeripheralPtr(comptime self: Channel, pointer: anytype, length: ?u32) void {
-        const DMA, const ch = switch (self) {
-            .dma1 => |ch| .{ DMA1, ch },
-            .dma2 => |ch| .{ DMA2, ch },
-        };
-        const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
-
-        @field(DMA, "PADDR" ++ ch_str).raw = @intFromPtr(pointer);
+        const DMA = ChannelRegister.from(self);
+        DMA.PADDR.raw = @intFromPtr(pointer);
         if (length) |len| {
-            @field(DMA, "CNTR" ++ ch_str).raw = len;
+            DMA.CNTR.raw = len;
         }
     }
 
     pub fn getRemaining(comptime self: Channel) u32 {
-        const DMA, const ch = switch (self) {
-            .dma1 => |ch| .{ DMA1, ch },
-            .dma2 => |ch| .{ DMA2, ch },
-        };
-        const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
-
-        return @field(DMA, "CNTR" ++ ch_str).raw;
+        const DMA = ChannelRegister.from(self);
+        return DMA.CNTR.raw;
     }
 };
 
@@ -173,6 +149,21 @@ pub const Interrupts = enum {
         var reg = DMA.INTFCR.default();
         @field(reg, name) = 1;
         DMA.INTFCR.write(reg);
+    }
+
+    pub fn clearAll(comptime dma: Channel) void {
+        const DMA, const ch = switch (dma) {
+            .dma1 => |ch| .{ DMA1, ch },
+            .dma2 => |ch| .{ DMA2, ch },
+        };
+        const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
+
+        const flag_names = &.{ "CGIF", "CTCIF", "CHTIF", "CTEIF" };
+        var flags = DMA.INTFCR.read();
+        inline for (flag_names) |flag| {
+            @field(flags, flag ++ ch_str) = 0;
+        }
+        DMA.INTFCR.write(flags);
     }
 };
 
@@ -267,19 +258,13 @@ pub const Priority = enum(u2) {
 };
 
 inline fn enableInternal(comptime dma: Channel, comptime value: u1) void {
-    const DMA, const ch = switch (dma) {
-        .dma1 => |ch| .{ DMA1, ch },
-        .dma2 => |ch| .{ DMA2, ch },
-    };
-    const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
-
-    @field(DMA, "CFGR" ++ ch_str).modify(.{ .EN = value });
+    const DMA = ChannelRegister.from(dma);
+    DMA.CFGR.modify(.{ .EN = value });
 }
 
-inline fn configureInternal(comptime DMA: anytype, ch_num: u4, comptime cfg: Config) void {
-    const ch_str = std.fmt.comptimePrint("{}", .{ch_num});
-
-    const pre_reg_cfg = svd.types.DMA1.CFGRx{
+inline fn configureInternal(comptime dma: Channel, comptime cfg: Config) void {
+    const DMA = ChannelRegister.from(dma);
+    DMA.CFGR.write(.{
         .DIR = @intFromEnum(cfg.direction),
         .CIRC = @intFromEnum(cfg.mode),
         .PINC = if (cfg.periph_inc) 1 else 0,
@@ -288,37 +273,73 @@ inline fn configureInternal(comptime DMA: anytype, ch_num: u4, comptime cfg: Con
         .MSIZE = @intFromEnum(cfg.mem_data_size),
         .PL = @intFromEnum(cfg.priority),
         .MEM2MEM = if (cfg.mem_to_mem) 1 else 0,
-    };
-
-    @field(DMA, "CFGR" ++ ch_str).writeAny(pre_reg_cfg);
-
+    });
     if (cfg.data_length != 0) {
-        @field(DMA, "CNTR" ++ ch_str).raw = cfg.data_length;
+        DMA.CNTR.raw = cfg.data_length;
     }
     if (cfg.periph_ptr) |ptr| {
-        @field(DMA, "PADDR" ++ ch_str).raw = @intFromPtr(ptr);
+        DMA.PADDR.raw = @intFromPtr(ptr);
     }
     if (cfg.mem_ptr) |ptr| {
-        @field(DMA, "MADDR" ++ ch_str).raw = @intFromPtr(ptr);
+        DMA.MADDR.raw = @intFromPtr(ptr);
     }
 }
 
 fn enableInterruptsInternal(comptime dma: Channel, irq: Interrupts, value: u1) void {
-    const DMA, const ch = switch (dma) {
-        .dma1 => |ch| .{ DMA1, ch },
-        .dma2 => |ch| .{ DMA2, ch },
-    };
-    const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
-
+    const DMA = ChannelRegister.from(dma);
     switch (irq) {
         .transfer_complete => {
-            @field(DMA, "CFGR" ++ ch_str).modify(.{ .TCIE = value });
+            DMA.CFGR.modify(.{ .TCIE = value });
         },
         .half_transfer_complete => {
-            @field(DMA, "CFGR" ++ ch_str).modify(.{ .HTIE = value });
+            DMA.CFGR.modify(.{ .HTIE = value });
         },
         .transfer_error => {
-            @field(DMA, "CFGR" ++ ch_str).modify(.{ .TEIE = value });
+            DMA.CFGR.modify(.{ .TEIE = value });
         },
     }
+}
+
+const ChannelRegister = extern struct {
+    pub inline fn from(comptime dma: Channel) *volatile ChannelRegister {
+        const DMA, const ch = switch (dma) {
+            .dma1 => |ch| .{ DMA1, ch },
+            .dma2 => |ch| .{ DMA2, ch },
+        };
+        const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
+        // Get channel offset from the DMA peripheral.
+        const ch_offset = @bitOffsetOf(@TypeOf(DMA.*), "CFGR" ++ ch_str) / 8;
+        return @ptrFromInt(DMA.addr() + ch_offset);
+    }
+
+    pub inline fn addr(self: *volatile ChannelRegister) u32 {
+        return @intFromPtr(self);
+    }
+
+    /// DMA channel configuration register (DMA_CFGR)
+    CFGR: svd.RegisterRW(svd.types.DMA1.CFGRx, svd.nullable_types.DMA1.CFGRx),
+    /// DMA channel number of data register
+    CNTR: svd.RegisterRW(svd.types.DMA1.CNTRx, svd.nullable_types.DMA1.CNTRx),
+    /// DMA channel peripheral address register
+    PADDR: svd.RegisterRW(svd.types.DMA1.PADDRx, svd.nullable_types.DMA1.PADDRx),
+    /// DMA channel memory address register
+    MADDR: svd.RegisterRW(svd.types.DMA1.MADDRx, svd.nullable_types.DMA1.MADDRx),
+};
+
+test "ChannelRegister offsets" {
+    if (config.chip.series != .ch32v30x) {
+        return error.SkipZigTest;
+    }
+
+    try std.testing.expectEqual(0x40020008, ChannelRegister.from(.{ .dma1 = .channel1 }).addr());
+    try std.testing.expectEqual(0x40020058, ChannelRegister.from(.{ .dma1 = .channel5 }).addr());
+    try std.testing.expectEqual(0x40020080, ChannelRegister.from(.{ .dma1 = .channel7 }).addr());
+
+    try std.testing.expectEqual(0x40020408, ChannelRegister.from(.{ .dma2 = .channel1 }).addr());
+    try std.testing.expectEqual(0x40020458, ChannelRegister.from(.{ .dma2 = .channel5 }).addr());
+    try std.testing.expectEqual(0x40020480, ChannelRegister.from(.{ .dma2 = .channel7 }).addr());
+    try std.testing.expectEqual(0x40020490, ChannelRegister.from(.{ .dma2 = .channel8 }).addr());
+    try std.testing.expectEqual(0x400204A0, ChannelRegister.from(.{ .dma2 = .channel9 }).addr());
+    try std.testing.expectEqual(0x400204B0, ChannelRegister.from(.{ .dma2 = .channel10 }).addr());
+    try std.testing.expectEqual(0x400204C0, ChannelRegister.from(.{ .dma2 = .channel11 }).addr());
 }
