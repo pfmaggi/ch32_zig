@@ -3,6 +3,20 @@ const std = @import("std");
 var writer: ?std.io.AnyWriter = null;
 
 pub fn setWriter(w: ?std.io.AnyWriter) void {
+    comptime {
+        const root = @import("root");
+        if (!@hasDecl(root, "ch32_options") or root.ch32_options.logFn == nopFn) {
+            @compileError(
+                \\Writer is set but logFn is not defined.
+                \\Add to your main file:
+                \\    pub const ch32_options: ch32.Options = .{
+                \\        .log_level = .debug,
+                \\        .logFn = hal.log.logFn,
+                \\    };
+            );
+        }
+    }
+
     writer = w;
 }
 
