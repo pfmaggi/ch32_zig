@@ -156,9 +156,7 @@ pub inline fn isActive(irq: svd.interrupts) bool {
 /// bit3~bit0 - reserved (must be 0)
 pub inline fn setPriority(comptime irq: svd.interrupts, priority: u8) void {
     const irq_num = @intFromEnum(irq);
-
-    var buf: [10]u8 = undefined;
-    const irq_num_str = std.fmt.formatIntBuf(&buf, irq_num, 10, .lower, .{});
+    const irq_num_str = std.fmt.comptimePrint("{}", .{irq_num});
     @field(PFIC, "IPRIOR" ++ irq_num_str) = priority & 0b1111_0000;
 }
 
@@ -208,10 +206,7 @@ fn CreateExportedVectorTableType() type {
             }
         }
 
-        var buf: [10]u8 = undefined;
-        const l = std.fmt.formatIntBuf(&buf, idx, 10, .lower, .{});
-        const idx_str = buf[0..l];
-
+        const idx_str = std.fmt.comptimePrint("{}", .{idx});
         const FieldType = if (name != null) Handler else std.meta.Int(.unsigned, @alignOf(Handler) * 8);
         field.* = .{
             .name = name orelse "_reserved" ++ idx_str,
