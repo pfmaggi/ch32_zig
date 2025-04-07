@@ -5,7 +5,11 @@ const svd = @import("svd");
 const port = @import("../port.zig");
 const Pin = @import("../Pin.zig");
 
+pub const hsi_frequency: u32 = 8_000_000;
+pub const default_hse_frequency: u32 = 8_000_000;
+
 pub const Clocks = struct {
+    source: ClockSource,
     sys: u32,
     hb: u32,
     pb1: u32,
@@ -13,6 +17,7 @@ pub const Clocks = struct {
 
     // Default clock configuration after systemInit() routine.
     pub const default: Clocks = .{
+        .source = .hsi,
         .sys = hsi_frequency,
         .hb = hsi_frequency,
         .pb1 = hsi_frequency,
@@ -20,8 +25,10 @@ pub const Clocks = struct {
     };
 };
 
-pub const hsi_frequency: u32 = 8_000_000;
-pub const default_hse_frequency: u32 = 8_000_000;
+pub const ClockSource = enum {
+    hsi,
+    hse,
+};
 
 const HseSource = struct {
     frequency: u32 = default_hse_frequency,
@@ -444,6 +451,7 @@ pub fn set(comptime cfg: Config) Error!Clocks {
     }
 
     return .{
+        .source = if (cfg.source == .hsi) .hsi else .hse,
         .sys = sys_clk_freq,
         .hb = hbclk_freq,
         .pb1 = pb1clk_freq,
@@ -455,17 +463,22 @@ pub fn get(hse_frequency: u32) ?Clocks {
     const RCC = svd.peripherals.RCC;
     const CFGR0 = RCC.CFGR0.read();
 
-    const sys_clk_freq: u32 = switch (CFGR0.SWS) {
-        0b00 => hsi_frequency,
-        0b01 => default_hse_frequency,
+    const sys_clk_freq: u32, const source: ClockSource = switch (CFGR0.SWS) {
+        // HSI
+        0b00 => .{ hsi_frequency, .hsi },
+        // HSE
+        0b01 => .{ hse_frequency, .hse },
+        // PLL
         0b10 => blk: {
-            const freq = switch (CFGR0.PLLSRC) {
-                0 => hsi_frequency,
-                1 => hse_frequency,
+            const freq, const src: ClockSource = switch (CFGR0.PLLSRC) {
+                // HSI
+                0b00 => .{ hsi_frequency, .hsi },
+                // HSE
+                0b01 => .{ hse_frequency, .hse },
             };
 
             const pll_mul = PllMul.fromBits(CFGR0.PLLMUL) orelse return null;
-            break :blk freq * pll_mul.num();
+            break :blk .{ freq * pll_mul.num(), src };
         },
         else => return null,
     };
@@ -480,6 +493,7 @@ pub fn get(hse_frequency: u32) ?Clocks {
     const pb2clk_freq: u32 = hbclk_freq / pb2pre.num();
 
     return .{
+        .source = source,
         .sys = sys_clk_freq,
         .hb = hbclk_freq,
         .pb1 = pb1clk_freq,

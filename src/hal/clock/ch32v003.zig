@@ -5,16 +5,22 @@ const svd = @import("svd");
 const port = @import("../port.zig");
 const Pin = @import("../Pin.zig");
 
+pub const hsi_frequency: u32 = 24_000_000;
+pub const default_hse_frequency: u32 = 24_000_000;
+
 pub const Clocks = struct {
+    source: ClockSource,
     sys: u32,
     hb: u32,
 
     // Default clock configuration after systemInit() routine.
-    pub const default: Clocks = .{ .sys = hsi_frequency, .hb = hsi_frequency };
+    pub const default: Clocks = .{ .source = .hsi, .sys = hsi_frequency, .hb = hsi_frequency };
 };
 
-pub const hsi_frequency: u32 = 24_000_000;
-pub const default_hse_frequency: u32 = 24_000_000;
+pub const ClockSource = enum {
+    hsi,
+    hse,
+};
 
 const HseSource = struct {
     frequency: u32 = default_hse_frequency,
@@ -235,6 +241,7 @@ pub fn set(comptime cfg: Config) Error!Clocks {
     }
 
     return .{
+        .source = if (cfg.source == .hsi) .hsi else .hse,
         .sys = sys_clk_freq,
         .hb = hbclk_freq,
     };
@@ -243,16 +250,25 @@ pub fn set(comptime cfg: Config) Error!Clocks {
 pub fn get(hse_frequency: u32) ?Clocks {
     const RCC = svd.peripherals.RCC;
     const CFGR0 = RCC.CFGR0.read();
-    const sys_clk_freq: u32 = switch (CFGR0.SWS) {
-        0b00 => hsi_frequency,
-        0b01 => hse_frequency,
-        0b10 => hsi_frequency * 2,
+    const sys_clk_freq: u32, const source: ClockSource = switch (CFGR0.SWS) {
+        // HSI
+        0b00 => .{ hsi_frequency, .hsi },
+        // HSE
+        0b01 => .{ hse_frequency, .hse },
+        // PLL
+        0b10 => switch (CFGR0.PLLSRC) {
+            // HSI
+            0b00 => .{ hsi_frequency * 2, .hsi },
+            // HSE
+            0b01 => .{ hse_frequency * 2, .hse },
+        },
         else => return null,
     };
 
     const hpre = HbPrescaler.fromBits(CFGR0.HPRE) orelse return null;
     const hbclk_freq: u32 = sys_clk_freq / hpre.num();
     return .{
+        .source = source,
         .sys = sys_clk_freq,
         .hb = hbclk_freq,
     };
