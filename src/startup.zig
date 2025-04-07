@@ -87,11 +87,13 @@ pub fn start() callconv(.naked) void {
 
     // mtvec: set the base address of the interrupt vector table
     // and set the mode0 and mode1.
-    asm volatile (
-        \\la t0, _start
-        \\ori t0, t0, 0b11
-        \\csrw mtvec, t0
-    );
+    // asm volatile (
+    //     \\la t0, 0x00000000
+    //     \\ori t0, t0, 0b11
+    //     \\csrw mtvec, t0
+    // );
+    // or:
+    asm volatile ("csrsi mtvec, 0b11");
 
     // Call systemInit for system initialization.
     @export(&systemInit, .{ .name = "systemInit" });
