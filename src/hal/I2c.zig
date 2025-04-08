@@ -8,9 +8,22 @@ const Pin = @import("Pin.zig");
 pub const DeadlineFn = fn () bool;
 
 pub const Config = struct {
+    mode: Mode = .master,
     baud_rate: ?BaudRate = null,
     /// I2C pins. If not provided, default pins will be used.
     pins: ?Pins = null,
+};
+
+pub const Mode = union(enum) {
+    master: void,
+    slave: ModeSlave,
+};
+
+pub const ModeSlave = struct {
+    /// Own address 1.
+    own_address1: ?Address = null,
+    /// Own address 2.
+    own_address2: ?Address = null,
 };
 
 pub const DutyCycle = enum {
@@ -162,30 +175,49 @@ pub fn configureBaudRate(self: I2C, baud_rate: BaudRate) BaudRateError!void {
 }
 
 fn configureCtrl(self: I2C, comptime cfg: Config) void {
-    // PE: Peripheral enable
-    self.reg.CTLR1.write(.{ .PE = 1 });
+    switch (cfg.mode) {
+        .master => {
+            // PE: Peripheral enable
+            self.reg.CTLR1.write(.{ .PE = 1 });
+        },
+        .slave => |slave| {
+            if (slave.own_address1) |own_addr| {
+                switch (own_addr) {
+                    .seven_bit => |addr| {
+                        self.reg.OADDR1.write(.{ .ADD7_1 = addr });
+                    },
+                    .ten_bit => |addr| {
+                        self.reg.OADDR1.write(.{
+                            .ADDMODE = 1,
+                            .ADD0 = @truncate(addr),
+                            .ADD7_1 = @truncate(addr >> 1),
+                            .ADD9_8 = @truncate(addr >> 8),
+                        });
+                    },
+                }
+            }
 
-    _ = cfg;
-    // FIXME slave mode.
-    // if (cfg.ack) |ack| {
-    //     self.reg.CTLR1.modify(.{ .ACK = 1 });
-    //
-    //     if (ack.own_address1) |own_address1| {
-    //         switch (own_address1) {
-    //             .seven_bit => |addr| {
-    //                 self.reg.OADDR1.write(.{ .ADD7_1 = addr });
-    //             },
-    //             .ten_bit => |addr| {
-    //                 self.reg.OADDR1.write(.{
-    //                     .ADDMODE = 1,
-    //                     .ADD0 = @truncate(addr),
-    //                     .ADD7_1 = @truncate(addr >> 1),
-    //                     .ADD9_8 = @truncate(addr >> 8),
-    //                 });
-    //             },
-    //         }
-    //     }
-    // }
+            if (slave.own_address2) |own_addr| {
+                switch (own_addr) {
+                    .seven_bit => |addr| {
+                        self.reg.OADDR2.write(.{
+                            // Dual address mode enable bit, set this bit to allow
+                            // ADD2 to be recognized as well.
+                            .ENDUAL = 1,
+                            .ADD2 = addr,
+                        });
+                    },
+                    .ten_bit => @compileError("I2C slave address 2 must be 7-bit address."),
+                }
+            }
+
+            // PE: Peripheral enable
+            self.reg.CTLR1.write(.{ .PE = 1 });
+
+            // ACK: Acknowledge enable
+            self.reg.CTLR1.modify(.{ .ACK = 1 });
+        },
+    }
 }
 
 pub fn enable(self: I2C) void {
@@ -198,6 +230,10 @@ pub fn disable(self: I2C) void {
 
 fn reset(self: I2C) void {
     rcc.reset(self.reg);
+
+    // Software reset.
+    self.reg.CTLR1.modify(.{ .SWRST = 1 });
+    self.reg.CTLR1.modify(.{ .SWRST = 0 });
 }
 
 /// Master transfer with blocking.
@@ -221,19 +257,136 @@ pub fn masterTransferVecBlocking(self: I2C, address: Address, send: ?[]const []c
 
     try self.waitEvent(.master_mode_select, deadlineFn);
 
-    try self.writeVecBlockingInternal(address, send, deadlineFn);
+    try self.masterWriteVecBlockingInternal(address, send, deadlineFn);
 
     if (recv) |buffers| {
         // Repeat start condition.
         self.reg.CTLR1.modify(.{ .START = 1, .ACK = 1 });
         try self.waitEvent(.master_mode_select, deadlineFn);
 
-        try self.readVecBlockingInternal(address, buffers, deadlineFn);
+        try self.masterReadVecBlockingInternal(address, buffers, deadlineFn);
     }
 }
 
-fn writeVecBlockingInternal(self: I2C, address: Address, send: ?[]const []const u8, deadlineFn: ?DeadlineFn) Error!void {
-    try self.sendAddressAndWaitModeSelectedEvent(address, .transmitter, deadlineFn);
+pub fn slaveAddressMatchingBlocking(self: I2C, deadlineFn: ?DeadlineFn) Error!Direction {
+    while (true) {
+        const event_status = self.getEventStatus();
+        if (event_status.has(.slave_transmitter_address_matched)) return .transmit;
+        if (event_status.has(.slave_reveiver_address_matched)) return .receive;
+
+        try self.checkErrors();
+
+        if (deadlineFn) |check| {
+            if (check()) {
+                return error.Timeout;
+            }
+        }
+        asm volatile ("" ::: "memory");
+    }
+}
+
+pub fn slaveReadBlocking(self: I2C, buffer: []u8, deadlineFn: ?DeadlineFn) Error!usize {
+    return self.slaveReadVecBlocking(&.{buffer}, deadlineFn);
+}
+
+pub fn slaveReadVecBlocking(self: I2C, buffers: []const []u8, deadlineFn: ?DeadlineFn) Error!usize {
+    var total: usize = 0;
+
+    for (buffers) |buffer| buffers: {
+        for (buffer) |*byte| {
+            while (true) {
+                const STAR1 = self.reg.STAR1.read();
+
+                // Is readable.
+                if (STAR1.RxNE == 1) break;
+
+                if (STAR1.STOPF == 1 or STAR1.ADDR == 1) break :buffers;
+
+                self.checkErrors() catch |err| switch (err) {
+                    error.AckFailure => break :buffers,
+                    else => return err,
+                };
+
+                if (deadlineFn) |check| {
+                    if (check()) {
+                        return error.Timeout;
+                    }
+                }
+                asm volatile ("" ::: "memory");
+            }
+
+            byte.* = @truncate(self.reg.DATAR.raw);
+            total += 1;
+        }
+    }
+
+    while (true) {
+        const STAR1 = self.reg.STAR1.read();
+
+        // Need to keep reading as long as the master send data,
+        // otherwise, the system may hang in an undefined state.
+        if (STAR1.RxNE == 0) {
+            break;
+        }
+        self.reg.DATAR.raw = 0;
+    }
+
+    return total;
+}
+
+pub fn slaveWriteBlocking(self: I2C, send: []const u8, deadlineFn: ?DeadlineFn) Error!usize {
+    return self.slaveWriteVecBlocking(&.{send}, deadlineFn);
+}
+
+pub fn slaveWriteVecBlocking(self: I2C, payloads: []const []const u8, deadlineFn: ?DeadlineFn) Error!usize {
+    var total: usize = 0;
+
+    for (payloads) |payload| payloads: {
+        for (payload) |b| {
+            while (true) {
+                const STAR1 = self.reg.STAR1.read();
+
+                // Is writable.
+                if (STAR1.TxE == 1) break;
+
+                if (STAR1.STOPF == 1 or STAR1.ADDR == 1 or STAR1.AF == 1) break :payloads;
+
+                try self.checkErrors();
+
+                if (deadlineFn) |check| {
+                    if (check()) {
+                        return error.Timeout;
+                    }
+                }
+                asm volatile ("" ::: "memory");
+            }
+
+            self.reg.DATAR.raw = b;
+            total += 1;
+        }
+    }
+
+    while (true) {
+        const STAR1 = self.reg.STAR1.read();
+
+        // Need to keep writing as long as the master requests data,
+        // otherwise, the system may hang in an undefined state.
+        if (STAR1.TxE == 1) {
+            self.reg.DATAR.raw = 0;
+        }
+
+        // Wait NAck
+        if (STAR1.AF == 1) break;
+    }
+
+    // Clear NAck
+    self.reg.STAR1.modify(.{ .AF = 0 });
+
+    return total;
+}
+
+fn masterWriteVecBlockingInternal(self: I2C, address: Address, send: ?[]const []const u8, deadlineFn: ?DeadlineFn) Error!void {
+    try self.sendAddressAndWaitModeSelectedEvent(address, .transmit, deadlineFn);
 
     const payloads = send orelse return;
 
@@ -254,8 +407,8 @@ fn writeVecBlockingInternal(self: I2C, address: Address, send: ?[]const []const 
     try self.waitEvent(.master_byte_transmitted, deadlineFn);
 }
 
-fn readVecBlockingInternal(self: I2C, address: Address, buffers: []const []u8, deadlineFn: ?DeadlineFn) Error!void {
-    try self.sendAddressAndWaitModeSelectedEvent(address, .receiver, deadlineFn);
+fn masterReadVecBlockingInternal(self: I2C, address: Address, buffers: []const []u8, deadlineFn: ?DeadlineFn) Error!void {
+    try self.sendAddressAndWaitModeSelectedEvent(address, .receive, deadlineFn);
 
     for (buffers) |buffer| {
         for (buffer, 0..) |*byte, i| {
@@ -321,7 +474,15 @@ const Event = enum(u32) {
     slave_ack_failure = 0x00000400, // AF flag (EVT3_2)
 };
 
-fn checkEvent(self: I2C, event: Event) bool {
+const EventStatus = enum(u32) {
+    _,
+
+    fn has(self: EventStatus, event: Event) bool {
+        return @intFromEnum(self) & @intFromEnum(event) == @intFromEnum(event);
+    }
+};
+
+fn getEventStatus(self: I2C) EventStatus {
     // Order of reading the status registers is important!
     // First read STAR1 and then STAR2.
     const s1 = self.reg.STAR1;
@@ -334,12 +495,8 @@ fn checkEvent(self: I2C, event: Event) bool {
 
     const status: u32 = (@as(u32, s2_raw) << 16) | s1_raw;
     const last_event = status & 0x00FFFFFF;
-    const has_event = last_event & @intFromEnum(event) == @intFromEnum(event);
-    if (has_event) {
-        return true;
-    }
 
-    return false;
+    return @enumFromInt(last_event);
 }
 
 fn checkErrors(self: I2C) Error!void {
@@ -374,8 +531,8 @@ fn checkErrors(self: I2C) Error!void {
 }
 
 const Direction = enum(u1) {
-    transmitter = 0,
-    receiver = 1,
+    transmit = 0,
+    receive = 1,
 };
 
 fn sendAddressAndWaitModeSelectedEvent(self: I2C, address: Address, direction: Direction, deadlineFn: ?DeadlineFn) !void {
@@ -389,8 +546,8 @@ fn sendAddressAndWaitModeSelectedEvent(self: I2C, address: Address, direction: D
     // enter the master device receive mode.
 
     const event = switch (direction) {
-        .transmitter => Event.master_transmitter_mode_selected,
-        .receiver => Event.master_receiver_mode_selected,
+        .transmit => Event.master_transmitter_mode_selected,
+        .receive => Event.master_receiver_mode_selected,
     };
 
     switch (address) {
@@ -401,7 +558,7 @@ fn sendAddressAndWaitModeSelectedEvent(self: I2C, address: Address, direction: D
         .ten_bit => |addr| {
             // Write frame header
             const upper_2_bits = addr >> 8;
-            self.reg.DATAR.raw = 0xF0 | upper_2_bits << 1 | @intFromEnum(Direction.transmitter);
+            self.reg.DATAR.raw = 0xF0 | upper_2_bits << 1 | @intFromEnum(Direction.transmit);
 
             try self.waitEvent(.master_mode_address10, deadlineFn);
 
@@ -411,12 +568,12 @@ fn sendAddressAndWaitModeSelectedEvent(self: I2C, address: Address, direction: D
             try self.waitEvent(.master_transmitter_mode_selected, deadlineFn);
 
             // Write the repeated start condition.
-            if (direction == Direction.receiver) {
+            if (direction == Direction.receive) {
                 // Repeat start condition.
                 self.reg.CTLR1.modify(.{ .START = 1 });
                 try self.waitEvent(.master_mode_select, deadlineFn);
 
-                self.reg.DATAR.raw = 0xF0 | upper_2_bits << 1 | @intFromEnum(Direction.receiver);
+                self.reg.DATAR.raw = 0xF0 | upper_2_bits << 1 | @intFromEnum(Direction.receive);
 
                 try self.waitEvent(event, deadlineFn);
             }
@@ -425,7 +582,7 @@ fn sendAddressAndWaitModeSelectedEvent(self: I2C, address: Address, direction: D
 }
 
 fn waitEvent(self: I2C, event: Event, deadlineFn: ?DeadlineFn) Error!void {
-    while (!self.checkEvent(event)) {
+    while (!self.getEventStatus().has(event)) {
         try self.checkErrors();
 
         if (deadlineFn) |check| {
