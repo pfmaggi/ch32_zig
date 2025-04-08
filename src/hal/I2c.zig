@@ -459,7 +459,7 @@ pub fn checkPins(comptime reg: *volatile svd.registers.I2C, comptime pins: Pins)
     var periph_pins_maybe: ?Pins = null;
     for (@typeInfo(pins_namespace).@"struct".decls) |decl| {
         const p_pins: Pins = @field(pins_namespace, decl.name);
-        if (p_pins.eqWithoutNss(pins)) {
+        if (p_pins.eq(pins)) {
             periph_pins_maybe = p_pins;
             break;
         }

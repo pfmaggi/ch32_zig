@@ -51,6 +51,10 @@ pub const Pins = struct {
     pub inline fn defaultFor(comptime reg: *volatile svd.registers.I2C) Pins {
         return namespaceFor(reg).default;
     }
+
+    pub fn eq(self: Pins, other: Pins) bool {
+        return self.scl.eq(other.scl) and self.sda.eq(other.sda);
+    }
 };
 
 pub const rcc = struct {

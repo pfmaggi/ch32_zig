@@ -72,6 +72,17 @@ pub const Pins = struct {
     pub inline fn defaultFor(comptime reg: *volatile svd.registers.USART) Pins {
         return namespaceFor(reg).default;
     }
+
+    pub fn eq(self: Pins, other: Pins) bool {
+        return eqNull(self.ck, other.ck) and self.tx.eq(other.tx) and self.rx.eq(other.rx) and
+            eqNull(self.cts, other.cts) and eqNull(self.rts, other.rts);
+    }
+
+    fn eqNull(self: ?Pin, other: ?Pin) bool {
+        if (self == null and other == null) return true;
+        if (self == null or other == null) return false;
+        return self.?.eq(other.?);
+    }
 };
 
 pub const rcc = struct {
