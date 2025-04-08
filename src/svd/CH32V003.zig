@@ -3936,9 +3936,9 @@ pub const types = struct {
             /// SMP11 [3:5]
             /// Channel 11 sample time selection
             SMP11: u3 = 0,
-            /// SMP12_TKCG12 [6:8]
+            /// SMP12 [6:8]
             /// Channel 12 sample time selection
-            SMP12_TKCG12: u3 = 0,
+            SMP12: u3 = 0,
             /// SMP13 [9:11]
             /// Channel 13 sample time selection
             SMP13: u3 = 0,
@@ -3972,9 +3972,9 @@ pub const types = struct {
             /// SMP5 [15:17]
             /// Channel 5 sample time selection
             SMP5: u3 = 0,
-            /// SMP6_TKCG6 [18:20]
+            /// SMP6 [18:20]
             /// Channel 6 sample time selection
-            SMP6_TKCG6: u3 = 0,
+            SMP6: u3 = 0,
             /// SMP7 [21:23]
             /// Channel 7 sample time selection
             SMP7: u3 = 0,
@@ -4170,9 +4170,11 @@ pub const types = struct {
 
         /// regular data register
         pub const RDATAR = packed struct(u32) {
-            /// DATA [0:31]
+            /// DATA [0:15]
             /// Regular data
-            DATA: u32 = 0,
+            DATA: u16 = 0,
+            /// padding [16:31]
+            _padding: u16 = 0,
         };
 
         /// delay data register
@@ -7671,9 +7673,9 @@ pub const nullable_types = struct {
             /// SMP11 [3:5]
             /// Channel 11 sample time selection
             SMP11: ?u3 = null,
-            /// SMP12_TKCG12 [6:8]
+            /// SMP12 [6:8]
             /// Channel 12 sample time selection
-            SMP12_TKCG12: ?u3 = null,
+            SMP12: ?u3 = null,
             /// SMP13 [9:11]
             /// Channel 13 sample time selection
             SMP13: ?u3 = null,
@@ -7705,9 +7707,9 @@ pub const nullable_types = struct {
             /// SMP5 [15:17]
             /// Channel 5 sample time selection
             SMP5: ?u3 = null,
-            /// SMP6_TKCG6 [18:20]
+            /// SMP6 [18:20]
             /// Channel 6 sample time selection
-            SMP6_TKCG6: ?u3 = null,
+            SMP6: ?u3 = null,
             /// SMP7 [21:23]
             /// Channel 7 sample time selection
             SMP7: ?u3 = null,
@@ -7873,9 +7875,9 @@ pub const nullable_types = struct {
 
         /// regular data register
         pub const RDATAR = struct {
-            /// DATA [0:31]
+            /// DATA [0:15]
             /// Regular data
-            DATA: ?u32 = null,
+            DATA: ?u16 = null,
         };
 
         /// delay data register

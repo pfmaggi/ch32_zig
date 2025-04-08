@@ -6964,7 +6964,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
               <bitWidth>3</bitWidth>
             </field>
             <field>
-              <name>SMP12_TKCG12</name>
+              <name>SMP12</name>
               <description>Channel 12 sample time
               selection</description>
               <bitOffset>6</bitOffset>
@@ -7045,7 +7045,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
               <bitWidth>3</bitWidth>
             </field>
             <field>
-              <name>SMP6_TKCG6</name>
+              <name>SMP6</name>
               <description>Channel 6 sample time
               selection</description>
               <bitOffset>18</bitOffset>
@@ -7466,7 +7466,7 @@ xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocatio
               <name>DATA</name>
               <description>Regular data</description>
               <bitOffset>0</bitOffset>
-              <bitWidth>32</bitWidth>
+              <bitWidth>16</bitWidth>
             </field>
           </fields>
         </register>

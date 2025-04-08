@@ -78,10 +78,9 @@ done
 For creating patches, use:
 
 ```shell
-git diff CH32V003.svd > patches/0xx_CH32V003.svd.patch
-git diff CH32V103.svd > patches/0xx_CH32V103.svd.patch
-git diff CH32V20x.svd > patches/0xx_CH32V20x.svd.patch
-git diff CH32V30x.svd > patches/0xx_CH32V30x.svd.patch
+for f in CH32V00*.svd; do
+  git diff "$f" > "patches/0xx_${f%xx.svd}.patch"
+done
 ```
 
 Generate Zig files:

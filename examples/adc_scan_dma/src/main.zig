@@ -95,7 +95,7 @@ pub fn main() !void {
         .SMP3 = adc_cycles,
         .SMP4 = adc_cycles,
         .SMP5 = adc_cycles,
-        .SMP6_TKCG6 = adc_cycles, // FIXME: fix in SVD.
+        .SMP6 = adc_cycles,
         .SMP7 = adc_cycles,
     });
 
