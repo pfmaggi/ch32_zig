@@ -29,8 +29,11 @@ pub fn main() !void {
     hal.debug.sdi_print.init();
     const console_writer = hal.debug.sdi_print.writer();
     // If you want to use the UART for logging, you can replace SDI print with:
-    // WARNING: comment out in `pins` - A5/PD5 and edit `RSQRx`, as it is used for TX.
-    // const USART1 = hal.Uart.init(.USART1, .{ .mode = .tx });
+    // WARNING: TX pin was remapped to PD0 because PD5 is used as ADC A5 channel.
+    // const USART1 = hal.Uart.init(.USART1, .{
+    //     .mode = .tx,
+    //     .pins = hal.Uart.Pins.usart1.tx_pd0_rx_pd1,
+    // });
     // USART1.configureBaudRate(.{
     //     .peripheral_clock = switch (config.chip.series) {
     //         .ch32v003 => clock.hb,
