@@ -8,9 +8,20 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 1760 | 388 | 0 | 4 | 2304 |
-| ReleaseFast | 156 | 2024 | 228 | 0 | 4 | 2408 |
-| ReleaseSafe | 156 | 2572 | 228 | 0 | 4 | 2956 |
+| ReleaseSmall | 156 | 1472 | 208 | 0 | 4 | 1836 |
+| ReleaseFast | 156 | 1994 | 204 | 0 | 4 | 2356 |
+| ReleaseSafe | 156 | 8860 | 948 | 0 | 4 | 9964 |
+
+
+## [examples/adc_scan_dma](examples/adc_scan_dma)
+
+### adc_scan_dma_ch32v003.elf 
+
+| Mode | .init | .text | .rodata | .data | .bss | Total |
+|--------|--------|--------|--------|--------|--------|--------|
+| ReleaseSmall | 156 | 1868 | 216 | 0 | 20 | 2240 |
+| ReleaseFast | 156 | 2682 | 208 | 0 | 20 | 3048 |
+| ReleaseSafe | 156 | 9564 | 952 | 0 | 20 | 10672 |
 
 
 ## [examples/blink_delay](examples/blink_delay)
