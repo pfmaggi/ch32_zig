@@ -29,6 +29,7 @@ pub fn main() !void {
     hal.debug.sdi_print.init();
     const console_writer = hal.debug.sdi_print.writer();
     // If you want to use the UART for logging, you can replace SDI print with:
+    // WARNING: comment out in `pins` - A5/PD5 and edit `RSQRx`, as it is used for TX.
     // const USART1 = hal.Uart.init(.USART1, .{ .mode = .tx });
     // USART1.configureBaudRate(.{
     //     .peripheral_clock = switch (config.chip.series) {
