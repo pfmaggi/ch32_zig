@@ -7,32 +7,18 @@ pub fn main() !void {
     const clock = hal.clock.setOrGet(.hsi_max);
     hal.delay.init(clock);
 
-    // Select LED pin based on chip series.
-    const led = switch (config.chip.series) {
-        .ch32v003 => hal.Pin.init(.GPIOC, 0),
-        .ch32v103 => hal.Pin.init(.GPIOC, 0),
-        .ch32v20x => hal.Pin.init(.GPIOA, 15), // nanoCH32V203 board
-        .ch32v30x => hal.Pin.init(.GPIOA, 3), // nanoCH32V305 board
-        // else => @compileError("Unsupported chip series"),
-    };
-    hal.port.enable(led.port);
-    led.asOutput(.{ .speed = .max_50mhz, .mode = .push_pull });
-
-    // Configure UART.
-    // The default pins are:
-    // For CH32V003: TX: PD5, RX: PD6.
-    // For CH32V103, CH32V20x and CH32V30x: TX: PA9, RX: PA10.
-    const USART1 = hal.Uart.init(.USART1, .{
-        .mode = .tx,
-    });
-    // Runtime baud rate configuration.
-    USART1.configureBaudRate(.{
-        .peripheral_clock = switch (config.chip.series) {
-            .ch32v003 => clock.hb,
-            else => clock.pb2,
-        },
-        .baud_rate = 115_200,
-    });
+    hal.debug.sdi_print.init();
+    const console_writer = hal.debug.sdi_print.writer();
+    // If you want to use the UART for logging, you can replace SDI print with:
+    // const USART1 = hal.Uart.init(.USART1, .{ .mode = .tx });
+    // USART1.configureBaudRate(.{
+    //     .peripheral_clock = switch (config.chip.series) {
+    //         .ch32v003 => clock.hb,
+    //         else => clock.pb2,
+    //     },
+    //     .baud_rate = 115_200,
+    // });
+    // const console_writer = USART1.writer();
 
     // ADC.
     const RCC = svd.peripherals.RCC;
@@ -41,22 +27,32 @@ pub fn main() !void {
     RCC.CFGR0.modify(.{ .ADCPRE = 0 });
     RCC.APB2PCENR.modify(.{ .ADC1EN = 1 });
 
-    // ADC pin.
+    // ADC pin. A7 - PD4.
     const adc_pin = hal.Pin.init(.GPIOD, 4);
     hal.port.enable(adc_pin.port);
     adc_pin.asInput(.analog);
 
-    ADC1.RSQR1.raw = 0;
-    ADC1.RSQR2.raw = 0;
-    ADC1.RSQR3.raw = 7;
+    // Reset ADC.
+    RCC.APB2PRSTR.write(.{ .ADC1RST = 1 });
+    RCC.APB2PRSTR.write(.{ .ADC1RST = 0 });
 
-    // 3/9/15/30/43/57/73/241 cycles
-    ADC1.SAMPTR2.write(.{ .SMP7 = 7 });
+    // ADC1 regular sequence length.
+    // 0000-1111: 1-16 conversions.
+    ADC1.RSQR1.write(.{ .L = 0 });
+    ADC1.RSQR2.write(.{});
+    // ADC1 regular sequence: 0-9.
+    // Set channel 7 as the first channel to be converted.
+    ADC1.RSQR3.write(.{ .SQ1 = 7 });
 
-    ADC1.CTLR2.modify(.{
-        .ADON = 1,
-        .EXTSEL = 0b111, // SWSTART software trigger.
-    });
+    // Sample time configuration for channels:
+    // 000: 3 cycles; 001: 9 cycles.
+    // 010: 15 cycles; 011: 30 cycles.
+    // 100: 43 cycles; 101:57 cycles.
+    // 110: 73 cycles; 111: 241 cycles.
+    ADC1.SAMPTR2.write(.{ .SMP7 = 0b111 });
+
+    // Enable ADC.
+    ADC1.CTLR2.modify(.{ .ADON = 1 });
 
     // Reset calibration
     ADC1.CTLR2.modify(.{ .RSTCAL = 1 });
@@ -70,13 +66,13 @@ pub fn main() !void {
         asm volatile ("" ::: "memory");
     }
 
-    _ = try USART1.writeBlocking("ADC example\r\n", null);
+    _ = try console_writer.write("ADC calibration done\n");
+
+    // Set SWSTART software trigger.
+    ADC1.CTLR2.modify(.{ .EXTSEL = 0b111 });
 
     var buf: [10]u8 = undefined;
     while (true) {
-        led.toggle();
-        hal.delay.ms(200);
-
         // Start.
         ADC1.CTLR2.modify(.{ .SWSTART = 1 });
 
@@ -87,7 +83,13 @@ pub fn main() !void {
 
         // Result.
         const v: u16 = @truncate(ADC1.RDATAR.raw);
-        _ = try USART1.writeVecBlocking(&.{ "ADC: ", intToStr(&buf, v), "\r\n" }, null);
+
+        const fmt = [_][]const u8{ "ADC: ", intToStr(&buf, v), "\n" };
+        for (fmt) |s| {
+            _ = try console_writer.write(s);
+        }
+
+        hal.delay.ms(200);
     }
 }
 
