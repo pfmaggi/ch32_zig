@@ -16,17 +16,20 @@ pub fn main() !void {
     const clock = hal.clock.setOrGet(.hsi_max);
     hal.delay.init(clock);
 
-    // Configure UART for logging.
+    hal.debug.sdi_print.init();
+    const console_writer = hal.debug.sdi_print.writer();
+    // If you want to use the UART for logging, you can replace SDI print with:
+    // const USART1 = hal.Uart.init(.USART1, .{ .mode = .tx });
+    // USART1.configureBaudRate(.{
+    //     .peripheral_clock = switch (config.chip.series) {
+    //         .ch32v003 => clock.hb,
+    //         else => clock.pb2,
+    //     },
+    //     .baud_rate = 115_200,
+    // });
+    // const console_writer = USART1.writer();
 
-    const USART1 = hal.Uart.init(.USART1, .{});
-    USART1.configureBaudRate(.{
-        .peripheral_clock = switch (config.chip.series) {
-            .ch32v003 => clock.hb,
-            else => clock.pb2,
-        },
-        .baud_rate = 115_200,
-    });
-    hal.log.setWriter(USART1.writer().any());
+    hal.log.setWriter(console_writer.any());
 
     // Configure I2C.
     // The default pins are:
