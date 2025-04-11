@@ -224,6 +224,23 @@ fn makeFirmwareSize(step: *std.Build.Step, options: std.Build.Step.MakeOptions) 
     std.log.info("{s} size: {d} bytes", .{ name, size });
 }
 
+pub fn addMinichlink(b: *std.Build, dep_maybe: ?*std.Build.Dependency, step: *std.Build.Step) void {
+    const ch32_builder = if (dep_maybe) |dep| dep.builder else b;
+
+    const minichlink_dep = ch32_builder.dependency("tools/minichlink", .{});
+    const minichlink = minichlink_dep.artifact("minichlink");
+
+    if (b.args) |args| {
+        const minichlink_run = ch32_builder.addRunArtifact(minichlink);
+        minichlink_run.setCwd(.{ .cwd_relative = "." });
+        minichlink_run.addArgs(args);
+        step.dependOn(&minichlink_run.step);
+    } else {
+        const minichlink_install = ch32_builder.addInstallArtifact(minichlink, .{});
+        step.dependOn(&minichlink_install.step);
+    }
+}
+
 pub fn build(b: *std.Build) void {
     const native_target = b.standardTargetOptions(.{});
     const targets: []const Target = &.{
@@ -273,4 +290,10 @@ pub fn build(b: *std.Build) void {
     const clean_step = b.step("clean", "Clean up");
     clean_step.dependOn(&b.addRemoveDirTree(.{ .cwd_relative = b.install_path }).step);
     clean_step.dependOn(&b.addRemoveDirTree(.{ .cwd_relative = b.pathFromRoot(".zig-cache") }).step);
+
+    //      ┌──────────────────────────────────────────────────────────┐
+    //      │                        minichlink                        │
+    //      └──────────────────────────────────────────────────────────┘
+    const minichlink_step = b.step("minichlink", "minichlink");
+    addMinichlink(b, null, minichlink_step);
 }

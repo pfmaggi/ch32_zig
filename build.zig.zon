@@ -12,4 +12,8 @@
         "README.md",
         "LICENSE",
     },
+    .dependencies = .{
+        .@"tools/minichlink" = .{ .path = "tools/minichlink" },
+        .@"tools/svd4zig" = .{ .path = "tools/svd4zig" },
+    },
 }
