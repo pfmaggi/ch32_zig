@@ -5,7 +5,7 @@
     .minimum_zig_version = "0.14.0",
     .dependencies = .{
         .ch32 = .{
-            // zig fetch --save=ch32_zig https://github.com/ghostiam/ch32_zig/archive/refs/heads/master.zip
+            // zig fetch --save=ch32 https://github.com/ghostiam/ch32_zig/archive/refs/heads/master.zip
             .path = "../..",
         },
     },
