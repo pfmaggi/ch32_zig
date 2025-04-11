@@ -3,9 +3,9 @@ const config = @import("config");
 const hal = @import("hal");
 
 // Connect and reset:
-// minichlink -T
+// zig build minichlink -- -T
 // Connect and resume:
-// minichlink -e -T
+// zig build minichlink -- -e -T
 pub fn main() !void {
     hal.delay.init(.default);
 

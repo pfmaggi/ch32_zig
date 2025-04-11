@@ -21,9 +21,9 @@ pub const ch32_options: ch32.Options = .{
 };
 
 // Connect and reset:
-// minichlink -T
+// zig build minichlink -- -T
 // Connect and resume:
-// minichlink -e -T
+// zig build minichlink -- -e -T
 pub fn main() !void {
     hal.delay.init(.default);
 
