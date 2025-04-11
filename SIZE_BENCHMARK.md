@@ -33,7 +33,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 156 | 402 | 0 | 0 | 4 | 558 |
 | ReleaseFast | 156 | 400 | 0 | 0 | 4 | 556 |
 | ReleaseSafe | 156 | 700 | 0 | 0 | 4 | 856 |
-| Debug | 156 | 2694 | 236 | 0 | 12 | 3092 |
+| Debug | 156 | 2724 | 236 | 0 | 12 | 3116 |
 
 ### blink_delay_ch32v20x.elf 
 
@@ -42,7 +42,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 392 | 430 | 0 | 0 | 4 | 822 |
 | ReleaseFast | 392 | 408 | 0 | 0 | 4 | 800 |
 | ReleaseSafe | 392 | 454 | 0 | 0 | 4 | 846 |
-| Debug | 392 | 2718 | 244 | 0 | 12 | 3356 |
+| Debug | 392 | 2748 | 244 | 0 | 12 | 3388 |
 
 ### blink_delay_ch32v30x.elf 
 
@@ -51,7 +51,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 416 | 448 | 0 | 0 | 4 | 864 |
 | ReleaseFast | 416 | 426 | 0 | 0 | 4 | 842 |
 | ReleaseSafe | 416 | 464 | 0 | 0 | 4 | 880 |
-| Debug | 416 | 2802 | 244 | 0 | 12 | 3468 |
+| Debug | 416 | 2832 | 244 | 0 | 12 | 3492 |
 
 
 ## [examples/blink_minimal](examples/blink_minimal)
@@ -63,7 +63,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 156 | 268 | 0 | 0 | 0 | 424 |
 | ReleaseFast | 156 | 302 | 0 | 0 | 0 | 458 |
 | ReleaseSafe | 156 | 304 | 0 | 0 | 0 | 460 |
-| Debug | 156 | 1972 | 224 | 0 | 0 | 2352 |
+| Debug | 156 | 2002 | 224 | 0 | 0 | 2384 |
 
 ### blink_minimal_ch32v20x.elf 
 
@@ -72,7 +72,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 392 | 318 | 0 | 0 | 0 | 710 |
 | ReleaseFast | 392 | 354 | 0 | 0 | 0 | 746 |
 | ReleaseSafe | 392 | 356 | 0 | 0 | 0 | 748 |
-| Debug | 392 | 2306 | 224 | 0 | 0 | 2928 |
+| Debug | 392 | 2336 | 224 | 0 | 0 | 2952 |
 
 ### blink_minimal_ch32v30x.elf 
 
@@ -81,7 +81,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 416 | 328 | 0 | 0 | 0 | 744 |
 | ReleaseFast | 416 | 364 | 0 | 0 | 0 | 780 |
 | ReleaseSafe | 416 | 366 | 0 | 0 | 0 | 782 |
-| Debug | 416 | 2390 | 224 | 0 | 0 | 3032 |
+| Debug | 416 | 2420 | 224 | 0 | 0 | 3064 |
 
 
 ## [examples/blink_systick_interrupt](examples/blink_systick_interrupt)
@@ -93,7 +93,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 156 | 366 | 8 | 0 | 0 | 532 |
 | ReleaseFast | 156 | 416 | 8 | 0 | 0 | 580 |
 | ReleaseSafe | 156 | 418 | 8 | 0 | 0 | 584 |
-| Debug | 156 | 2094 | 232 | 0 | 0 | 2488 |
+| Debug | 156 | 2124 | 232 | 0 | 0 | 2512 |
 
 ### blink_systick_interrupt_ch32v20x.elf 
 
@@ -102,7 +102,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 392 | 390 | 8 | 0 | 0 | 792 |
 | ReleaseFast | 392 | 440 | 8 | 0 | 0 | 840 |
 | ReleaseSafe | 392 | 442 | 8 | 0 | 0 | 844 |
-| Debug | 392 | 2446 | 232 | 0 | 0 | 3072 |
+| Debug | 392 | 2472 | 232 | 0 | 0 | 3096 |
 
 ### blink_systick_interrupt_ch32v30x.elf 
 
@@ -111,7 +111,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 416 | 412 | 8 | 0 | 0 | 836 |
 | ReleaseFast | 416 | 462 | 8 | 0 | 0 | 888 |
 | ReleaseSafe | 416 | 464 | 8 | 0 | 0 | 888 |
-| Debug | 416 | 2684 | 232 | 0 | 0 | 3336 |
+| Debug | 416 | 2710 | 232 | 0 | 0 | 3360 |
 
 
 ## [examples/blink_time_delay](examples/blink_time_delay)
@@ -123,7 +123,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 156 | 462 | 0 | 0 | 8 | 618 |
 | ReleaseFast | 156 | 444 | 0 | 0 | 8 | 600 |
 | ReleaseSafe | 156 | 464 | 0 | 0 | 8 | 620 |
-| Debug | 156 | 2562 | 236 | 0 | 8 | 2956 |
+| Debug | 156 | 2590 | 236 | 0 | 8 | 2988 |
 
 ### blink_time_delay_ch32v20x.elf 
 
@@ -132,7 +132,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 392 | 512 | 0 | 0 | 8 | 904 |
 | ReleaseFast | 392 | 496 | 0 | 0 | 8 | 888 |
 | ReleaseSafe | 392 | 516 | 0 | 0 | 8 | 908 |
-| Debug | 392 | 2886 | 244 | 0 | 8 | 3524 |
+| Debug | 392 | 2916 | 244 | 0 | 8 | 3556 |
 
 ### blink_time_delay_ch32v30x.elf 
 
@@ -141,7 +141,7 @@ This document contains the size in bytes of the firmware for each optimize mode.
 | ReleaseSmall | 416 | 522 | 0 | 0 | 8 | 938 |
 | ReleaseFast | 416 | 506 | 0 | 0 | 8 | 922 |
 | ReleaseSafe | 416 | 526 | 0 | 0 | 8 | 942 |
-| Debug | 416 | 2970 | 244 | 0 | 8 | 3636 |
+| Debug | 416 | 3000 | 244 | 0 | 8 | 3660 |
 
 
 ## [examples/debug_sdi_print](examples/debug_sdi_print)
