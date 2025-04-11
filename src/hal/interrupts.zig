@@ -28,7 +28,7 @@ pub inline fn isGlobalEnabled() bool {
     return (mstatus & 0b1000) != 0;
 }
 
-// Wait for interrupt.
+/// Wait for interrupt.
 pub inline fn wait() void {
     PFIC.SCTLR.modify(.{ .WFITOWFE = 0 });
     asm volatile ("wfi");
@@ -120,7 +120,7 @@ pub inline fn setPending(irq: svd.interrupts) void {
     }
 }
 
-// Clear interrupt pending.
+/// Clear interrupt pending.
 pub inline fn clearPending(irq: svd.interrupts) void {
     const irq_num = @intFromEnum(irq);
     const num = irq_num >> 5;
@@ -197,9 +197,7 @@ fn CreateExportedVectorTableType() type {
     for (&fields, offset..) |*field, idx| {
         // Find name of the interrupt by its number.
         var name: ?[:0]const u8 = null;
-        for (interrupts_list, 0..) |decl, decl_idx| {
-            if (decl_idx == interrupts_list.len - 1) break;
-
+        for (interrupts_list) |decl| {
             if (decl.value == idx) {
                 name = decl.name;
                 break;
