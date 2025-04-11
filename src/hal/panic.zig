@@ -13,9 +13,9 @@ pub const Options = struct {
 
 /// Returns a panic handler that will print the registers and hang.
 /// If configured, the LED will blink with a pattern of 3 long and 3 short.
-pub fn initLog(comptime o: Options) fn (message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+pub fn initLog(comptime o: Options) fn (message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) callconv(.@"inline") noreturn {
     return struct {
-        fn panic(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+        inline fn panic(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
             printRegisters(message, @returnAddress());
 
             if (o.led) |led| {
@@ -29,9 +29,9 @@ pub fn initLog(comptime o: Options) fn (message: []const u8, _: ?*std.builtin.St
 
 /// Returns a silent panic handler.
 /// If configured, the LED will blink with a pattern of 3 long and 3 short.
-pub fn initSilent(o: Options) fn (message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+pub fn initSilent(comptime o: Options) fn (message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) callconv(.@"inline") noreturn {
     return struct {
-        fn panic(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+        inline fn panic(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
             if (o.led) |led| {
                 hangWithLed(led);
             } else {
@@ -41,7 +41,7 @@ pub fn initSilent(o: Options) fn (message: []const u8, _: ?*std.builtin.StackTra
     }.panic;
 }
 
-pub fn hang() noreturn {
+pub inline fn hang() noreturn {
     interrupts.globalDisable();
     while (true) {
         interrupts.wait();

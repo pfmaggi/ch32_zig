@@ -30,7 +30,6 @@ pub inline fn isGlobalEnabled() bool {
 
 /// Wait for interrupt.
 pub inline fn wait() void {
-    PFIC.SCTLR.modify(.{ .WFITOWFE = 0 });
     asm volatile ("wfi");
 }
 
