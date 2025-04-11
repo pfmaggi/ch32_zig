@@ -5,11 +5,18 @@ const ch32 = @import("ch32");
 
 const bmi160 = @import("bmi160.zig");
 
-pub const panic = hal.panic.log;
-
 pub const ch32_options: ch32.Options = .{
     .log_level = .debug,
     .logFn = hal.log.logFn,
+    .panic_options = .{
+        .led = switch (config.chip.series) {
+            .ch32v003 => hal.Pin.init(.GPIOC, 0),
+            .ch32v103 => hal.Pin.init(.GPIOC, 0),
+            .ch32v20x => hal.Pin.init(.GPIOA, 15), // nanoCH32V203 board
+            .ch32v30x => hal.Pin.init(.GPIOA, 3), // nanoCH32V305 board
+            // else => @compileError("Unsupported chip series"),
+        },
+    },
 };
 
 pub fn main() !void {
@@ -56,7 +63,7 @@ pub fn main() !void {
     // Can be 0x68 or 0x69.
     const BMI160_I2C_ADDR = 0x69;
 
-    bmi160.setup(I2C1, BMI160_I2C_ADDR, null) catch |err| switch (err) {
+    bmi160.setup(I2C1, BMI160_I2C_ADDR, hal.deadline.simple(100_000)) catch |err| switch (err) {
         error.I2CDeviceNotFound => {
             std.log.err("Device on address 0x{X:0>2} not found", .{BMI160_I2C_ADDR});
             return err;
@@ -70,7 +77,7 @@ pub fn main() !void {
 
     var imu_data: bmi160.ImuData = undefined;
     while (true) {
-        try bmi160.readImuData(I2C1, BMI160_I2C_ADDR, &imu_data, null);
+        try bmi160.readImuData(I2C1, BMI160_I2C_ADDR, &imu_data, hal.deadline.simple(100_000));
 
         std.log.info("{any}", .{imu_data});
 

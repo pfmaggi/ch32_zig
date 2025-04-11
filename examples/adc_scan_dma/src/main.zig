@@ -3,12 +3,6 @@ const config = @import("config");
 const hal = @import("hal");
 const svd = @import("svd");
 
-const ch32 = @import("ch32");
-pub const ch32_options: ch32.Options = .{
-    .log_level = .debug,
-    .logFn = hal.log.logFn,
-};
-
 // const AdcResults = packed struct {
 //     a0_pa2: u16 = 0,
 //     a1_pa1: u16 = 0,
