@@ -4,7 +4,7 @@
 
 ```shell
 # Write and reboot.
-minichlink -w zig-out/firmware/ch32v003_blink.bin flash -b
+minichlink -w zig-out/firmware/blink_minimal_ch32v003.bin flash -b
 ```
 
 ## Debugging

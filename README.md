@@ -2,7 +2,13 @@
 
 HAL(Hardware Abstraction Layer) for the WCH CH32 series of microcontrollers written in Zig.
 
-## TODO
+## Project Goals
+
+- The size of the firmware output file. After each change, the size of all examples is checked, and if it increases, the
+  cause is investigated and resolved.
+- IDE autocompletion support is a top priority. Whatever you interact with, autocompletion should work seamlessly.
+
+## Flashing
 
 The [minichlink](tools/minichlink) flasher is also included and can be
 compiled using `zig build` as well.
@@ -33,9 +39,9 @@ export PATH=$PATH:$(pwd)/zig-out/bin
 ### Build and upload the example
 
 ```shell
-cd examples/blink
+cd examples/blink_minimal
 zig build
-minichlink -w zig-out/firmware/ch32v003_blink.bin flash -b
+minichlink -w zig-out/firmware/blink_minimal_ch32v003.bin flash -b
 ```
 
 ## Basic Examples
