@@ -3,11 +3,78 @@ const config = @import("config");
 
 const zasm = @import("asm.zig");
 const interrupts = @import("interrupts.zig");
+const Pin = @import("Pin.zig");
 
-// Prints the message and registers dump to the logger if configured.
-pub fn log(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+pub const Options = struct {
+    /// The LED pin to use for panic indication.
+    /// If not set, the panic handler will just hang.
+    led: ?Pin = null,
+};
+
+/// Returns a panic handler that will print the registers and hang.
+/// If configured, the LED will blink with a pattern of 3 long and 3 short.
+pub fn initLog(comptime o: Options) fn (message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+    return struct {
+        fn panic(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+            printRegisters(message, @returnAddress());
+
+            if (o.led) |led| {
+                hangWithLed(led);
+            } else {
+                hang();
+            }
+        }
+    }.panic;
+}
+
+/// Returns a silent panic handler.
+/// If configured, the LED will blink with a pattern of 3 long and 3 short.
+pub fn initSilent(o: Options) fn (message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+    return struct {
+        fn panic(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
+            if (o.led) |led| {
+                hangWithLed(led);
+            } else {
+                hang();
+            }
+        }
+    }.panic;
+}
+
+pub fn hang() noreturn {
+    interrupts.globalDisable();
+    while (true) {
+        interrupts.wait();
+    }
+}
+
+pub fn hangWithLed(pin: Pin) noreturn {
     interrupts.globalDisable();
 
+    const short_delay: u32 = 500_000;
+    const long_delay: u32 = 1_500_000;
+    const blinks: u32 = 3;
+
+    pin.enablePort();
+    pin.asOutput(.{ .speed = .max_50mhz, .mode = .push_pull });
+
+    // Fast blink for debugging.
+    while (true) {
+        // Short blinks.
+        for (0..blinks * 2) |_| {
+            pin.toggle();
+            dummyLoop(short_delay);
+        }
+
+        // Long blinks.
+        for (0..blinks * 2) |_| {
+            pin.toggle();
+            dummyLoop(long_delay);
+        }
+    }
+}
+
+inline fn printRegisters(message: []const u8, retAddr: usize) void {
     std.log.err(
         \\PANIC: {s}
         \\Registers dump:
@@ -21,7 +88,7 @@ pub fn log(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn
     // Stack trace
     // Use `riscv-none-elf-addr2line -e zig-out/firmware/ch32v003_blink.elf 0x08000950` ---> main.zig:xxx
     var index: usize = 0;
-    var iter = std.debug.StackIterator.init(@returnAddress(), null);
+    var iter = std.debug.StackIterator.init(retAddr, null);
     while (iter.next()) |address| : (index += 1) {
         if (index == 0) {
             std.log.err("Stack trace:", .{});
@@ -30,58 +97,6 @@ pub fn log(message: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn
 
         // Avoid infinite loop.
         if (index >= 10) break;
-    }
-
-    hang();
-}
-
-// Silent panic handler.
-pub fn silent(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
-    hang();
-}
-
-// Nop panic handler.
-pub fn nop(_: []const u8, _: ?*std.builtin.StackTrace, _: ?usize) noreturn {
-    while (true) {
-        asm volatile ("" ::: "memory");
-    }
-}
-
-pub fn hang() noreturn {
-    interrupts.globalDisable();
-
-    const has_led = true;
-    if (!has_led) {
-        while (true) {
-            interrupts.wait();
-        }
-    }
-
-    // Fast blink for debugging.
-    // FIXME: use LED GPIO instead raw.
-    const led_pin_num: u5 = if (config.chip.series == .ch32v003) 0 else 3;
-    const GPIO_BASE: u32 = if (config.chip.series == .ch32v003) 0x40011000 else 0x40010800; // C else A
-    const GPIO_CFGLR: *volatile u32 = @ptrFromInt(GPIO_BASE + 0x00);
-    const GPIO_OUTDR: *volatile u32 = @ptrFromInt(GPIO_BASE + 0x0C);
-    GPIO_CFGLR.* &= ~@as(u32, 0b1111 << 0); // Clear all bits for PC0
-    GPIO_CFGLR.* |= @as(u32, 0b0011 << 0); // Set push-pull output for PC0
-
-    const short_delay: u32 = 500_000;
-    const long_delay: u32 = 1_500_000;
-    const blinks: u32 = 3;
-
-    while (true) {
-        // Short blinks.
-        for (0..blinks * 2) |_| {
-            GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
-            dummyLoop(short_delay);
-        }
-
-        // Long blinks.
-        for (0..blinks * 2) |_| {
-            GPIO_OUTDR.* ^= @as(u16, 1 << led_pin_num);
-            dummyLoop(long_delay);
-        }
     }
 }
 
