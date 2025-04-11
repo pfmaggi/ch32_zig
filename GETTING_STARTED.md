@@ -136,7 +136,7 @@ zig build
 zig build minichlink -- -w zig-out/firmware/YOUR_PROJECT_NAME_ch32v003.bin flash -b
 ```
 
-### Build the `minichlink`
+### Build the `minichlink` as standalone
 
 [Minichlink](https://github.com/cnlohr/ch32v003fun/tree/master/minichlink) is a open-source flasher for WCH chips.
 It is built with Zig and can be compiled using the following command:
