@@ -9,6 +9,7 @@ pub fn setWriter(w: ?std.io.AnyWriter) void {
             @compileError(
                 \\Writer is set but logFn is not defined.
                 \\Add to your main file:
+                \\    const ch32 = @import("ch32");
                 \\    pub const ch32_options: ch32.Options = .{
                 \\        .log_level = .debug,
                 \\        .logFn = hal.log.logFn,
