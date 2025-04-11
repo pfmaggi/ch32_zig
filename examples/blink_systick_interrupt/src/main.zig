@@ -30,8 +30,7 @@ const led: hal.Pin = switch (config.chip.series) {
 pub fn main() !void {
     const clock = hal.clock.Clocks.default;
 
-    hal.port.enable(led.port);
-
+    led.enablePort();
     led.asOutput(.{ .speed = .max_50mhz, .mode = .push_pull });
 
     // Configure SysTick

@@ -13,8 +13,10 @@ pub fn main() !void {
         .ch32v30x => hal.Pin.init(.GPIOA, 3), // nanoCH32V305 board
         // else => @compileError("Unsupported chip series"),
     };
-    hal.port.enable(led.port);
+    // hal.port.enable(led.port);
     // hal.port.disable(led.port);
+    // or
+    led.enablePort();
 
     led.asOutput(.{ .speed = .max_50mhz, .mode = .push_pull });
 
