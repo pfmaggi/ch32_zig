@@ -35,6 +35,9 @@ pub const Options = struct {
     /// The current log level.
     log_level: std.log.Level = std.log.default_level,
     log_scope_levels: []const std.log.ScopeLevel = &.{},
+    /// Logger function to use for std.log.
+    /// When a logger function other than nopFn is set,
+    /// it will be used to output the panic message.
     logFn: fn (
         comptime message_level: std.log.Level,
         comptime scope: @TypeOf(.enum_literal),
@@ -43,6 +46,7 @@ pub const Options = struct {
     ) void = hal.log.nopFn,
     fmt_max_depth: usize = std.fmt.default_max_depth,
     unhandledInterruptFn: fn () callconv(hal.interrupts.call_conv) void = hal.interrupts.unhandled,
+    panic_options: hal.panic.Options = .{},
 };
 
 pub const ch32_options: Options = if (@hasDecl(app, "ch32_options")) app.ch32_options else .{};
@@ -54,7 +58,8 @@ pub const std_options: std.Options = .{
     .fmt_max_depth = ch32_options.fmt_max_depth,
 };
 
-pub const panic = if (@hasDecl(app, "panic")) app.panic else hal.panic.nop;
+const defaultPanic = if (ch32_options.logFn == hal.log.nopFn) hal.panic.initSilent(ch32_options.panic_options) else hal.panic.initLog(ch32_options.panic_options);
+pub const panic = if (@hasDecl(app, "panic")) app.panic else defaultPanic;
 
 pub const interrupts: hal.interrupts.VectorTable = if (@hasDecl(app, "interrupts")) app.interrupts else .{};
 
