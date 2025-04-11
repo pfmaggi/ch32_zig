@@ -12,7 +12,7 @@ minichlink -w zig-out/firmware/blink_minimal_ch32v003.bin flash -b
 ### Using minichlink + GDB or CLion
 
 ```shell
-# Run GDB server.
+# Start the GDB server.
 minichlink -G
 # Reboot into halt and run GDB server 
 # (firmware will be halted until GDB is connected).
