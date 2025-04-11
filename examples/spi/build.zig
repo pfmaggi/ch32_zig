@@ -80,4 +80,10 @@ pub fn build(b: *std.Build) void {
     const clean_step = b.step("clean", "Clean up");
     clean_step.dependOn(&b.addRemoveDirTree(.{ .cwd_relative = b.install_path }).step);
     clean_step.dependOn(&b.addRemoveDirTree(.{ .cwd_relative = b.pathFromRoot(".zig-cache") }).step);
+
+    //      ┌──────────────────────────────────────────────────────────┐
+    //      │                        minichlink                        │
+    //      └──────────────────────────────────────────────────────────┘
+    const minichlink_step = b.step("minichlink", "minichlink");
+    ch32.addMinichlink(b, ch32_dep, minichlink_step);
 }
