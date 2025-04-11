@@ -180,7 +180,7 @@
           ];
 
         baseShellHook = ''
-          export FLAKE_ROOT="$(nix flake metadata | grep 'Resolved URL' | awk '{print $3}' | awk -F'://' '{print $2}')"
+          export FLAKE_ROOT="$(nix flake metadata | grep 'Resolved URL' | awk '{print $3}' | sed 's/^path://' | sed 's/^git+file:\/\///')"
         '';
       in
       {
