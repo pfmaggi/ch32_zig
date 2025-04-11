@@ -40,6 +40,10 @@ pub fn init(port: svd.peripherals.GPIO, num: u4) Pin {
     return .{ .port = port, .num = num };
 }
 
+pub fn enablePort(self: Pin) void {
+    @import("port.zig").enable(self.port);
+}
+
 pub fn asInput(self: Pin, cfg: InputConfig) void {
     const data: u4 = switch (cfg) {
         .analog => 0b00_00,
