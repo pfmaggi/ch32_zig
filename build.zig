@@ -236,7 +236,7 @@ pub fn addMinichlink(b: *std.Build, dep_maybe: ?*std.Build.Dependency, step: *st
         minichlink_run.addArgs(args);
         step.dependOn(&minichlink_run.step);
     } else {
-        const minichlink_install = ch32_builder.addInstallArtifact(minichlink, .{});
+        const minichlink_install = b.addInstallArtifact(minichlink, .{});
         step.dependOn(&minichlink_install.step);
     }
 }
