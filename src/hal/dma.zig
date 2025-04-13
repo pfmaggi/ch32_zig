@@ -18,7 +18,7 @@ pub const Channel = union(enum) {
 
     pub fn disable(comptime self: Channel) void {
         const DMA = ChannelRegister.from(self);
-        DMA.modify(.{ .EN = 0 });
+        DMA.CFGR.modify(.{ .EN = 0 });
     }
 
     pub fn reset(comptime self: Channel) void {

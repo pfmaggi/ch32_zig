@@ -12,7 +12,7 @@ fn dma1Channel4Handler() callconv(hal.interrupts.call_conv) void {
     led.toggle();
 
     // Clear the state for the next interrupt.
-    hal.dma.Interrupts.clear(usart1_tx_dma_channel, .transfer_complete);
+    hal.dma.Interrupt.clear(usart1_tx_dma_channel, .transfer_complete);
 }
 
 // Select LED pin based on chip series.
@@ -78,7 +78,7 @@ pub fn main() !void {
         .mem_to_mem = false,
     });
     // Enable DMA interrupt when transfer is complete.
-    hal.dma.Interrupts.enable(usart1_tx_dma_channel, .transfer_complete);
+    hal.dma.Interrupt.enable(usart1_tx_dma_channel, .transfer_complete);
 
     // Counter is 32 bits, so we need 10 bytes to store it,
     // because max value is 4294967295.

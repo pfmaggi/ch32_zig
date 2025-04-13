@@ -63,7 +63,8 @@ pub fn main() !void {
     // Can be 0x68 or 0x69.
     const BMI160_I2C_ADDR = 0x69;
 
-    bmi160.setup(I2C1, BMI160_I2C_ADDR, hal.deadline.simple(100_000)) catch |err| switch (err) {
+    const timeout = 100_000;
+    bmi160.setup(I2C1, BMI160_I2C_ADDR, hal.deadline.simple(timeout)) catch |err| switch (err) {
         error.I2CDeviceNotFound => {
             std.log.err("Device on address 0x{X:0>2} not found", .{BMI160_I2C_ADDR});
             return err;
@@ -77,7 +78,7 @@ pub fn main() !void {
 
     var imu_data: bmi160.ImuData = undefined;
     while (true) {
-        try bmi160.readImuData(I2C1, BMI160_I2C_ADDR, &imu_data, hal.deadline.simple(100_000));
+        try bmi160.readImuData(I2C1, BMI160_I2C_ADDR, &imu_data, hal.deadline.simple(timeout));
 
         std.log.info("{any}", .{imu_data});
 
