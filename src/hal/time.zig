@@ -30,7 +30,7 @@ pub fn init(clock: hal.clock.Clocks) void {
     systicks_per.us = @truncate(divOptimized(clock.hb, 1_000_000));
     systicks_per.ms = @truncate(divOptimized(clock.hb, 1_000));
 
-    PFIC.STK_CTLR.write(.{});
+    PFIC.STK_CTLR.raw = 0;
     // Reset the Count Register.
     PFIC.STK_CNTL.raw = 0;
     // Set the compare register to trigger once per millisecond.
@@ -68,17 +68,17 @@ pub fn sysTickHandler() callconv(hal.interrupts.call_conv) void {
     systick_millis +%= 1;
 }
 
-pub inline fn millis() u32 {
-    return systick_millis;
+pub inline fn ticks() u32 {
+    return PFIC.STK_CNTL.raw;
 }
 
 // micros rolls over every ~89.5 seconds if cpu frequency is 48MHz.
 pub inline fn micros() u32 {
-    return divOptimized(ticks() / systicks_per.us);
+    return ticks() / systicks_per.us;
 }
 
-pub inline fn ticks() u32 {
-    return PFIC.STK_CNTL.raw;
+pub inline fn millis() u32 {
+    return systick_millis;
 }
 
 pub const delay = struct {
@@ -93,10 +93,10 @@ pub const delay = struct {
         }
     }
 
-    /// Delay in microseconds.
-    pub inline fn us(n: u32) void {
+    /// Delay in microseconds. Max value is 65_535.
+    pub inline fn us(n: u16) void {
         const start = PFIC.STK_CNTL.raw;
-        const ticks_count = n * @as(u32, @intCast(systicks_per.us));
+        const ticks_count: u32 = n * @as(u32, @intCast(systicks_per.us));
         const end = start +% ticks_count;
 
         while (diffTime(PFIC.STK_CNTL.raw, end) < 0) {

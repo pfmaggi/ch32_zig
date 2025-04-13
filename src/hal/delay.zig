@@ -38,10 +38,10 @@ pub fn ticks(n: u32) void {
     }
 }
 
-/// Delay in microseconds.
-pub fn us(n: u32) void {
+/// Delay in microseconds. Max value is 65_535.
+pub fn us(n: u16) void {
     const start = PFIC.STK_CNTL.raw;
-    const ticks_count = n * @as(u32, @intCast(systicks_per.us));
+    const ticks_count: u32 = n * @as(u32, @intCast(systicks_per.us));
     const end = start +% ticks_count;
 
     while (diffTime(PFIC.STK_CNTL.raw, end) < 0) {
