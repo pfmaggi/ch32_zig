@@ -114,6 +114,39 @@ pub const delay = struct {
     }
 };
 
+pub const Duration = union(enum) {
+    ticks: u32,
+    us: u16,
+    ms: u32,
+};
+
+pub const Deadline = struct {
+    deadline: ?Duration,
+
+    pub fn init(timeout: ?Duration) Deadline {
+        const tm = timeout orelse return .{ .deadline = null };
+
+        const time = switch (tm) {
+            .ticks => |t| Duration{ .ticks = ticks() +% t },
+            .us => |us| Duration{ .us = @as(u16, @truncate(micros())) +% us },
+            .ms => |ms| Duration{ .ms = millis() +% ms },
+        };
+
+        return .{ .deadline = time };
+    }
+
+    pub fn isReached(self: Deadline) bool {
+        const time = self.deadline orelse return false;
+        const diff = switch (time) {
+            .ticks => |t| diffTime(ticks(), t),
+            .us => |us| diffTime(micros(), us),
+            .ms => |ms| diffTime(millis(), ms),
+        };
+
+        return diff >= 0;
+    }
+};
+
 inline fn diffTime(a: u32, b: u32) i32 {
     return @bitCast(a -% b);
 }
