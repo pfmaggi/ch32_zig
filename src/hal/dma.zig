@@ -12,15 +12,19 @@ pub const Channel = union(enum) {
     dma2: Dma2Channel,
 
     pub fn enable(comptime self: Channel) void {
-        enableInternal(self, 1);
+        const DMA = ChannelRegister.from(self);
+        DMA.CFGR.modify(.{ .EN = 1 });
     }
 
     pub fn disable(comptime self: Channel) void {
-        enableInternal(self, 0);
+        const DMA = ChannelRegister.from(self);
+        DMA.modify(.{ .EN = 0 });
     }
 
     pub fn reset(comptime self: Channel) void {
         const DMA = ChannelRegister.from(self);
+
+        // Disable.
         DMA.CFGR.modify(.{ .EN = 0 });
 
         // Zero out the registers.
@@ -30,7 +34,7 @@ pub const Channel = union(enum) {
         DMA.MADDR.raw = 0;
 
         // Clear flags.
-        Interrupts.clearAll(self);
+        Interrupt.clearAll(self);
     }
 
     pub fn configure(comptime dma: Channel, comptime cfg: Config) void {
@@ -42,7 +46,27 @@ pub const Channel = union(enum) {
                 RCC.AHBPCENR.modify(.{ .DMA2EN = 1, .SRAMEN = 1 });
             },
         }
-        configureInternal(dma, cfg);
+
+        const DMA = ChannelRegister.from(dma);
+        DMA.CFGR.write(.{
+            .DIR = @intFromEnum(cfg.direction),
+            .CIRC = @intFromEnum(cfg.mode),
+            .PINC = if (cfg.periph_inc) 1 else 0,
+            .MINC = if (cfg.mem_inc) 1 else 0,
+            .PSIZE = @intFromEnum(cfg.periph_data_size),
+            .MSIZE = @intFromEnum(cfg.mem_data_size),
+            .PL = @intFromEnum(cfg.priority),
+            .MEM2MEM = if (cfg.mem_to_mem) 1 else 0,
+        });
+        if (cfg.data_length != 0) {
+            DMA.CNTR.raw = cfg.data_length;
+        }
+        if (cfg.periph_ptr) |ptr| {
+            DMA.PADDR.raw = @intFromPtr(ptr);
+        }
+        if (cfg.mem_ptr) |ptr| {
+            DMA.MADDR.raw = @intFromPtr(ptr);
+        }
     }
 
     /// Set the memory pointer. Length is optional.
@@ -69,7 +93,7 @@ pub const Channel = union(enum) {
     }
 };
 
-pub const Interrupts = enum {
+pub const Interrupt = enum {
     /// Transfer complete interrupt.
     transfer_complete,
     /// Half transfer complete interrupt.
@@ -77,9 +101,8 @@ pub const Interrupts = enum {
     /// Transfer error interrupt.
     transfer_error,
 
-    /// Enabled interrupt for the DMA channel.
-    pub fn enable(comptime dma: Channel, comptime irq: Interrupts) void {
-        enableInterruptsInternal(dma, irq, 1);
+    pub fn enable(comptime dma: Channel, comptime irq: Interrupt) void {
+        enableInternal(dma, irq, 1);
 
         const irq_name = switch (dma) {
             .dma1 => |ch| "DMA1_Channel" ++ std.fmt.comptimePrint("{}", .{@intFromEnum(ch)}),
@@ -89,9 +112,23 @@ pub const Interrupts = enum {
         hal.interrupts.enable(std.meta.stringToEnum(svd.interrupts, irq_name).?);
     }
 
-    /// Disabled interrupt for the DMA channel.
-    pub fn disable(comptime dma: Channel, irq: Interrupts) void {
-        enableInterruptsInternal(dma, irq, 0);
+    pub fn disable(comptime dma: Channel, irq: Interrupt) void {
+        enableInternal(dma, irq, 0);
+    }
+
+    fn enableInternal(comptime dma: Channel, irq: Interrupt, value: u1) void {
+        const DMA = ChannelRegister.from(dma);
+        switch (irq) {
+            .transfer_complete => {
+                DMA.CFGR.modify(.{ .TCIE = value });
+            },
+            .half_transfer_complete => {
+                DMA.CFGR.modify(.{ .HTIE = value });
+            },
+            .transfer_error => {
+                DMA.CFGR.modify(.{ .TEIE = value });
+            },
+        }
     }
 
     pub const Flags = struct {
@@ -257,49 +294,6 @@ pub const Priority = enum(u2) {
     very_high = 0b11,
 };
 
-inline fn enableInternal(comptime dma: Channel, comptime value: u1) void {
-    const DMA = ChannelRegister.from(dma);
-    DMA.CFGR.modify(.{ .EN = value });
-}
-
-inline fn configureInternal(comptime dma: Channel, comptime cfg: Config) void {
-    const DMA = ChannelRegister.from(dma);
-    DMA.CFGR.write(.{
-        .DIR = @intFromEnum(cfg.direction),
-        .CIRC = @intFromEnum(cfg.mode),
-        .PINC = if (cfg.periph_inc) 1 else 0,
-        .MINC = if (cfg.mem_inc) 1 else 0,
-        .PSIZE = @intFromEnum(cfg.periph_data_size),
-        .MSIZE = @intFromEnum(cfg.mem_data_size),
-        .PL = @intFromEnum(cfg.priority),
-        .MEM2MEM = if (cfg.mem_to_mem) 1 else 0,
-    });
-    if (cfg.data_length != 0) {
-        DMA.CNTR.raw = cfg.data_length;
-    }
-    if (cfg.periph_ptr) |ptr| {
-        DMA.PADDR.raw = @intFromPtr(ptr);
-    }
-    if (cfg.mem_ptr) |ptr| {
-        DMA.MADDR.raw = @intFromPtr(ptr);
-    }
-}
-
-fn enableInterruptsInternal(comptime dma: Channel, irq: Interrupts, value: u1) void {
-    const DMA = ChannelRegister.from(dma);
-    switch (irq) {
-        .transfer_complete => {
-            DMA.CFGR.modify(.{ .TCIE = value });
-        },
-        .half_transfer_complete => {
-            DMA.CFGR.modify(.{ .HTIE = value });
-        },
-        .transfer_error => {
-            DMA.CFGR.modify(.{ .TEIE = value });
-        },
-    }
-}
-
 const ChannelRegister = extern struct {
     pub inline fn from(comptime dma: Channel) *volatile ChannelRegister {
         const DMA, const ch = switch (dma) {
@@ -308,7 +302,7 @@ const ChannelRegister = extern struct {
         };
         const ch_str = std.fmt.comptimePrint("{}", .{@intFromEnum(ch)});
         // Get channel offset from the DMA peripheral.
-        const ch_offset = @bitOffsetOf(@TypeOf(DMA.*), "CFGR" ++ ch_str) / 8;
+        const ch_offset = @offsetOf(@TypeOf(DMA.*), "CFGR" ++ ch_str);
         return @ptrFromInt(DMA.addr() + ch_offset);
     }
 
