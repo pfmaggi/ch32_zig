@@ -1,7 +1,8 @@
 const std = @import("std");
 const builtin = @import("builtin");
 
-// zig build --release=fast
+// Run: `zig build`
+// Requirements:
 // MacOS: install XCode
 // Linux: apt install libudev-dev
 pub fn build(b: *std.Build) !void {
@@ -16,10 +17,17 @@ pub fn build(b: *std.Build) !void {
     const minichlink = try buildMinichlink(b, .exe, target, optimize);
     b.installArtifact(minichlink);
 
+    const build_lib = b.step("lib", "Build the minichlink as library");
     const minichlink_lib = try buildMinichlink(b, .lib, target, optimize);
     const install_minichlink_lib = b.addInstallArtifact(minichlink_lib, .{});
-    const build_lib = b.step("lib", "Build the minichlink as library");
     build_lib.dependOn(&install_minichlink_lib.step);
+
+    const minichlink_ocd = buildMinichlinkOcd(b, target, optimize, minichlink_lib);
+    b.installArtifact(minichlink);
+
+    const run_step = b.step("run", "Run the minichlink-ocd");
+    const ocd_run = b.addRunArtifact(minichlink_ocd);
+    run_step.dependOn(&ocd_run.step);
 }
 
 fn buildMinichlink(
@@ -242,4 +250,157 @@ fn createLibusb(
     }
 
     return lib;
+}
+
+fn buildMinichlinkOcd(
+    b: *std.Build,
+    target: std.Build.ResolvedTarget,
+    optimize: std.builtin.OptimizeMode,
+    minichlink_lib: *std.Build.Step.Compile,
+) *std.Build.Step.Compile {
+    const minichlink_dep = b.dependency("ch32v003fun", .{});
+    const minichlink_root_path = minichlink_dep.path("minichlink");
+
+    const ocd = b.addExecutable(.{
+        .name = "minichlink-ocd",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = target,
+            .optimize = optimize,
+            .sanitize_c = false,
+            .sanitize_thread = false,
+        }),
+    });
+    ocd.linkLibrary(minichlink_lib);
+    ocd.root_module.addAnonymousImport("build_zig_zon", .{ .root_source_file = b.path("build.zig.zon") });
+
+    const main_file_path = minichlink_dep.builder.pathFromRoot("minichlink/minichlink.c");
+    const minichlink_main_file = CopyAndPatchMinichlinkMainFile.create(
+        b,
+        main_file_path,
+        "src/minichlink-patched.c",
+    );
+    ocd.step.dependOn(&minichlink_main_file.step);
+
+    ocd.addIncludePath(minichlink_root_path);
+    ocd.addIncludePath(b.path("src"));
+    ocd.addCSourceFile(.{ .file = b.path(minichlink_main_file.dest_rel_path) });
+
+    b.getInstallStep().dependOn(&b.addInstallArtifact(ocd, .{ .dest_dir = .{ .override = .{ .custom = b.pathJoin(&.{ "bin", "ocd", "bin" }) } } }).step);
+    b.getInstallStep().dependOn(&b.addInstallFileWithDir(.{ .cwd_relative = "wch-riscv.cfg" }, .{ .custom = b.pathJoin(&.{ "bin", "ocd", "share", "openocd", "scripts", "board" }) }, "wch-riscv.cfg").step);
+
+    return ocd;
+}
+
+const CopyAndPatchMinichlinkMainFile = struct {
+    step: std.Build.Step,
+    source: []const u8,
+    dest_rel_path: []const u8,
+
+    pub fn create(
+        owner: *std.Build,
+        source: []const u8,
+        dest_rel_path: []const u8,
+    ) *CopyAndPatchMinichlinkMainFile {
+        const copy_file = owner.allocator.create(CopyAndPatchMinichlinkMainFile) catch @panic("OOM");
+        copy_file.* = .{
+            .step = std.Build.Step.init(.{
+                .id = .install_file,
+                .name = owner.fmt("copy and patch {s} to {s}", .{ source, dest_rel_path }),
+                .owner = owner,
+                .makeFn = make,
+            }),
+            .source = source,
+            .dest_rel_path = owner.dupePath(dest_rel_path),
+        };
+        return copy_file;
+    }
+
+    fn make(step: *std.Build.Step, options: std.Build.Step.MakeOptions) !void {
+        _ = options;
+        const b = step.owner;
+        const copy_file: *CopyAndPatchMinichlinkMainFile = @fieldParentPtr("step", step);
+
+        const cwd = std.fs.cwd();
+
+        const full_src_path = copy_file.source;
+
+        const src_file = std.fs.openFileAbsolute(copy_file.source, .{}) catch |err| {
+            return step.fail("unable to open file '{s}': {s}", .{
+                full_src_path, @errorName(err),
+            });
+        };
+        defer src_file.close();
+
+        const stat = try src_file.stat();
+
+        const buf = try b.allocator.alloc(u8, stat.size);
+        defer b.allocator.free(buf);
+
+        _ = try src_file.readAll(buf);
+
+        // Find start and end of the main function.
+        const main_start, const main_end = findFunction(buf, "int main(") orelse return step.fail("unable to find main function in '{s}'", .{copy_file.source});
+        const str_mem_start, const str_mem_end = findFunction(buf[main_start..], "int64_t StringToMemoryAddress(") orelse return step.fail("unable to find StringToMemoryAddress function in '{s}'", .{copy_file.source});
+
+        const dest_file = cwd.createFile(copy_file.dest_rel_path, .{ .truncate = true }) catch |err| {
+            return step.fail("unable to create file '{s}': {s}", .{
+                copy_file.dest_rel_path, @errorName(err),
+            });
+        };
+        defer dest_file.close();
+
+        // Write header.
+        try dest_file.writeAll(
+            \\#include <stdio.h>
+            \\#include <string.h>
+            \\#include <stdlib.h>
+            \\#include <getopt.h>
+            \\#include "terminalhelp.h"
+            \\#include "minichlink.h"
+            \\
+            \\static int64_t StringToMemoryAddress( const char * number ) __attribute__((used));
+            \\void PostSetupConfigureInterface( void * dev );
+            \\
+            \\int orig_main( int argc, char ** argv )
+        );
+
+        const main_start_offset = std.mem.indexOf(u8, buf[main_start..], "\n") orelse unreachable;
+        // Write the functions.
+        try dest_file.writeAll(buf[main_start + main_start_offset .. main_end]);
+        try dest_file.writeAll(buf[main_start + str_mem_start .. main_start + str_mem_end]);
+    }
+};
+
+fn findFunction(buf: []const u8, name: []const u8) ?struct { usize, usize } {
+    const func_start = std.mem.indexOf(u8, buf, name) orelse {
+        return null;
+    };
+
+    // Search for the end of the main function.
+    var maybe_brackets: ?usize = null;
+    var maybe_func_end_offset: ?usize = 0;
+    for (buf[func_start..], 0..) |c, i| {
+        const brackets = maybe_brackets orelse {
+            if (c == '{') {
+                maybe_brackets = 1;
+            }
+            continue;
+        };
+
+        if (c == '{') {
+            maybe_brackets = brackets + 1;
+        } else if (c == '}') {
+            maybe_brackets = brackets - 1;
+        }
+
+        if (brackets == 0) {
+            maybe_func_end_offset = i + 1;
+            break;
+        }
+    }
+
+    const func_end_offset = maybe_func_end_offset orelse return null;
+
+    return .{ func_start, func_start + func_end_offset };
 }
