@@ -23,7 +23,7 @@ pub fn build(b: *std.Build) !void {
     build_lib.dependOn(&install_minichlink_lib.step);
 
     const minichlink_ocd = buildMinichlinkOcd(b, target, optimize, minichlink_lib);
-    b.installArtifact(minichlink);
+    b.installArtifact(minichlink_ocd);
 
     const run_step = b.step("run", "Run the minichlink-ocd");
     const ocd_run = b.addRunArtifact(minichlink_ocd);
