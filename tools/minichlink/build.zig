@@ -28,6 +28,18 @@ pub fn build(b: *std.Build) !void {
     const run_step = b.step("run", "Run the minichlink-ocd");
     const ocd_run = b.addRunArtifact(minichlink_ocd);
     run_step.dependOn(&ocd_run.step);
+
+    const test_step = b.step("test", "Run tests");
+    const minichlink_ocd_tests = b.addTest(.{
+        .target = target,
+        .optimize = optimize,
+        .name = "test",
+        .root_source_file = b.path("src/main.zig"),
+        .test_runner = .{ .path = b.path("test_runner.zig"), .mode = .simple },
+    });
+    // b.installArtifact(minichlink_ocd_tests);
+    const minichlink_ocd_tests_run = b.addRunArtifact(minichlink_ocd_tests);
+    test_step.dependOn(&minichlink_ocd_tests_run.step);
 }
 
 fn buildMinichlink(
@@ -131,7 +143,7 @@ fn createLibusb(
         .@"PRINTF_FORMAT(a, b)" = .@"/* */",
         .PLATFORM_POSIX = defineBool(is_posix),
         .PLATFORM_WINDOWS = defineBool(target.result.os.tag == .windows),
-        .ENABLE_DEBUG_LOGGING = defineBool(optimize == .Debug),
+        // .ENABLE_DEBUG_LOGGING = defineBool(optimize == .Debug),
         .ENABLE_LOGGING = 1,
         .HAVE_CLOCK_GETTIME = defineBool(target.result.os.tag != .windows),
         .HAVE_EVENTFD = null,

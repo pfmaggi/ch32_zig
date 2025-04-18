@@ -38,21 +38,57 @@ pub fn main() !u8 {
         return 0;
     }
 
-    // int orig_main( int argc, char ** argv )
-    // var info_arg: [:0]const u8 = "-i";
-    // const info_arg_ptr: [*:0]u8 = @ptrCast(&info_arg);
-    // const argv_pre = [_][*:0]u8{
-    //     std.os.argv[0],
-    //     info_arg_ptr,
-    // };
-    // const argv: [][*:0]u8 = @constCast(&argv_pre);
+    var minichlink_args = std.ArrayList([*:0]u8).init(allocator);
+    defer minichlink_args.deinit();
+    try minichlink_args.append(args[0]);
 
-    const argv_pre = [_][*:0]u8{
-        args[0],
-        @constCast("-i"),
-        // @constCast("-T"),
+    var programZ: ?[:0]u8 = null;
+    if (ocd_args.program) |program| {
+        if (std.mem.eql(u8, std.fs.path.extension(program), ".elf")) {
+            programZ = try std.mem.concatWithSentinel(allocator, u8, &.{ program[0 .. program.len - "elf".len], "bin" }, 0);
+            errdefer allocator.free(programZ.?);
+
+            // Check file exists
+            const file = std.fs.openFileAbsoluteZ(programZ.?, .{ .mode = .read_only }) catch |err| {
+                std.log.err("Failed to open file: {s}: {}\n", .{ programZ.?, err });
+                return err;
+            };
+            file.close();
+        } else {
+            programZ = try allocator.dupeZ(u8, program);
+        }
+
+        try minichlink_args.append(@constCast("-w"));
+        try minichlink_args.append(programZ.?);
+        try minichlink_args.append(@constCast("flash"));
+    }
+    defer if (programZ) |v| {
+        allocator.free(v);
     };
-    const argv: [][*:0]u8 = @constCast(&argv_pre);
+
+    if (ocd_args.reset) {
+        if (ocd_args.halt) {
+            // Reboot into Halt.
+            try minichlink_args.append(@constCast("-a"));
+        } else {
+            // reBoot
+            try minichlink_args.append(@constCast("-b"));
+        }
+    } else {
+        // rEsume
+        try minichlink_args.append(@constCast("-e"));
+    }
+
+    if (ocd_args.gdb_port > 0) {
+        try minichlink_args.append(@constCast("-G"));
+    }
+
+    if (ocd_args.echo) |echo| {
+        const stderr = std.io.getStdErr().writer();
+        try stderr.writeAll(echo);
+    }
+
+    const argv: [][*:0]u8 = @constCast(minichlink_args.items);
     const argv_c_ptr: [*c][*c]u8 = @ptrCast(argv.ptr);
     const code = c.orig_main(@intCast(argv.len), argv_c_ptr);
     if (code != 0) {
@@ -63,21 +99,155 @@ pub fn main() !u8 {
 
 const OcdArgs = struct {
     show_version: bool = false,
+    reset: bool = false,
+    halt: bool = false,
+    run: bool = false,
+    program: ?[]const u8 = null,
+    gdb_port: u16 = 0,
+    echo: ?[]const u8 = null,
 
     fn parse(allocator: std.mem.Allocator, args: [][:0]u8) !*OcdArgs {
         const ocd_args = try allocator.create(OcdArgs);
+        ocd_args.* = OcdArgs{};
 
-        for (args) |arg| {
+        var i: usize = 0;
+        while (i < args.len) : (i += 1) {
+            const arg = args[i];
+
             if (std.mem.eql(u8, arg, "--version")) {
                 ocd_args.show_version = true;
+                continue;
+            }
+
+            if (std.mem.eql(u8, arg, "-c")) {
+                while (i < args.len) {
+                    i += 1;
+                    if (i >= args.len) {
+                        break;
+                    }
+
+                    const command = args[i];
+                    if (std.mem.startsWith(u8, command, "-")) {
+                        i -= 1;
+                        break;
+                    }
+
+                    if (std.mem.startsWith(u8, command, "echo ")) {
+                        ocd_args.echo = trimPrefix(command, "echo ");
+                        continue;
+                    }
+
+                    if (std.mem.startsWith(u8, command, "program ")) {
+                        ocd_args.program = std.mem.trim(u8, trimPrefix(command, "program "), " \"");
+                        continue;
+                    }
+
+                    if (std.mem.startsWith(u8, command, "gdb_port ")) {
+                        const gdb_port_str = std.mem.trim(u8, trimPrefix(command, "gdb_port "), " \"");
+                        if (std.mem.eql(u8, gdb_port_str, "disabled")) continue;
+
+                        const gdb_port = std.fmt.parseInt(u16, gdb_port_str, 10) catch |err| {
+                            std.debug.print("Failed to parse gdb_port: {s}: {}\n", .{ gdb_port_str, err });
+                            return err;
+                        };
+                        ocd_args.gdb_port = gdb_port;
+                        continue;
+                    }
+
+                    if (std.mem.containsAtLeast(u8, command, 1, "reset")) {
+                        ocd_args.reset = true;
+                    }
+
+                    if (std.mem.containsAtLeast(u8, command, 1, "halt")) {
+                        ocd_args.halt = true;
+                    }
+
+                    if (std.mem.containsAtLeast(u8, command, 1, "run")) {
+                        ocd_args.run = true;
+                    }
+                }
             }
         }
 
         return ocd_args;
     }
 
-    test parse {}
+    fn trimPrefix(
+        haystack: []const u8,
+        prefix: []const u8,
+    ) []const u8 {
+        if (std.mem.startsWith(u8, haystack, prefix)) {
+            return haystack[prefix.len..];
+        }
+        return haystack;
+    }
 };
+
+test "OcdArgs.parse" {
+    // Version
+    {
+        const args_raw: []const [:0]const u8 = &.{"--version"};
+        const expected = OcdArgs{ .show_version = true };
+
+        try testOcdArgsParse(expected, args_raw);
+    }
+
+    // Download firmware
+    {
+        const args_raw: []const [:0]const u8 = &.{ "-s", "/openocd/share/openocd/scripts", "-f", "target/wch-riscv.cfg", "-c", "tcl_port disabled", "-c", "gdb_port disabled", "-c", "tcl_port disabled", "-c", "program /ch32_zig/examples/debug_sdi_print/zig-out/firmware/debug_sdi_print_ch32v003.elf", "-c", "reset", "-c", "shutdown" };
+        const expected = OcdArgs{
+            .program = "/ch32_zig/examples/debug_sdi_print/zig-out/firmware/debug_sdi_print_ch32v003.elf",
+            .reset = true,
+        };
+
+        try testOcdArgsParse(expected, args_raw);
+    }
+
+    // Debug
+    {
+        const args_raw: []const [:0]const u8 = &.{ "-c", "tcl_port disabled", "-c", "gdb_port 3333", "-c", "telnet_port 4444", "-s", "/openocd/share/openocd/scripts", "-f", "target/wch-riscv.cfg", "-c", "init;reset halt", "-c", "echo (((READY)))" };
+        const expected = OcdArgs{
+            .reset = true,
+            .halt = true,
+            .gdb_port = 3333,
+            .echo = "(((READY)))",
+        };
+
+        try testOcdArgsParse(expected, args_raw);
+    }
+
+    // Download and debug
+    {
+        const args_raw: []const [:0]const u8 = &.{ "-c", "tcl_port disabled", "-c", "gdb_port 3333", "-c", "telnet_port 4444", "-s", "/openocd/share/openocd/scripts", "-f", "target/wch-riscv.cfg", "-c", "program /ch32_zig/examples/debug_sdi_print/zig-out/firmware/debug_sdi_print_ch32v003.elf", "-c", "init;reset halt", "-c", "echo (((READY)))" };
+        const expected = OcdArgs{
+            .program = "/ch32_zig/examples/debug_sdi_print/zig-out/firmware/debug_sdi_print_ch32v003.elf",
+            .reset = true,
+            .halt = true,
+            .gdb_port = 3333,
+            .echo = "(((READY)))",
+        };
+
+        try testOcdArgsParse(expected, args_raw);
+    }
+}
+
+fn testOcdArgsParse(expected: OcdArgs, args_raw: []const [:0]const u8) !void {
+    const allocator = std.testing.allocator;
+
+    var args = std.ArrayList([:0]u8).init(allocator);
+    defer args.deinit();
+
+    for (args_raw) |arg_raw| {
+        try args.append(@constCast(arg_raw));
+    }
+
+    const actual = try OcdArgs.parse(allocator, args.items);
+    defer allocator.destroy(actual);
+
+    std.log.info("expected: {}, actual: {}", .{ expected, actual });
+
+    try std.testing.expectEqualDeep(expected, actual.*);
+}
 
 const Version = struct { version: []const u8 };
 
