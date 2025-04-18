@@ -17,10 +17,14 @@
         flake-utils.follows = "flake-utils";
       };
     };
+    zls-src = {
+      url = "github:zigtools/zls/0.14.0";
+      flake = false;
+    };
 
     # https://github.com/llogick/zigscient
     zigscient-src = {
-      url = "github:llogick/zigscient";
+      url = "github:llogick/zigscient/0.14.x";
       flake = false;
     };
 
@@ -37,15 +41,15 @@
     , ...
     }:
     let
-      zlsBinName = "zigscient";
       overlays = [
         (
           _final: prev: with prev; rec {
             zig = inputs.zig.packages.${system}."0.14.0";
             zls = stdenvNoCC.mkDerivation {
-              pname = "zigscient";
+              name = "zls";
               version = "${inputs.zigscient-src.shortRev}-${inputs.zigscient-src.lastModifiedDate}";
-              src = "${inputs.zigscient-src}";
+              meta.mainProgram = "zls";
+              src = "${inputs.zls-src}";
               nativeBuildInputs = [ zig ];
               phases = [
                 "unpackPhase"
@@ -60,9 +64,34 @@
                 zig build test --cache-dir $(pwd)/.zig-cache --global-cache-dir $(pwd)/.cache -Dcpu=baseline
               '';
             };
+            zigscient = stdenvNoCC.mkDerivation {
+              pname = "zigscient";
+              version = "${inputs.zigscient-src.shortRev}-${inputs.zigscient-src.lastModifiedDate}";
+              meta.mainProgram = "zigscient";
+              src = "${inputs.zigscient-src}";
+              nativeBuildInputs = [ zig ];
+              phases = [
+                "unpackPhase"
+                "patchPhase"
+                "buildPhase"
+                "checkPhase"
+              ];
+              patchPhase = ''
+                sed -i 's/version = "0.14.1"/version = "0.14.0"/g' build.zig.zon
+                sed -i 's/patch = 1/patch = 0/g' build.zig
+              '';
+              buildPhase = ''
+                mkdir -p .cache
+                zig build install --cache-dir $(pwd)/.zig-cache --global-cache-dir $(pwd)/.cache -Dcpu=baseline -Doptimize=ReleaseSafe --prefix $out
+              '';
+              checkPhase = ''
+                zig build test --cache-dir $(pwd)/.zig-cache --global-cache-dir $(pwd)/.cache -Dcpu=baseline
+              '';
+            };
             minichlink = stdenvNoCC.mkDerivation {
               name = "minichlink";
               src = ./tools/minichlink;
+              meta.mainProgram = "minichlink";
               nativeBuildInputs =
                 [
                   zig
@@ -158,15 +187,19 @@
         # Eval the treefmt modules from ./treefmt.nix
         treefmtEval = inputs.treefmt.lib.evalModule pkgs ./treefmt.nix;
         inherit (pkgs) zig;
-        inherit (pkgs) zls;
         inherit (pkgs) minichlink;
         # inherit (pkgs) wch-openocd;
+
+        # zlsBinName = "zigscient";
+        zlsBinName = "zls";
+        zls = pkgs.zls;
 
         buildInputs =
           with pkgs;
           [
             zig
             zls
+            zigscient
             xmlstarlet
             coreutils
             bash
@@ -222,7 +255,7 @@
                 fi
 
                 # Find CLion latest path
-                IDE_PATH=$(ls -d "$JETBRAINS_PATH"/* | grep -E 'CLion[0-9]+\.[0-9]+')
+                IDE_PATH=$(ls -d "$JETBRAINS_PATH"/* | grep -E 'CLion[0-9]+\.[0-9]+' | tail -1)
                 echo "IDE_PATH: $IDE_PATH"
 
                 if [[ -f ".idea/zigbrains.xml" ]]; then
