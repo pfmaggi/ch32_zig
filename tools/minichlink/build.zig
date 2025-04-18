@@ -68,9 +68,7 @@ fn createMinichlink(
     const root_path = dep.path("minichlink");
     const exe = std.Build.Step.Compile.create(b, .{
         .name = "minichlink",
-        .version = .{ .major = 1, .minor = 0, .patch = 0, .pre = "rc.2" },
         .kind = kind,
-        .linkage = .dynamic,
         .root_module = b.createModule(.{
             .target = target,
             .optimize = optimize,
@@ -80,7 +78,8 @@ fn createMinichlink(
     });
 
     if (kind == .lib) {
-        // exe.root_module.addCMacro("MINICHLINK_AS_LIBRARY", "1");
+        exe.linkage = .static;
+        exe.root_module.addCMacro("MINICHLINK_AS_LIBRARY", "1");
         exe.installHeader(root_path.path(b, "minichlink.h"), "minichlink.h");
     }
 
