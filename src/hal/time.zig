@@ -124,6 +124,14 @@ pub const Deadline = struct {
     deadline: ?Duration,
 
     pub fn init(timeout: ?Duration) Deadline {
+        comptime {
+            if (!isEnabledInterrupt()) {
+                @compileError(
+                    \\`hal.time` module should be initialized with `hal.time.init()` before using deadline.
+                );
+            }
+        }
+
         const tm = timeout orelse return .{ .deadline = null };
 
         const time = switch (tm) {
