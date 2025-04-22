@@ -238,17 +238,17 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 4078 | 856 | 0 | 8 | 5096 |
-| ReleaseFast | 156 | 6358 | 836 | 0 | 8 | 7356 |
-| ReleaseSafe | 156 | 11566 | 1168 | 0 | 8 | 12896 |
+| ReleaseSmall | 156 | 4056 | 856 | 0 | 8 | 5072 |
+| ReleaseFast | 156 | 5886 | 836 | 0 | 8 | 6884 |
+| ReleaseSafe | 156 | 11354 | 1168 | 0 | 8 | 12680 |
 
 ### i2c_blocking_ch32v003_slave.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 4488 | 1008 | 0 | 8 | 5656 |
-| ReleaseFast | 156 | 6260 | 1196 | 0 | 8 | 7612 |
-| ReleaseSafe | 156 | 11814 | 1328 | 0 | 8 | 13304 |
+| ReleaseSmall | 156 | 4492 | 1008 | 0 | 8 | 5656 |
+| ReleaseFast | 156 | 6190 | 1196 | 0 | 8 | 7548 |
+| ReleaseSafe | 156 | 11736 | 1328 | 0 | 8 | 13224 |
 
 
 ## [examples/i2c_bmi160](examples/i2c_bmi160)
@@ -257,8 +257,8 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 6970 | 1188 | 0 | 17 | 8316 |
-| ReleaseFast | 156 | 10986 | 1376 | 0 | 17 | 12520 |
+| ReleaseSmall | 156 | 6954 | 1188 | 0 | 17 | 8300 |
+| ReleaseFast | 156 | 10754 | 1376 | 0 | 17 | 12288 |
 
 
 ## [examples/mco](examples/mco)

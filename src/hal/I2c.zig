@@ -249,7 +249,7 @@ pub fn masterTransferBlocking(self: I2C, address: Address, send: ?[]const u8, re
 /// Master transfer with blocking. See `masterTransferBlocking` for more details.
 /// This function the same as `masterTransferBlocking` but allows to send multiple payloads.
 pub fn masterTransferVecBlocking(self: I2C, address: Address, send: ?[]const []const u8, recv: ?[]const []u8, deadline: time.Deadline) Error!void {
-    try self.wait(isNotBusy, deadline);
+    try self.waitEventNot(.is_busy, deadline);
 
     self.reg.CTLR1.modify(.{ .START = 1 });
     defer self.reg.CTLR1.modify(.{ .STOP = 1 });
@@ -269,11 +269,11 @@ pub fn masterTransferVecBlocking(self: I2C, address: Address, send: ?[]const []c
 
 pub fn slaveAddressMatchingBlocking(self: I2C, deadline: time.Deadline) Error!Direction {
     while (true) {
-        const event_status = self.getEventStatus();
-        if (event_status.has(.slave_transmitter_address_matched)) return .transmit;
-        if (event_status.has(.slave_reveiver_address_matched)) return .receive;
+        const status = self.getStatus();
+        if (status.hasEvent(.slave_transmitter_address_matched)) return .transmit;
+        if (status.hasEvent(.slave_reveiver_address_matched)) return .receive;
 
-        try self.checkErrors();
+        try self.checkErrors(status.toStar1());
 
         if (deadline.isReached()) {
             return error.Timeout;
@@ -299,7 +299,7 @@ pub fn slaveReadVecBlocking(self: I2C, buffers: []const []u8, deadline: time.Dea
 
                 if (STAR1.STOPF == 1 or STAR1.ADDR == 1) break :buffers;
 
-                self.checkErrors() catch |err| switch (err) {
+                self.checkErrors(STAR1) catch |err| switch (err) {
                     error.AckFailure => break :buffers,
                     else => return err,
                 };
@@ -346,7 +346,7 @@ pub fn slaveWriteVecBlocking(self: I2C, payloads: []const []const u8, deadline: 
 
                 if (STAR1.STOPF == 1 or STAR1.ADDR == 1 or STAR1.AF == 1) break :payloads;
 
-                try self.checkErrors();
+                try self.checkErrors(STAR1);
 
                 if (deadline.isReached()) {
                     return error.Timeout;
@@ -417,110 +417,6 @@ fn masterReadVecBlockingInternal(self: I2C, address: Address, buffers: []const [
     }
 }
 
-fn isNotBusy(self: I2C) bool {
-    return self.reg.STAR2.read().BUSY == 0;
-}
-
-const Event = enum(u32) {
-    // I2C Master Events.
-
-    // Start communicate.
-
-    master_mode_select = 0x00030001, // BUSY, MSL and SB flag (EVT5)
-
-    // Address Acknowledge.
-
-    master_transmitter_mode_selected = 0x00070082, // BUSY, MSL, ADDR, TXE and TRA flags (EVT6)
-    master_receiver_mode_selected = 0x00030002, // BUSY, MSL and ADDR flags (EVT6)
-    master_mode_address10 = 0x00030008, // BUSY, MSL and ADD10 flags (EVT9)
-
-    // Communication events.
-
-    master_byte_received = 0x00030040, // BUSY, MSL and RXNE flags (EVT7)
-    master_byte_transmitting = 0x00070080, // TRA, BUSY, MSL and TXE flags (EVT8)
-    master_byte_transmitted = 0x00070084, // TRA, BUSY, MSL, TXE and BTF flags (EVT8_2)
-
-    // I2C Slave Events.
-
-    // Start Communicate events
-
-    slave_reveiver_address_matched = 0x00020002, // BUSY and ADDR flags  (EVT1)
-    slave_transmitter_address_matched = 0x00060082, // TRA, BUSY, TXE and ADDR flags
-    slave_reveiver_second_address_matched = 0x00820000, // DUALF and BUSY flags
-    slave_transmitter_second_address_matched = 0x00860080, // DUALF, TRA, BUSY and TXE flags
-    slave_general_call_address_matched = 0x00120000, // GENCALL and BUSY flags
-
-    // Communication events.
-
-    slave_byte_received = 0x00020040, // BUSY and RXNE flags (EVT2)
-    slave_stop_detected = 0x00000010, // STOPF flag (EVT4)
-    slave_byte_transmitted = 0x00060084, // TRA, BUSY, TXE and BTF flags (EVT3)
-    slave_byte_transmitting = 0x00060080, // TRA, BUSY and TXE flags (EVT3)
-    slave_ack_failure = 0x00000400, // AF flag (EVT3_2)
-
-    // Common Events.
-
-    is_busy = 0x00020000, // BUSY flag
-    is_writable = 0x00000080, // TXE flag
-    is_readable = 0x00000040, // RXNE flag
-};
-
-const EventStatus = enum(u32) {
-    _,
-
-    fn has(self: EventStatus, event: Event) bool {
-        return @intFromEnum(self) & @intFromEnum(event) == @intFromEnum(event);
-    }
-};
-
-fn getEventStatus(self: I2C) EventStatus {
-    // Order of reading the status registers is important!
-    // First read STAR1 and then STAR2.
-    const s1 = self.reg.STAR1;
-    // Prevent compiler reordering of reads.
-    asm volatile ("" ::: "memory");
-    const s2 = self.reg.STAR2;
-
-    const s1_raw: u16 = @truncate(s1.raw);
-    const s2_raw: u16 = @truncate(s2.raw);
-
-    const status: u32 = (@as(u32, s2_raw) << 16) | s1_raw;
-    const last_event = status & 0x00FFFFFF;
-
-    return @enumFromInt(last_event);
-}
-
-fn checkErrors(self: I2C) Error!void {
-    const star1 = self.reg.STAR1.read();
-
-    if (config.chip.series != .ch32v003) {
-        if (star1.TIMEOUT == 1) {
-            self.reg.STAR1.modify(.{ .TIMEOUT = 0 });
-            return error.Timeout;
-        }
-    }
-    if (star1.PECERR == 1) {
-        self.reg.STAR1.modify(.{ .PECERR = 0 });
-        return error.PacketCheck;
-    }
-    if (star1.OVR == 1) {
-        self.reg.STAR1.modify(.{ .OVR = 0 });
-        return error.Overrun;
-    }
-    if (star1.ARLO == 1) {
-        self.reg.STAR1.modify(.{ .ARLO = 0 });
-        return error.ArbitrationLost;
-    }
-    if (star1.AF == 1) {
-        self.reg.STAR1.modify(.{ .AF = 0 });
-        return error.AckFailure;
-    }
-    if (star1.BERR == 1) {
-        self.reg.STAR1.modify(.{ .BERR = 0 });
-        return error.Bus;
-    }
-}
-
 const Direction = enum(u1) {
     transmit = 0,
     receive = 1,
@@ -572,21 +468,151 @@ fn sendAddressAndWaitModeSelectedEvent(self: I2C, address: Address, direction: D
     }
 }
 
-fn waitEvent(self: I2C, event: Event, deadline: time.Deadline) Error!void {
-    while (!self.getEventStatus().has(event)) {
-        try self.checkErrors();
+pub const Event = enum(u32) {
+    // I2C Master Events.
 
-        if (deadline.isReached()) {
+    // Start communicate.
+
+    master_mode_select = BUSY | MSL | SB, // EVT5
+
+    // Address Acknowledge.
+
+    master_transmitter_mode_selected = BUSY | MSL | ADDR | TxE | TRA, // EVT6
+    master_receiver_mode_selected = BUSY | MSL | ADDR, // EVT6
+    master_mode_address10 = BUSY | MSL | ADD10, // EVT9
+
+    // Communication events.
+
+    master_byte_received = BUSY | MSL | RxNE, // EVT7
+    master_byte_transmitting = TRA | BUSY | MSL | TxE, // EVT8
+    master_byte_transmitted = TRA | BUSY | MSL | TxE | BTF, // EVT8_2
+
+    // I2C Slave Events.
+
+    // Start Communicate events
+
+    slave_reveiver_address_matched = BUSY | ADDR, // EVT1
+    slave_transmitter_address_matched = TRA | BUSY | TxE | ADDR, // EVT1
+    slave_reveiver_second_address_matched = DUALF | BUSY, // EVT1
+    slave_transmitter_second_address_matched = DUALF | TRA | BUSY | TxE, // EVT1
+    slave_general_call_address_matched = GENCALL | BUSY, // EVT1
+
+    // Communication events.
+
+    slave_byte_received = BUSY | RxNE, // EVT2
+    slave_stop_detected = STOPF, // EVT4
+    slave_byte_transmitted = TRA | BUSY | TxE | BTF, // EVT3
+    slave_byte_transmitting = TRA | BUSY | TxE, // EVT3
+    slave_ack_failure = AF, // EVT3_2
+
+    // Common Events.
+
+    is_busy = BUSY,
+    is_writable = TxE,
+    is_readable = RxNE,
+
+    _,
+
+    const SB = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR1, "SB");
+    const ADDR = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR1, "ADDR");
+    const BTF = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR1, "BTF");
+    const ADD10 = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR1, "ADD10");
+    const STOPF = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR1, "STOPF");
+    const RxNE = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR1, "RxNE");
+    const TxE = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR1, "TxE");
+    const AF = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR1, "AF");
+
+    const MSL = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR2, "MSL") + 16;
+    const BUSY = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR2, "BUSY") + 16;
+    const TRA = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR2, "TRA") + 16;
+    const GENCALL = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR2, "GENCALL") + 16;
+    const SMBDEFAULT = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR2, "SMBDEFAULT") + 16;
+    const SMBHOST = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR2, "SMBHOST") + 16;
+    const DUALF = @as(u32, 1) << @bitOffsetOf(svd.types.I2C.STAR2, "DUALF") + 16;
+
+    pub fn from(v: u32) Event {
+        return @enumFromInt(v);
+    }
+};
+
+pub const Status = enum(u32) {
+    _,
+
+    pub fn hasEvent(self: Status, event: Event) bool {
+        return @intFromEnum(self) & @intFromEnum(event) == @intFromEnum(event);
+    }
+
+    inline fn toStar1(self: Status) svd.types.I2C.STAR1 {
+        return @bitCast(@intFromEnum(self));
+    }
+
+    inline fn toStar2(self: Status) svd.types.I2C.STAR2 {
+        return @bitCast(@intFromEnum(self) >> 16);
+    }
+};
+
+pub fn getStatus(self: I2C) Status {
+    // Order of reading the status registers is important!
+    // First read STAR1 and then STAR2.
+    const s1 = self.reg.STAR1;
+    // Prevent compiler reordering of reads.
+    asm volatile ("" ::: "memory");
+    const s2 = self.reg.STAR2;
+
+    const s1_raw: u16 = @truncate(s1.raw);
+    const s2_raw: u16 = @truncate(s2.raw);
+
+    const status: u32 = (@as(u32, s2_raw) << 16) | s1_raw;
+    const last_event = status & 0x00FFFFFF;
+
+    return @enumFromInt(last_event);
+}
+
+fn checkErrors(i2c: I2C, star1: svd.types.I2C.STAR1) Error!void {
+    if (config.chip.series != .ch32v003) {
+        if (star1.TIMEOUT == 1) {
+            i2c.reg.STAR1.modify(.{ .TIMEOUT = 0 });
             return error.Timeout;
         }
-        asm volatile ("" ::: "memory");
+    }
+    if (star1.PECERR == 1) {
+        i2c.reg.STAR1.modify(.{ .PECERR = 0 });
+        return error.PacketCheck;
+    }
+    if (star1.OVR == 1) {
+        i2c.reg.STAR1.modify(.{ .OVR = 0 });
+        return error.Overrun;
+    }
+    if (star1.ARLO == 1) {
+        i2c.reg.STAR1.modify(.{ .ARLO = 0 });
+        return error.ArbitrationLost;
+    }
+    if (star1.AF == 1) {
+        i2c.reg.STAR1.modify(.{ .AF = 0 });
+        return error.AckFailure;
+    }
+    if (star1.BERR == 1) {
+        i2c.reg.STAR1.modify(.{ .BERR = 0 });
+        return error.Bus;
     }
 }
 
-// Wait for a condition to be true.
-fn wait(self: I2C, conditionFn: fn (self: I2C) bool, deadline: time.Deadline) Error!void {
-    while (!conditionFn(self)) {
-        try self.checkErrors();
+fn waitEvent(self: I2C, event: Event, deadline: time.Deadline) Error!void {
+    return self.waitEventState(event, true, deadline);
+}
+
+fn waitEventNot(self: I2C, event: Event, deadline: time.Deadline) Error!void {
+    return self.waitEventState(event, false, deadline);
+}
+
+fn waitEventState(self: I2C, event: Event, state: bool, deadline: time.Deadline) Error!void {
+    while (true) {
+        const status = self.getStatus();
+        if (status.hasEvent(event) == state) {
+            return;
+        }
+
+        try self.checkErrors(status.toStar1());
 
         if (deadline.isReached()) {
             return error.Timeout;
@@ -596,7 +622,7 @@ fn wait(self: I2C, conditionFn: fn (self: I2C) bool, deadline: time.Deadline) Er
 }
 
 // Comptime pins checks.
-pub fn checkPins(comptime reg: *volatile svd.registers.I2C, comptime pins: Pins) void {
+fn checkPins(comptime reg: *volatile svd.registers.I2C, comptime pins: Pins) void {
     const pins_namespace = Pins.namespaceFor(reg);
 
     // Find pins from namespace.
