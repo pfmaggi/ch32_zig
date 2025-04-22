@@ -22,7 +22,7 @@ pub fn build(b: *std.Build) !void {
     const install_minichlink_lib = b.addInstallArtifact(minichlink_lib, .{});
     build_lib.dependOn(&install_minichlink_lib.step);
 
-    const minichlink_ocd = buildMinichlinkOcd(b, target, optimize, minichlink_lib);
+    const minichlink_ocd = try buildMinichlinkOcd(b, target, optimize, minichlink_lib);
 
     const run_step = b.step("run", "Run the minichlink-ocd");
     const ocd_run = b.addRunArtifact(minichlink_ocd);
@@ -48,7 +48,7 @@ fn buildMinichlink(
     optimize: std.builtin.OptimizeMode,
 ) !*std.Build.Step.Compile {
     const libusb_dep = b.dependency("libusb", .{});
-    const libusb = createLibusb(b, libusb_dep, target, optimize);
+    const libusb = try createLibusb(b, libusb_dep, target, optimize);
 
     const minichlink_dep = b.dependency("ch32v003fun", .{});
     const minichlink = try createMinichlink(b, minichlink_dep, kind, target, optimize);
@@ -111,6 +111,10 @@ fn createMinichlink(
         .linux, .netbsd, .openbsd => {
             const rules = b.addInstallBinFile(try root_path.join(b.allocator, "99-minichlink.rules"), "99-minichlink.rules");
             exe.step.dependOn(&rules.step);
+
+            const triple = try exe.rootModuleTarget().linuxTriple(b.allocator);
+            exe.addLibraryPath(.{ .cwd_relative = b.fmt("/usr/lib/{s}", .{triple}) });
+            exe.addIncludePath(.{ .cwd_relative = "/usr/include/" });
         },
         .windows => {
             exe.root_module.addCMacro("_WIN32_WINNT", "0x0600");
@@ -133,7 +137,7 @@ fn createLibusb(
     dep: *std.Build.Dependency,
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
-) *std.Build.Step.Compile {
+) !*std.Build.Step.Compile {
     const is_posix = target.result.os.tag != .windows;
     const config_header = b.addConfigHeader(.{ .style = .blank }, .{
         ._GNU_SOURCE = 1,
@@ -232,6 +236,10 @@ fn createLibusb(
                 },
             });
             lib.linkSystemLibrary("udev");
+
+            const triple = try lib.rootModuleTarget().linuxTriple(b.allocator);
+            lib.addLibraryPath(.{ .cwd_relative = b.fmt("/usr/lib/{s}", .{triple}) });
+            lib.addIncludePath(.{ .cwd_relative = "/usr/include/" });
         },
         .windows => {
             lib.addCSourceFiles(.{
@@ -267,7 +275,7 @@ fn buildMinichlinkOcd(
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
     minichlink_lib: *std.Build.Step.Compile,
-) *std.Build.Step.Compile {
+) !*std.Build.Step.Compile {
     const minichlink_dep = b.dependency("ch32v003fun", .{});
     const minichlink_root_path = minichlink_dep.path("minichlink");
 
@@ -295,6 +303,15 @@ fn buildMinichlinkOcd(
     ocd.addIncludePath(minichlink_root_path);
     ocd.addIncludePath(b.path("src"));
     ocd.addCSourceFile(.{ .file = b.path(minichlink_main_file.dest_rel_path) });
+
+    switch (target.result.os.tag) {
+        .linux, .netbsd, .openbsd => {
+            const triple = try ocd.rootModuleTarget().linuxTriple(b.allocator);
+            ocd.addLibraryPath(.{ .cwd_relative = b.fmt("/usr/lib/{s}", .{triple}) });
+            ocd.addIncludePath(.{ .cwd_relative = "/usr/include/" });
+        },
+        else => {},
+    }
 
     b.getInstallStep().dependOn(&b.addInstallArtifact(ocd, .{ .dest_dir = .{ .override = .{ .custom = b.pathJoin(&.{ "bin", "ocd", "bin" }) } } }).step);
     b.getInstallStep().dependOn(&b.addInstallFileWithDir(.{ .cwd_relative = "wch-riscv.cfg" }, .{ .custom = b.pathJoin(&.{ "bin", "ocd", "share", "openocd", "scripts", "board" }) }, "wch-riscv.cfg").step);
@@ -368,6 +385,17 @@ const CopyAndPatchMinichlinkMainFile = struct {
             \\#include <getopt.h>
             \\#include "terminalhelp.h"
             \\#include "minichlink.h"
+            \\
+            \\#if defined(WINDOWS) || defined(WIN32) || defined(_WIN32)
+            \\extern int isatty(int);
+            \\#if !defined(_SYNCHAPI_H_) && !defined(__TINYC__)
+            \\void Sleep(uint32_t dwMilliseconds);
+            \\#endif
+            \\#else
+            \\#include <pwd.h>
+            \\#include <unistd.h>
+            \\#include <grp.h>
+            \\#endif
             \\
             \\static int64_t StringToMemoryAddress( const char * number ) __attribute__((used));
             \\void PostSetupConfigureInterface( void * dev );
