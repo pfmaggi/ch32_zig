@@ -2,10 +2,9 @@ const std = @import("std");
 const config = @import("config");
 const svd = @import("svd");
 
+const time = @import("time.zig");
 const port = @import("port.zig");
 const Pin = @import("Pin.zig");
-
-pub const DeadlineFn = fn () bool;
 
 pub const Config = struct {
     mode: Mode = .master,
@@ -241,34 +240,34 @@ fn reset(self: I2C) void {
 /// Null send buffer allowed for scan devices.
 /// If device is present, it will ACK and no error will be returned.
 /// Otherwise, NACK will be received and AckFailure error will be returned.
-pub fn masterTransferBlocking(self: I2C, address: Address, send: ?[]const u8, recv: ?[]u8, deadlineFn: ?DeadlineFn) Error!void {
+pub fn masterTransferBlocking(self: I2C, address: Address, send: ?[]const u8, recv: ?[]u8, deadline: time.Deadline) Error!void {
     const send_vec: ?[]const []const u8 = if (send) |s| &.{s} else null;
     const recv_vec: ?[]const []u8 = if (recv) |r| &.{r} else null;
-    return self.masterTransferVecBlocking(address, send_vec, recv_vec, deadlineFn);
+    return self.masterTransferVecBlocking(address, send_vec, recv_vec, deadline);
 }
 
 /// Master transfer with blocking. See `masterTransferBlocking` for more details.
 /// This function the same as `masterTransferBlocking` but allows to send multiple payloads.
-pub fn masterTransferVecBlocking(self: I2C, address: Address, send: ?[]const []const u8, recv: ?[]const []u8, deadlineFn: ?DeadlineFn) Error!void {
-    try self.wait(isNotBusy, deadlineFn);
+pub fn masterTransferVecBlocking(self: I2C, address: Address, send: ?[]const []const u8, recv: ?[]const []u8, deadline: time.Deadline) Error!void {
+    try self.wait(isNotBusy, deadline);
 
     self.reg.CTLR1.modify(.{ .START = 1 });
     defer self.reg.CTLR1.modify(.{ .STOP = 1 });
 
-    try self.waitEvent(.master_mode_select, deadlineFn);
+    try self.waitEvent(.master_mode_select, deadline);
 
-    try self.masterWriteVecBlockingInternal(address, send, deadlineFn);
+    try self.masterWriteVecBlockingInternal(address, send, deadline);
 
     if (recv) |buffers| {
         // Repeat start condition.
         self.reg.CTLR1.modify(.{ .START = 1, .ACK = 1 });
-        try self.waitEvent(.master_mode_select, deadlineFn);
+        try self.waitEvent(.master_mode_select, deadline);
 
-        try self.masterReadVecBlockingInternal(address, buffers, deadlineFn);
+        try self.masterReadVecBlockingInternal(address, buffers, deadline);
     }
 }
 
-pub fn slaveAddressMatchingBlocking(self: I2C, deadlineFn: ?DeadlineFn) Error!Direction {
+pub fn slaveAddressMatchingBlocking(self: I2C, deadline: time.Deadline) Error!Direction {
     while (true) {
         const event_status = self.getEventStatus();
         if (event_status.has(.slave_transmitter_address_matched)) return .transmit;
@@ -276,20 +275,18 @@ pub fn slaveAddressMatchingBlocking(self: I2C, deadlineFn: ?DeadlineFn) Error!Di
 
         try self.checkErrors();
 
-        if (deadlineFn) |check| {
-            if (check()) {
-                return error.Timeout;
-            }
+        if (deadline.isReached()) {
+            return error.Timeout;
         }
         asm volatile ("" ::: "memory");
     }
 }
 
-pub fn slaveReadBlocking(self: I2C, buffer: []u8, deadlineFn: ?DeadlineFn) Error!usize {
-    return self.slaveReadVecBlocking(&.{buffer}, deadlineFn);
+pub fn slaveReadBlocking(self: I2C, buffer: []u8, deadline: time.Deadline) Error!usize {
+    return self.slaveReadVecBlocking(&.{buffer}, deadline);
 }
 
-pub fn slaveReadVecBlocking(self: I2C, buffers: []const []u8, deadlineFn: ?DeadlineFn) Error!usize {
+pub fn slaveReadVecBlocking(self: I2C, buffers: []const []u8, deadline: time.Deadline) Error!usize {
     var total: usize = 0;
 
     for (buffers) |buffer| buffers: {
@@ -307,10 +304,8 @@ pub fn slaveReadVecBlocking(self: I2C, buffers: []const []u8, deadlineFn: ?Deadl
                     else => return err,
                 };
 
-                if (deadlineFn) |check| {
-                    if (check()) {
-                        return error.Timeout;
-                    }
+                if (deadline.isReached()) {
+                    return error.Timeout;
                 }
                 asm volatile ("" ::: "memory");
             }
@@ -334,11 +329,11 @@ pub fn slaveReadVecBlocking(self: I2C, buffers: []const []u8, deadlineFn: ?Deadl
     return total;
 }
 
-pub fn slaveWriteBlocking(self: I2C, send: []const u8, deadlineFn: ?DeadlineFn) Error!usize {
-    return self.slaveWriteVecBlocking(&.{send}, deadlineFn);
+pub fn slaveWriteBlocking(self: I2C, send: []const u8, deadline: time.Deadline) Error!usize {
+    return self.slaveWriteVecBlocking(&.{send}, deadline);
 }
 
-pub fn slaveWriteVecBlocking(self: I2C, payloads: []const []const u8, deadlineFn: ?DeadlineFn) Error!usize {
+pub fn slaveWriteVecBlocking(self: I2C, payloads: []const []const u8, deadline: time.Deadline) Error!usize {
     var total: usize = 0;
 
     for (payloads) |payload| payloads: {
@@ -353,10 +348,8 @@ pub fn slaveWriteVecBlocking(self: I2C, payloads: []const []const u8, deadlineFn
 
                 try self.checkErrors();
 
-                if (deadlineFn) |check| {
-                    if (check()) {
-                        return error.Timeout;
-                    }
+                if (deadline.isReached()) {
+                    return error.Timeout;
                 }
                 asm volatile ("" ::: "memory");
             }
@@ -385,15 +378,15 @@ pub fn slaveWriteVecBlocking(self: I2C, payloads: []const []const u8, deadlineFn
     return total;
 }
 
-fn masterWriteVecBlockingInternal(self: I2C, address: Address, send: ?[]const []const u8, deadlineFn: ?DeadlineFn) Error!void {
-    try self.sendAddressAndWaitModeSelectedEvent(address, .transmit, deadlineFn);
+fn masterWriteVecBlockingInternal(self: I2C, address: Address, send: ?[]const []const u8, deadline: time.Deadline) Error!void {
+    try self.sendAddressAndWaitModeSelectedEvent(address, .transmit, deadline);
 
     const payloads = send orelse return;
 
     var is_sent = false;
     for (payloads) |payload| {
         for (payload) |b| {
-            try self.wait(isWriteable, deadlineFn);
+            try self.waitEvent(.is_writable, deadline);
 
             self.reg.DATAR.raw = b;
         }
@@ -404,11 +397,11 @@ fn masterWriteVecBlockingInternal(self: I2C, address: Address, send: ?[]const []
     // If no data was sent, return without waiting for the event.
     if (!is_sent) return;
 
-    try self.waitEvent(.master_byte_transmitted, deadlineFn);
+    try self.waitEvent(.master_byte_transmitted, deadline);
 }
 
-fn masterReadVecBlockingInternal(self: I2C, address: Address, buffers: []const []u8, deadlineFn: ?DeadlineFn) Error!void {
-    try self.sendAddressAndWaitModeSelectedEvent(address, .receive, deadlineFn);
+fn masterReadVecBlockingInternal(self: I2C, address: Address, buffers: []const []u8, deadline: time.Deadline) Error!void {
+    try self.sendAddressAndWaitModeSelectedEvent(address, .receive, deadline);
 
     for (buffers) |buffer| {
         for (buffer, 0..) |*byte, i| {
@@ -417,7 +410,7 @@ fn masterReadVecBlockingInternal(self: I2C, address: Address, buffers: []const [
                 self.reg.CTLR1.modify(.{ .ACK = 0 });
             }
 
-            try self.wait(isReadable, deadlineFn);
+            try self.waitEvent(.is_readable, deadline);
 
             byte.* = @truncate(self.reg.DATAR.raw);
         }
@@ -426,14 +419,6 @@ fn masterReadVecBlockingInternal(self: I2C, address: Address, buffers: []const [
 
 fn isNotBusy(self: I2C) bool {
     return self.reg.STAR2.read().BUSY == 0;
-}
-
-fn isReadable(self: I2C) bool {
-    return self.reg.STAR1.read().RxNE == 1;
-}
-
-fn isWriteable(self: I2C) bool {
-    return self.reg.STAR1.read().TxE == 1;
 }
 
 const Event = enum(u32) {
@@ -472,6 +457,12 @@ const Event = enum(u32) {
     slave_byte_transmitted = 0x00060084, // TRA, BUSY, TXE and BTF flags (EVT3)
     slave_byte_transmitting = 0x00060080, // TRA, BUSY and TXE flags (EVT3)
     slave_ack_failure = 0x00000400, // AF flag (EVT3_2)
+
+    // Common Events.
+
+    is_busy = 0x00020000, // BUSY flag
+    is_writable = 0x00000080, // TXE flag
+    is_readable = 0x00000040, // RXNE flag
 };
 
 const EventStatus = enum(u32) {
@@ -535,7 +526,7 @@ const Direction = enum(u1) {
     receive = 1,
 };
 
-fn sendAddressAndWaitModeSelectedEvent(self: I2C, address: Address, direction: Direction, deadlineFn: ?DeadlineFn) !void {
+fn sendAddressAndWaitModeSelectedEvent(self: I2C, address: Address, direction: Direction, deadline: time.Deadline) !void {
     // In 7-bit address mode, the first byte sent is the address byte, the first 7 bits represent the address of the target
     // slave device, the 8th bit determines the direction of the subsequent message, 0 means the master device writes
     // data to the slave device, 1 means the master device reads information to the slave device.
@@ -553,56 +544,52 @@ fn sendAddressAndWaitModeSelectedEvent(self: I2C, address: Address, direction: D
     switch (address) {
         .seven_bit => |addr| {
             self.reg.DATAR.raw = @as(u8, addr) << 1 | @intFromEnum(direction);
-            try self.waitEvent(event, deadlineFn);
+            try self.waitEvent(event, deadline);
         },
         .ten_bit => |addr| {
             // Write frame header
             const upper_2_bits = addr >> 8;
             self.reg.DATAR.raw = 0xF0 | upper_2_bits << 1 | @intFromEnum(Direction.transmit);
 
-            try self.waitEvent(.master_mode_address10, deadlineFn);
+            try self.waitEvent(.master_mode_address10, deadline);
 
             // Write 8-bit address
             self.reg.DATAR.raw = @as(u8, @truncate(addr));
 
-            try self.waitEvent(.master_transmitter_mode_selected, deadlineFn);
+            try self.waitEvent(.master_transmitter_mode_selected, deadline);
 
             // Write the repeated start condition.
             if (direction == Direction.receive) {
                 // Repeat start condition.
                 self.reg.CTLR1.modify(.{ .START = 1 });
-                try self.waitEvent(.master_mode_select, deadlineFn);
+                try self.waitEvent(.master_mode_select, deadline);
 
                 self.reg.DATAR.raw = 0xF0 | upper_2_bits << 1 | @intFromEnum(Direction.receive);
 
-                try self.waitEvent(event, deadlineFn);
+                try self.waitEvent(event, deadline);
             }
         },
     }
 }
 
-fn waitEvent(self: I2C, event: Event, deadlineFn: ?DeadlineFn) Error!void {
+fn waitEvent(self: I2C, event: Event, deadline: time.Deadline) Error!void {
     while (!self.getEventStatus().has(event)) {
         try self.checkErrors();
 
-        if (deadlineFn) |check| {
-            if (check()) {
-                return error.Timeout;
-            }
+        if (deadline.isReached()) {
+            return error.Timeout;
         }
         asm volatile ("" ::: "memory");
     }
 }
 
 // Wait for a condition to be true.
-fn wait(self: I2C, conditionFn: fn (self: I2C) bool, deadlineFn: ?DeadlineFn) Error!void {
+fn wait(self: I2C, conditionFn: fn (self: I2C) bool, deadline: time.Deadline) Error!void {
     while (!conditionFn(self)) {
         try self.checkErrors();
 
-        if (deadlineFn) |check| {
-            if (check()) {
-                return error.Timeout;
-            }
+        if (deadline.isReached()) {
+            return error.Timeout;
         }
         asm volatile ("" ::: "memory");
     }

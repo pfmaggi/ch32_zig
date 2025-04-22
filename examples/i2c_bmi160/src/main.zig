@@ -19,9 +19,13 @@ pub const ch32_options: ch32.Options = .{
     },
 };
 
+pub const interrupts: hal.interrupts.VectorTable = .{
+    .SysTick = hal.time.sysTickHandler,
+};
+
 pub fn main() !void {
     const clock = hal.clock.setOrGet(.hsi_max);
-    hal.delay.init(clock);
+    hal.time.init(clock);
 
     hal.debug.sdi_print.init();
     const console_writer = hal.debug.sdi_print.writer();
@@ -63,8 +67,8 @@ pub fn main() !void {
     // Can be 0x68 or 0x69.
     const BMI160_I2C_ADDR = 0x69;
 
-    const timeout = 100_000;
-    bmi160.setup(I2C1, BMI160_I2C_ADDR, hal.deadline.simple(timeout)) catch |err| switch (err) {
+    const timeout = hal.time.Duration{ .ms = 1000 };
+    bmi160.setup(I2C1, BMI160_I2C_ADDR, .init(timeout)) catch |err| switch (err) {
         error.I2CDeviceNotFound => {
             std.log.err("Device on address 0x{X:0>2} not found", .{BMI160_I2C_ADDR});
             return err;
@@ -78,7 +82,7 @@ pub fn main() !void {
 
     var imu_data: bmi160.ImuData = undefined;
     while (true) {
-        try bmi160.readImuData(I2C1, BMI160_I2C_ADDR, &imu_data, hal.deadline.simple(timeout));
+        try bmi160.readImuData(I2C1, BMI160_I2C_ADDR, &imu_data, .init(timeout));
 
         std.log.info("{any}", .{imu_data});
 

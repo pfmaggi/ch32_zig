@@ -4,9 +4,13 @@ const hal = @import("hal");
 
 const address: hal.I2c.Address = .from7(0x42);
 
+pub const interrupts: hal.interrupts.VectorTable = .{
+    .SysTick = hal.time.sysTickHandler,
+};
+
 pub fn main() !void {
     const clock = hal.clock.setOrGet(.hsi_max);
-    hal.delay.init(clock);
+    hal.time.init(clock);
 
     hal.debug.sdi_print.init();
     const console_writer = hal.debug.sdi_print.writer();
@@ -65,7 +69,7 @@ pub fn main() !void {
             try console_writer.print("I2C master send: {s}\n", .{i2c_send});
 
             // Send and receive data from the slave.
-            I2C1.masterTransferBlocking(address, i2c_send, buf[0..i2c_recv_expected.len], null) catch |err| {
+            I2C1.masterTransferBlocking(address, i2c_send, buf[0..i2c_recv_expected.len], .init(null)) catch |err| {
                 try console_writer.print("I2C master transfer error: {s}\n", .{@errorName(err)});
             };
 
@@ -75,7 +79,7 @@ pub fn main() !void {
             try console_writer.writeAll("I2C slave waiting for master...\n");
 
             // Wait for the master to send valid address and direction.
-            const dir = I2C1.slaveAddressMatchingBlocking(null) catch |err| {
+            const dir = I2C1.slaveAddressMatchingBlocking(.init(null)) catch |err| {
                 try console_writer.print("I2C slave address matching error: {s}\n", .{@errorName(err)});
                 continue;
             };
@@ -85,7 +89,7 @@ pub fn main() !void {
                     try console_writer.writeAll("I2C slave receive request\n");
 
                     // Receive data from the master.
-                    const n = I2C1.slaveReadBlocking(&buf, null) catch |err| blk: {
+                    const n = I2C1.slaveReadBlocking(&buf, .init(null)) catch |err| blk: {
                         try console_writer.print("I2C slave read error: {s}\n", .{@errorName(err)});
                         break :blk 0;
                     };
@@ -98,7 +102,7 @@ pub fn main() !void {
                     try console_writer.print("I2C slave send: {s}\n", .{i2c_slave_data});
 
                     // Send data to the master.
-                    const n = I2C1.slaveWriteBlocking(i2c_slave_data, null) catch |err| blk: {
+                    const n = I2C1.slaveWriteBlocking(i2c_slave_data, .init(null)) catch |err| blk: {
                         try console_writer.print("I2C slave write error: {s}\n", .{@errorName(err)});
                         break :blk 0;
                     };
