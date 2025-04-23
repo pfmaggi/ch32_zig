@@ -353,7 +353,7 @@ fn wait(self: SPI, conditionFn: fn (self: SPI) bool, deadlineFn: ?DeadlineFn) Ti
 }
 
 // Comptime pins checks.
-pub fn checkPins(comptime reg: *volatile svd.registers.SPI, comptime pins: Pins) void {
+fn checkPins(comptime reg: *volatile svd.registers.SPI, comptime pins: Pins) void {
     const pins_namespace = Pins.namespaceFor(reg);
 
     // Find pins from namespace.
