@@ -2,9 +2,13 @@ const std = @import("std");
 const config = @import("config");
 const hal = @import("hal");
 
+pub const interrupts: hal.interrupts.VectorTable = .{
+    .SysTick = hal.time.sysTickHandler,
+};
+
 pub fn main() !void {
     const clock = hal.clock.setOrGet(.hsi_max);
-    hal.delay.init(clock);
+    hal.time.init(clock);
 
     // Configure UART.
     // The default pins are:
@@ -25,28 +29,12 @@ pub fn main() !void {
         .baud_rate = 115_200,
     });
 
-    _ = try USART1.writeBlocking("Echo UART example\r\n", null);
+    _ = try USART1.writeBlocking("Echo UART example\r\n", hal.time.Deadline.init(null));
 
     while (true) {
         // Wait for a byte to be received.
-        const v = try USART1.readByteBlocking(null);
+        const v = try USART1.readByteBlocking(hal.time.Deadline.init(null));
         // Echo the received byte.
-        try USART1.writeByteBlocking(v, null);
+        try USART1.writeByteBlocking(v, hal.time.Deadline.init(null));
     }
-}
-
-fn intToStr(buf: []u8, value: u32) []u8 {
-    var i: u32 = buf.len;
-    var v: u32 = value;
-    if (v == 0) {
-        buf[0] = '0';
-        return buf[0..1];
-    }
-
-    while (v > 0) : (v /= 10) {
-        i -= 1;
-        buf[i] = @as(u8, @truncate(v % 10)) + '0';
-    }
-
-    return buf[i..];
 }

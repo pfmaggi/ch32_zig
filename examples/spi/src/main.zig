@@ -3,12 +3,16 @@ const config = @import("config");
 const hal = @import("hal");
 const sdi_print = hal.debug.sdi_print;
 
+pub const interrupts: hal.interrupts.VectorTable = .{
+    .SysTick = hal.time.sysTickHandler,
+};
+
 pub fn main() !void {
     // Enable SDI print for logging.
     sdi_print.init();
 
     const clock = hal.clock.setOrGet(.hsi_max);
-    hal.delay.init(clock);
+    hal.time.init(clock);
 
     // Configure SPI.
     // The default pins are:
@@ -45,7 +49,7 @@ pub fn main() !void {
     while (true) {
         sdi_print.writeVec(&.{ "SPI send: ", spi_send, "\r\n" });
 
-        SPI1.transferBlocking(u8, spi_send, &buf, null) catch {};
+        SPI1.transferBlocking(u8, spi_send, &buf, hal.time.Deadline.init(null)) catch {};
 
         sdi_print.writeVec(&.{ "SPI recv: ", &buf, "\r\n" });
 

@@ -2,10 +2,7 @@ const std = @import("std");
 const config = @import("config");
 const svd = @import("svd");
 
-const port = @import("port.zig");
-const deadline = @import("deadline.zig");
-
-pub const DeadlineFn = fn () bool;
+const time = @import("time.zig");
 
 pub const Config = struct {
     mode: Mode = .tx_rx,
@@ -146,12 +143,12 @@ fn configurePins(comptime self: UART, comptime cfg: Config) void {
     }
 
     if (cfg.mode == .tx or cfg.mode == .tx_rx) {
-        port.enable(pins.tx.port);
+        pins.tx.enablePort();
         pins.tx.asOutput(.{ .speed = .max_10mhz, .mode = .alt_push_pull });
     }
 
     if (cfg.mode == .rx or cfg.mode == .tx_rx) {
-        port.enable(pins.rx.port);
+        pins.rx.enablePort();
         pins.rx.asInput(.floating);
     }
 }
@@ -257,16 +254,16 @@ pub fn isWriteComplete(self: UART) bool {
     return self.reg.STATR.read().TC == 1;
 }
 
-pub fn writeBlocking(self: UART, payload: []const u8, deadlineFn: ?DeadlineFn) Timeout!usize {
-    return self.writeVecBlocking(&.{payload}, deadlineFn);
+pub fn writeBlocking(self: UART, payload: []const u8, deadline: time.Deadline) Timeout!usize {
+    return self.writeVecBlocking(&.{payload}, deadline);
 }
 
-pub fn writeVecBlocking(self: UART, payloads: []const []const u8, deadlineFn: ?DeadlineFn) Timeout!usize {
+pub fn writeVecBlocking(self: UART, payloads: []const []const u8, deadline: time.Deadline) Timeout!usize {
     var total: usize = 0;
 
     for (payloads) |payload| {
         for (payload) |b| {
-            self.wait(isWriteable, deadlineFn) catch |err| {
+            self.wait(isWriteable, deadline) catch |err| {
                 if (total > 0) {
                     return total;
                 }
@@ -276,7 +273,7 @@ pub fn writeVecBlocking(self: UART, payloads: []const []const u8, deadlineFn: ?D
             self.reg.DATAR.raw = b;
             total += 1;
 
-            self.wait(isWriteComplete, deadlineFn) catch {
+            self.wait(isWriteComplete, deadline) catch {
                 return total;
             };
         }
@@ -285,22 +282,22 @@ pub fn writeVecBlocking(self: UART, payloads: []const []const u8, deadlineFn: ?D
     return total;
 }
 
-pub fn writeByteBlocking(self: UART, byte: u8, deadlineFn: ?DeadlineFn) Timeout!void {
-    try self.wait(isWriteable, deadlineFn);
+pub fn writeByteBlocking(self: UART, byte: u8, deadline: time.Deadline) Timeout!void {
+    try self.wait(isWriteable, deadline);
     self.reg.DATAR.raw = byte;
-    try self.wait(isWriteComplete, deadlineFn);
+    try self.wait(isWriteComplete, deadline);
 }
 
-pub fn readBlocking(self: UART, buffer: []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
-    return self.readVecBlocking(&.{buffer}, deadlineFn);
+pub fn readBlocking(self: UART, buffer: []u8, deadline: time.Deadline) Timeout!usize {
+    return self.readVecBlocking(&.{buffer}, deadline);
 }
 
-pub fn readVecBlocking(self: UART, buffers: []const []u8, deadlineFn: ?DeadlineFn) Timeout!usize {
+pub fn readVecBlocking(self: UART, buffers: []const []u8, deadline: time.Deadline) Timeout!usize {
     var total: usize = 0;
 
     for (buffers) |buffer| {
         for (buffer) |*byte| {
-            byte.* = self.readByteBlocking(deadlineFn) catch |err| {
+            byte.* = self.readByteBlocking(deadline) catch |err| {
                 if (total > 0) {
                     return total;
                 }
@@ -314,8 +311,8 @@ pub fn readVecBlocking(self: UART, buffers: []const []u8, deadlineFn: ?DeadlineF
     return total;
 }
 
-pub fn readByteBlocking(self: UART, deadlineFn: ?DeadlineFn) Error!u8 {
-    try self.wait(isReadable, deadlineFn);
+pub fn readByteBlocking(self: UART, deadline: time.Deadline) Error!u8 {
+    try self.wait(isReadable, deadline);
 
     try self.checkErrors();
 
@@ -344,12 +341,10 @@ fn checkErrors(self: UART) Error!void {
 }
 
 // Wait for a condition to be true.
-fn wait(self: UART, conditionFn: fn (self: UART) bool, deadlineFn: ?DeadlineFn) Timeout!void {
+fn wait(self: UART, conditionFn: fn (self: UART) bool, deadline: time.Deadline) Timeout!void {
     while (!conditionFn(self)) {
-        if (deadlineFn) |check| {
-            if (check()) {
-                return error.Timeout;
-            }
+        if (deadline.isReached()) {
+            return error.Timeout;
         }
         asm volatile ("" ::: "memory");
     }
@@ -382,5 +377,5 @@ pub fn writer(self: UART) Writer {
 }
 
 fn genericWriterFn(self: UART, buffer: []const u8) Timeout!usize {
-    return self.writeBlocking(buffer, deadline.simple(100_000));
+    return self.writeBlocking(buffer, time.Deadline.init(.{ .us = 10_000 }));
 }

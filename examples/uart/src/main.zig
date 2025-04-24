@@ -2,9 +2,13 @@ const std = @import("std");
 const config = @import("config");
 const hal = @import("hal");
 
+pub const interrupts: hal.interrupts.VectorTable = .{
+    .SysTick = hal.time.sysTickHandler,
+};
+
 pub fn main() !void {
     const clock = hal.clock.setOrGet(.hsi_max);
-    hal.delay.init(clock);
+    hal.time.init(clock);
 
     // Configure UART.
     // The default pins are:
@@ -27,7 +31,7 @@ pub fn main() !void {
         .baud_rate = 115_200,
     });
 
-    _ = try USART1.writeBlocking("Hello, World!\r\n", hal.deadline.simple(100_000));
+    _ = try USART1.writeBlocking("Hello, World!\r\n", hal.time.Deadline.init(.{ .ms = 1 }));
 
     // Counter is 32 bits, so we need 10 bytes to store it,
     // because max value is 4294967295.
@@ -37,7 +41,7 @@ pub fn main() !void {
         counter += 1;
 
         // Print counter to UART.
-        _ = try USART1.writeVecBlocking(&.{ "Counter: ", intToStr(&buf, counter), "\r\n" }, null);
+        _ = try USART1.writeVecBlocking(&.{ "Counter: ", intToStr(&buf, counter), "\r\n" }, hal.time.Deadline.init(null));
 
         hal.delay.ms(1000);
     }

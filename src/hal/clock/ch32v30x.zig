@@ -537,7 +537,7 @@ pub fn mco(comptime o: McoOutput) void {
     };
 
     const pin = Pin.init(.GPIOC, 4);
-    port.enable(pin.port);
+    pin.enablePort();
     pin.asOutput(.{ .speed = .max_50mhz, .mode = .alt_push_pull });
 
     const RCC = svd.peripherals.RCC;

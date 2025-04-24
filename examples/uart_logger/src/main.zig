@@ -20,6 +20,10 @@ pub const ch32_options: ch32.Options = .{
     },
 };
 
+pub const interrupts: hal.interrupts.VectorTable = .{
+    .SysTick = hal.time.sysTickHandler,
+};
+
 pub fn main() !void {
     const clock = hal.clock.setOrGet(.hsi_max);
     hal.delay.init(clock);

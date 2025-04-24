@@ -2,10 +2,8 @@ const std = @import("std");
 const config = @import("config");
 const svd = @import("svd");
 
-const port = @import("port.zig");
+const time = @import("time.zig");
 const Pin = @import("Pin.zig");
-
-pub const DeadlineFn = fn () bool;
 
 pub const Config = struct {
     /// SPI mode. Master or slave.
@@ -175,31 +173,31 @@ fn configurePins(self: SPI, comptime cfg: Config, comptime pins: Pins) void {
     switch (cfg.mode) {
         .master => {
             if (pins.nss) |nss| {
-                port.enable(nss.pin.port);
+                nss.pin.enablePort();
                 nss.pin.asOutput(.{ .speed = .max_50mhz, .mode = if (nss.is_hardware) .alt_push_pull else .push_pull });
             }
 
-            port.enable(pins.sck.port);
+            pins.sck.enablePort();
             pins.sck.asOutput(.{ .speed = .max_50mhz, .mode = .alt_push_pull });
 
-            port.enable(pins.miso.port);
+            pins.miso.enablePort();
             pins.miso.asInput(.{ .pull = .up });
 
-            port.enable(pins.mosi.port);
+            pins.mosi.enablePort();
             pins.mosi.asOutput(.{ .speed = .max_50mhz, .mode = .alt_push_pull });
         },
         .slave => {
             if (pins.nss) |nss| {
-                port.enable(nss.pin.port);
+                nss.pin.enablePort();
                 nss.pin.asInput(.{ .pull = .up });
             }
-            port.enable(pins.sck.port);
+            pins.sck.enablePort();
             pins.sck.asInput(.floating);
 
-            port.enable(pins.miso.port);
+            pins.miso.enablePort();
             pins.miso.asOutput(.{ .speed = .max_50mhz, .mode = .alt_push_pull });
 
-            port.enable(pins.mosi.port);
+            pins.mosi.enablePort();
             pins.mosi.asInput(.{ .pull = .up });
         },
     }
@@ -279,8 +277,8 @@ fn reset(self: SPI) void {
 /// If recv.len > send.len, zeros will be sent for the remaining bytes.
 ///
 /// This function blocks execution until all data is transferred or a timeout occurs.
-/// The deadlineFn parameter allows specifying a timeout check function to avoid infinite waiting.
-pub fn transferBlocking(self: SPI, comptime u8_or_u16: type, send: ?[]const u8_or_u16, recv: ?[]u8_or_u16, deadlineFn: ?DeadlineFn) Timeout!void {
+/// The deadline parameter allows specifying a timeout check function to avoid infinite waiting.
+pub fn transferBlocking(self: SPI, comptime u8_or_u16: type, send: ?[]const u8_or_u16, recv: ?[]u8_or_u16, deadline: time.Deadline) Timeout!void {
     const type_info = @typeInfo(u8_or_u16).int;
     if (type_info.bits != 8 and type_info.bits != 16 or @typeInfo(u8_or_u16).int.signedness != .unsigned) {
         @compileError("Unsupported type, only u8 and u16 are supported");
@@ -298,7 +296,7 @@ pub fn transferBlocking(self: SPI, comptime u8_or_u16: type, send: ?[]const u8_o
             break :blk if (s.len > offset) s[offset] else 0;
         } else 0;
 
-        const v = self.transferWordBlocking(word, deadlineFn) catch |err| {
+        const v = self.transferWordBlocking(word, deadline) catch |err| {
             return err;
         };
 
@@ -309,7 +307,7 @@ pub fn transferBlocking(self: SPI, comptime u8_or_u16: type, send: ?[]const u8_o
         }
     }
 
-    try self.wait(isNotBusy, deadlineFn);
+    try self.wait(isNotBusy, deadline);
 }
 
 inline fn swNssWrite(self: SPI, v: bool) void {
@@ -330,23 +328,21 @@ fn isNotBusy(self: SPI) bool {
     return self.reg.STATR.read().BSY == 0;
 }
 
-fn transferWordBlocking(self: SPI, word: u16, deadlineFn: ?DeadlineFn) Timeout!u16 {
-    try self.wait(isWriteable, deadlineFn);
+fn transferWordBlocking(self: SPI, word: u16, deadline: time.Deadline) Timeout!u16 {
+    try self.wait(isWriteable, deadline);
 
     self.reg.DATAR.raw = word;
 
-    try self.wait(isReadable, deadlineFn);
+    try self.wait(isReadable, deadline);
 
     return @truncate(self.reg.DATAR.raw);
 }
 
 // Wait for a condition to be true.
-fn wait(self: SPI, conditionFn: fn (self: SPI) bool, deadlineFn: ?DeadlineFn) Timeout!void {
+fn wait(self: SPI, conditionFn: fn (self: SPI) bool, deadline: time.Deadline) Timeout!void {
     while (!conditionFn(self)) {
-        if (deadlineFn) |check| {
-            if (check()) {
-                return error.Timeout;
-            }
+        if (deadline.isReached()) {
+            return error.Timeout;
         }
         asm volatile ("" ::: "memory");
     }

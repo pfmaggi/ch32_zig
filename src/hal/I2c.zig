@@ -3,7 +3,6 @@ const config = @import("config");
 const svd = @import("svd");
 
 const time = @import("time.zig");
-const port = @import("port.zig");
 const Pin = @import("Pin.zig");
 
 pub const Config = struct {
@@ -134,9 +133,9 @@ fn configurePins(comptime self: I2C, comptime cfg: Config) void {
         }
     }
 
-    port.enable(pins.scl.port);
+    pins.scl.enablePort();
     pins.scl.asOutput(.{ .speed = .max_50mhz, .mode = .alt_open_drain });
-    port.enable(pins.sda.port);
+    pins.sda.enablePort();
     pins.sda.asOutput(.{ .speed = .max_50mhz, .mode = .alt_open_drain });
 }
 

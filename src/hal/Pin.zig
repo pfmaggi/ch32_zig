@@ -40,7 +40,7 @@ pub fn init(port: svd.peripherals.GPIO, num: u4) Pin {
     return .{ .port = port, .num = num };
 }
 
-pub fn enablePort(self: Pin) void {
+pub inline fn enablePort(self: Pin) void {
     @import("port.zig").enable(self.port);
 }
 
