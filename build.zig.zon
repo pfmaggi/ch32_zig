@@ -13,7 +13,11 @@
         "LICENSE",
     },
     .dependencies = .{
-        .@"tools/minichlink" = .{ .path = "tools/minichlink" },
+        // zig fetch --save=minichlink https://github.com/ghostiam/minichlink-ocd/archive/0d0fea3d1dad37134ee9eb05061f7c8ee59ecd98.zip
+        .minichlink = .{
+            .url = "https://github.com/ghostiam/minichlink-ocd/archive/0d0fea3d1dad37134ee9eb05061f7c8ee59ecd98.zip",
+            .hash = "minichlink-1.0.0-dev-733af6-Yu_TMFZAAAC5a6iUS0vdqly1Lte5UbH3x2XncXGb_sR8",
+        },
         .@"tools/svd4zig" = .{ .path = "tools/svd4zig" },
     },
 }

@@ -2,16 +2,13 @@
 
 > \[!NOTE\]
 > If you are using `nix`, you can simply run `nix develop` in the root of the project, and it will automatically install
-> `zig`, `zigscient`, `minichlink` and `wch-openocd` in your environment.
+> `zig`, `zls`, `zigscient`, `minichlink` and `minichlink-ocd` in your environment.
 
-### Install Zig and Zigscient
+### Install Zig
 
 Currently, the examples are tested with `0.14.0`.\
 Download the latest version from:
 https://ziglang.org/download/
-
-Download the `zigscient` from:
-https://github.com/llogick/zigscient/releases
 
 ### Configure a project
 

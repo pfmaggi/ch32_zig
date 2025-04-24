@@ -28,10 +28,14 @@
       flake = false;
     };
 
-    # https://github.com/cjacker/wch-openocd
-    wch-openocd = {
-      url = "github:cjacker/wch-openocd";
-      flake = false;
+    # https://github.com/ghostiam/minichlink-ocd
+    minichlink-ocd = {
+      url = "github:ghostiam/minichlink-ocd";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        flake-utils.follows = "flake-utils";
+        zig.follows = "zig";
+      };
     };
   };
 
@@ -88,94 +92,7 @@
                 zig build test --cache-dir $(pwd)/.zig-cache --global-cache-dir $(pwd)/.cache -Dcpu=baseline
               '';
             };
-            minichlink = stdenvNoCC.mkDerivation {
-              name = "minichlink";
-              src = ./tools/minichlink;
-              meta.mainProgram = "minichlink";
-              nativeBuildInputs =
-                [
-                  zig
-                ]
-                ++ lib.optionals stdenv.hostPlatform.isLinux [
-                  udev
-                ]
-                ++ lib.optionals stdenv.hostPlatform.isDarwin [
-                  apple-sdk_14
-                ];
-              buildPhase =
-                lib.optionalAttrs stdenv.isDarwin ''
-                  export NIX_CFLAGS_COMPILE="-iframework $SDKROOT/System/Library/Frameworks -isystem $SDKROOT/usr/include $NIX_CFLAGS_COMPILE"
-                  export NIX_LDFLAGS="-L$SDKROOT/usr/lib $NIX_LDFLAGS"
-                ''
-                + ''
-                  mkdir -p .cache
-                  zig build --cache-dir $(pwd)/.zig-cache --global-cache-dir $(pwd)/.cache -Dcpu=baseline --prefix $out
-                '';
-            };
-            # wch-openocd = stdenv.mkDerivation {
-            #   pname = "wch-openocd";
-            #   version = "2024.11.26";
-            #   src = inputs.wch-openocd;
-            #
-            #   nativeBuildInputs = [
-            #     autoconf
-            #     automake
-            #     pkg-config
-            #     libtool
-            #     texinfo
-            #     which
-            #     git
-            #   ];
-            #   buildInputs = [
-            #     hidapi
-            #     libusb1
-            #     tcl
-            #     jimtcl
-            #   ];
-            #
-            #   patchPhase = ''
-            #     rm -rf jimtcl src/jtag/drivers/libjaylink
-            #     mkdir -p jimtcl src/jtag/drivers/libjaylink
-            #   '';
-            #
-            #   preConfigure = ''
-            #     ./bootstrap nosubmodule
-            #   '';
-            #
-            #   configureFlags = [
-            #     "--disable-werror"
-            #     "--disable-internal-jimtcl"
-            #     "--disable-internal-libjaylink"
-            #     "--enable-remote-bitbang"
-            #     "--disable-ftdi"
-            #     "--disable-linuxgpiod"
-            #     "--disable-sysfsgpio"
-            #     "--enable-wlinke"
-            #     "--disable-ch347"
-            #     "--program-prefix=wch-"
-            #   ];
-            #
-            #   enableParallelBuilding = true;
-            #
-            #   NIX_CFLAGS_COMPILE = lib.optionals stdenv.cc.isGNU [
-            #     "-Wno-error=cpp"
-            #     "-Wno-error=strict-prototypes"
-            #   ];
-            #
-            #   postInstall =
-            #     ''
-            #       cp $out/share/openocd/scripts/target/wch-riscv.cfg $out/share/openocd/scripts/board/wch-riscv.cfg
-            #     ''
-            #     + lib.optionalString stdenv.isLinux ''
-            #       mkdir -p "$out/etc/udev/rules.d"
-            #       rules="$out/share/openocd/contrib/60-openocd.rules"
-            #       if [ ! -f "$rules" ]; then
-            #           echo "$rules is missing, must update the Nix file."
-            #           exit 1
-            #       fi
-            #       ln -s "$rules" "$out/etc/udev/rules.d/"
-            #     '';
-            # };
+            minichlink-ocd = inputs.minichlink-ocd.packages.${system}.default;
           }
         )
       ];
@@ -187,8 +104,7 @@
         # Eval the treefmt modules from ./treefmt.nix
         treefmtEval = inputs.treefmt.lib.evalModule pkgs ./treefmt.nix;
         inherit (pkgs) zig;
-        inherit (pkgs) minichlink;
-        # inherit (pkgs) wch-openocd;
+        inherit (pkgs) minichlink-ocd;
 
         # zlsBinName = "zigscient";
         zlsBinName = "zls";
@@ -206,8 +122,7 @@
             jq
             git
             clang
-            minichlink
-            # wch-openocd
+            minichlink-ocd
           ]
           ++ lib.optionals stdenv.isDarwin [
             apple-sdk_14
@@ -268,10 +183,7 @@
 
                 if [[ -f "$IDE_PATH/options/mac/embedded-support.xml" ]]; then
                     echo "Replace openocd path"
-                    xmlstarlet ed -L -u '//application/component[@name="EmbeddedDevelopment"]/option[@name="openOcdLocation"]/@value' -v '${minichlink}/bin/ocd/bin/minichlink-ocd' "$IDE_PATH/options/mac/embedded-support.xml"
-              ''
-              # xmlstarlet ed -L -u '//application/component[@name="EmbeddedDevelopment"]/option[@name="openOcdLocation"]/@value' -v '${wch-openocd}/bin/wch-openocd' "$IDE_PATH/options/mac/embedded-support.xml"
-              ''
+                    xmlstarlet ed -L -u '//application/component[@name="EmbeddedDevelopment"]/option[@name="openOcdLocation"]/@value' -v '${minichlink-ocd}/bin/minichlink-ocd' "$IDE_PATH/options/mac/embedded-support.xml"
                   else
                     echo "Failed replace openocd path. File '$IDE_PATH/options/mac/embedded-support.xml' not found"
                 fi

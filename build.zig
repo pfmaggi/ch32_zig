@@ -227,7 +227,7 @@ fn makeFirmwareSize(step: *std.Build.Step, options: std.Build.Step.MakeOptions) 
 pub fn addMinichlink(b: *std.Build, dep_maybe: ?*std.Build.Dependency, step: *std.Build.Step) void {
     const ch32_builder = if (dep_maybe) |dep| dep.builder else b;
 
-    const minichlink_dep = ch32_builder.dependency("tools/minichlink", .{});
+    const minichlink_dep = ch32_builder.dependency("minichlink", .{});
     const minichlink = minichlink_dep.artifact("minichlink");
 
     if (b.args) |args| {

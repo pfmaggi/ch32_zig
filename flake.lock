@@ -34,6 +34,32 @@
         "type": "github"
       }
     },
+    "minichlink-ocd": {
+      "inputs": {
+        "flake-utils": [
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "zig": [
+          "zig"
+        ]
+      },
+      "locked": {
+        "lastModified": 1745454202,
+        "narHash": "sha256-PNLbF4HJ8ZQqJJx1dBX9nDRgVg+ZcGmlhU7XyJ63smE=",
+        "owner": "ghostiam",
+        "repo": "minichlink-ocd",
+        "rev": "0d0fea3d1dad37134ee9eb05061f7c8ee59ecd98",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ghostiam",
+        "repo": "minichlink-ocd",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1741851582,
@@ -53,9 +79,9 @@
     "root": {
       "inputs": {
         "flake-utils": "flake-utils",
+        "minichlink-ocd": "minichlink-ocd",
         "nixpkgs": "nixpkgs",
         "treefmt": "treefmt",
-        "wch-openocd": "wch-openocd",
         "zig": "zig",
         "zigscient-src": "zigscient-src",
         "zls-src": "zls-src"
@@ -93,22 +119,6 @@
       "original": {
         "owner": "numtide",
         "repo": "treefmt-nix",
-        "type": "github"
-      }
-    },
-    "wch-openocd": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1732695161,
-        "narHash": "sha256-C06PZ/c8XrRc5qxoJRTN4VVcFRV2UJObwQB6l/W3SY8=",
-        "owner": "cjacker",
-        "repo": "wch-openocd",
-        "rev": "2b6802dde74a9560bdfb6eeecb6aff8a13cf8139",
-        "type": "github"
-      },
-      "original": {
-        "owner": "cjacker",
-        "repo": "wch-openocd",
         "type": "github"
       }
     },
