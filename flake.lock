@@ -47,11 +47,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1745454202,
-        "narHash": "sha256-PNLbF4HJ8ZQqJJx1dBX9nDRgVg+ZcGmlhU7XyJ63smE=",
+        "lastModified": 1745457367,
+        "narHash": "sha256-THCyfuZejxB/5APPPb0ZJcgIzdqH/6uZJ1C2IV/KmEo=",
         "owner": "ghostiam",
         "repo": "minichlink-ocd",
-        "rev": "0d0fea3d1dad37134ee9eb05061f7c8ee59ecd98",
+        "rev": "60272938a14171b9a20b4b3e478373064fd82fb9",
         "type": "github"
       },
       "original": {
