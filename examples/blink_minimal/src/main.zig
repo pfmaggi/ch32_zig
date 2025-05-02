@@ -24,14 +24,18 @@ pub fn main() !void {
         // or
         led.toggle();
 
-        dummyLoop(1_000_000);
+        busyDelay(1000);
     }
 }
 
-fn dummyLoop(cnt: u32) void {
+inline fn busyDelay(comptime ms: u32) void {
+    const cpu_frequency = hal.clock.Clocks.default.hb;
+    const cycles_per_ms = cpu_frequency / 1_000;
+    const loop_cycles = if (config.chip.series == .ch32v003) 4 else 3;
+    const limit = cycles_per_ms * ms / loop_cycles;
+
     var i: u32 = 0;
-    while (i < cnt) : (i += 1) {
-        // ZIG please don't optimize this loop away.
+    while (i < limit) : (i += 1) {
         asm volatile ("" ::: "memory");
     }
 }
