@@ -114,10 +114,10 @@ fn systemInit() callconv(.c) void {
     const RCC = svd.peripherals.RCC;
     RCC.CTLR.modify(.{ .HSION = 1 });
 
-    if (config.chip.class != .d8c) {
-        RCC.CFGR0.raw &= 0xF0FF0000;
-    } else {
+    if (config.chip.class == .d8c) {
         RCC.CFGR0.raw &= 0xF8FF0000;
+    } else {
+        RCC.CFGR0.raw &= 0xF0FF0000;
     }
 
     RCC.CTLR.modify(.{ .HSEON = 0, .CSSON = 0 });
