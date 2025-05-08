@@ -138,7 +138,6 @@ test RegisterRW {
         field2: ?u3 = null,
         field3: ?u4 = null,
         field4: ?u5 = null,
-        padding: ?u17 = null,
     };
 
     const TestPeriferalRegister = RegisterRW(TestPeriferal, TestPeriferalNullables);
