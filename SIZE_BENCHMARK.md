@@ -8,9 +8,9 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 1480 | 208 | 0 | 4 | 1844 |
-| ReleaseFast | 156 | 2002 | 204 | 0 | 4 | 2364 |
-| ReleaseSafe | 156 | 9240 | 948 | 0 | 4 | 10344 |
+| ReleaseSmall | 156 | 1506 | 208 | 0 | 4 | 1872 |
+| ReleaseFast | 156 | 2028 | 204 | 0 | 4 | 2388 |
+| ReleaseSafe | 156 | 9266 | 948 | 0 | 4 | 10372 |
 
 
 ## [examples/adc_scan_dma](examples/adc_scan_dma)
@@ -19,9 +19,9 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 1876 | 216 | 0 | 20 | 2248 |
-| ReleaseFast | 156 | 2690 | 208 | 0 | 20 | 3056 |
-| ReleaseSafe | 156 | 9962 | 952 | 0 | 20 | 11072 |
+| ReleaseSmall | 156 | 1902 | 216 | 0 | 20 | 2276 |
+| ReleaseFast | 156 | 2716 | 208 | 0 | 20 | 3080 |
+| ReleaseSafe | 156 | 9988 | 952 | 0 | 20 | 11096 |
 
 
 ## [examples/blink_delay](examples/blink_delay)
@@ -30,28 +30,28 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 402 | 0 | 0 | 4 | 558 |
-| ReleaseFast | 156 | 400 | 0 | 0 | 4 | 556 |
-| ReleaseSafe | 156 | 700 | 0 | 0 | 4 | 856 |
-| Debug | 156 | 2714 | 236 | 0 | 12 | 3108 |
+| ReleaseSmall | 156 | 428 | 0 | 0 | 4 | 584 |
+| ReleaseFast | 156 | 426 | 0 | 0 | 4 | 582 |
+| ReleaseSafe | 156 | 726 | 0 | 0 | 4 | 882 |
+| Debug | 156 | 3174 | 236 | 0 | 12 | 3572 |
 
 ### blink_delay_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 430 | 0 | 0 | 4 | 822 |
-| ReleaseFast | 392 | 408 | 0 | 0 | 4 | 800 |
-| ReleaseSafe | 392 | 454 | 0 | 0 | 4 | 846 |
-| Debug | 392 | 2736 | 244 | 0 | 12 | 3372 |
+| ReleaseSmall | 392 | 436 | 0 | 0 | 4 | 828 |
+| ReleaseFast | 392 | 414 | 0 | 0 | 4 | 806 |
+| ReleaseSafe | 392 | 460 | 0 | 0 | 4 | 852 |
+| Debug | 392 | 3094 | 244 | 0 | 12 | 3732 |
 
 ### blink_delay_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 448 | 0 | 0 | 4 | 864 |
-| ReleaseFast | 416 | 426 | 0 | 0 | 4 | 842 |
-| ReleaseSafe | 416 | 464 | 0 | 0 | 4 | 880 |
-| Debug | 416 | 2814 | 244 | 0 | 12 | 3476 |
+| ReleaseSmall | 416 | 452 | 0 | 0 | 4 | 868 |
+| ReleaseFast | 416 | 430 | 0 | 0 | 4 | 846 |
+| ReleaseSafe | 416 | 468 | 0 | 0 | 4 | 884 |
+| Debug | 416 | 3294 | 244 | 0 | 12 | 3956 |
 
 
 ## [examples/blink_minimal](examples/blink_minimal)
@@ -60,28 +60,28 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 268 | 0 | 0 | 0 | 424 |
-| ReleaseFast | 156 | 302 | 0 | 0 | 0 | 458 |
-| ReleaseSafe | 156 | 304 | 0 | 0 | 0 | 460 |
-| Debug | 156 | 1992 | 224 | 0 | 0 | 2376 |
+| ReleaseSmall | 156 | 294 | 0 | 0 | 0 | 450 |
+| ReleaseFast | 156 | 328 | 0 | 0 | 0 | 484 |
+| ReleaseSafe | 156 | 330 | 0 | 0 | 0 | 486 |
+| Debug | 156 | 2452 | 224 | 0 | 0 | 2832 |
 
 ### blink_minimal_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 318 | 0 | 0 | 0 | 710 |
-| ReleaseFast | 392 | 354 | 0 | 0 | 0 | 746 |
-| ReleaseSafe | 392 | 356 | 0 | 0 | 0 | 748 |
-| Debug | 392 | 2324 | 224 | 0 | 0 | 2944 |
+| ReleaseSmall | 392 | 324 | 0 | 0 | 0 | 716 |
+| ReleaseFast | 392 | 360 | 0 | 0 | 0 | 752 |
+| ReleaseSafe | 392 | 362 | 0 | 0 | 0 | 754 |
+| Debug | 392 | 2682 | 224 | 0 | 0 | 3304 |
 
 ### blink_minimal_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 328 | 0 | 0 | 0 | 744 |
-| ReleaseFast | 416 | 364 | 0 | 0 | 0 | 780 |
-| ReleaseSafe | 416 | 366 | 0 | 0 | 0 | 782 |
-| Debug | 416 | 2402 | 224 | 0 | 0 | 3048 |
+| ReleaseSmall | 416 | 332 | 0 | 0 | 0 | 748 |
+| ReleaseFast | 416 | 368 | 0 | 0 | 0 | 784 |
+| ReleaseSafe | 416 | 370 | 0 | 0 | 0 | 786 |
+| Debug | 416 | 2882 | 224 | 0 | 0 | 3528 |
 
 
 ## [examples/blink_systick_interrupt](examples/blink_systick_interrupt)
@@ -90,28 +90,28 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 366 | 8 | 0 | 0 | 532 |
-| ReleaseFast | 156 | 416 | 8 | 0 | 0 | 580 |
-| ReleaseSafe | 156 | 418 | 8 | 0 | 0 | 584 |
-| Debug | 156 | 2096 | 232 | 0 | 0 | 2488 |
+| ReleaseSmall | 156 | 392 | 8 | 0 | 0 | 556 |
+| ReleaseFast | 156 | 442 | 8 | 0 | 0 | 608 |
+| ReleaseSafe | 156 | 444 | 8 | 0 | 0 | 608 |
+| Debug | 156 | 2556 | 232 | 0 | 0 | 2944 |
 
 ### blink_systick_interrupt_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 390 | 8 | 0 | 0 | 792 |
-| ReleaseFast | 392 | 440 | 8 | 0 | 0 | 840 |
-| ReleaseSafe | 392 | 442 | 8 | 0 | 0 | 844 |
-| Debug | 392 | 2448 | 232 | 0 | 0 | 3072 |
+| ReleaseSmall | 392 | 396 | 8 | 0 | 0 | 796 |
+| ReleaseFast | 392 | 446 | 8 | 0 | 0 | 848 |
+| ReleaseSafe | 392 | 448 | 8 | 0 | 0 | 848 |
+| Debug | 392 | 2806 | 232 | 0 | 0 | 3432 |
 
 ### blink_systick_interrupt_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 412 | 8 | 0 | 0 | 836 |
-| ReleaseFast | 416 | 462 | 8 | 0 | 0 | 888 |
-| ReleaseSafe | 416 | 464 | 8 | 0 | 0 | 888 |
-| Debug | 416 | 2686 | 232 | 0 | 0 | 3336 |
+| ReleaseSmall | 416 | 416 | 8 | 0 | 0 | 840 |
+| ReleaseFast | 416 | 466 | 8 | 0 | 0 | 892 |
+| ReleaseSafe | 416 | 468 | 8 | 0 | 0 | 892 |
+| Debug | 416 | 3166 | 232 | 0 | 0 | 3816 |
 
 
 ## [examples/blink_time_deadline](examples/blink_time_deadline)
@@ -120,28 +120,28 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 832 | 0 | 0 | 8 | 988 |
-| ReleaseFast | 156 | 834 | 0 | 0 | 8 | 990 |
-| ReleaseSafe | 156 | 886 | 0 | 0 | 8 | 1042 |
-| Debug | 156 | 3678 | 264 | 0 | 8 | 4104 |
+| ReleaseSmall | 156 | 858 | 0 | 0 | 8 | 1014 |
+| ReleaseFast | 156 | 860 | 0 | 0 | 8 | 1016 |
+| ReleaseSafe | 156 | 912 | 0 | 0 | 8 | 1068 |
+| Debug | 156 | 4138 | 264 | 0 | 8 | 4560 |
 
 ### blink_time_deadline_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 572 | 0 | 0 | 8 | 964 |
-| ReleaseFast | 392 | 564 | 0 | 0 | 8 | 956 |
-| ReleaseSafe | 392 | 606 | 0 | 0 | 8 | 998 |
-| Debug | 392 | 3668 | 272 | 0 | 8 | 4336 |
+| ReleaseSmall | 392 | 578 | 0 | 0 | 8 | 970 |
+| ReleaseFast | 392 | 570 | 0 | 0 | 8 | 962 |
+| ReleaseSafe | 392 | 612 | 0 | 0 | 8 | 1004 |
+| Debug | 392 | 4026 | 272 | 0 | 8 | 4696 |
 
 ### blink_time_deadline_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 582 | 0 | 0 | 8 | 998 |
-| ReleaseFast | 416 | 574 | 0 | 0 | 8 | 990 |
-| ReleaseSafe | 416 | 616 | 0 | 0 | 8 | 1032 |
-| Debug | 416 | 3746 | 272 | 0 | 8 | 4440 |
+| ReleaseSmall | 416 | 586 | 0 | 0 | 8 | 1002 |
+| ReleaseFast | 416 | 578 | 0 | 0 | 8 | 994 |
+| ReleaseSafe | 416 | 620 | 0 | 0 | 8 | 1036 |
+| Debug | 416 | 4226 | 272 | 0 | 8 | 4920 |
 
 
 ## [examples/blink_time_delay](examples/blink_time_delay)
@@ -150,28 +150,28 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 462 | 0 | 0 | 8 | 618 |
-| ReleaseFast | 156 | 444 | 0 | 0 | 8 | 600 |
-| ReleaseSafe | 156 | 464 | 0 | 0 | 8 | 620 |
-| Debug | 156 | 2552 | 236 | 0 | 8 | 2948 |
+| ReleaseSmall | 156 | 488 | 0 | 0 | 8 | 644 |
+| ReleaseFast | 156 | 470 | 0 | 0 | 8 | 626 |
+| ReleaseSafe | 156 | 490 | 0 | 0 | 8 | 646 |
+| Debug | 156 | 3012 | 236 | 0 | 8 | 3404 |
 
 ### blink_time_delay_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 512 | 0 | 0 | 8 | 904 |
-| ReleaseFast | 392 | 496 | 0 | 0 | 8 | 888 |
-| ReleaseSafe | 392 | 516 | 0 | 0 | 8 | 908 |
-| Debug | 392 | 2876 | 244 | 0 | 8 | 3516 |
+| ReleaseSmall | 392 | 518 | 0 | 0 | 8 | 910 |
+| ReleaseFast | 392 | 502 | 0 | 0 | 8 | 894 |
+| ReleaseSafe | 392 | 522 | 0 | 0 | 8 | 914 |
+| Debug | 392 | 3234 | 244 | 0 | 8 | 3876 |
 
 ### blink_time_delay_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 522 | 0 | 0 | 8 | 938 |
-| ReleaseFast | 416 | 506 | 0 | 0 | 8 | 922 |
-| ReleaseSafe | 416 | 526 | 0 | 0 | 8 | 942 |
-| Debug | 416 | 2954 | 244 | 0 | 8 | 3620 |
+| ReleaseSmall | 416 | 526 | 0 | 0 | 8 | 942 |
+| ReleaseFast | 416 | 510 | 0 | 0 | 8 | 926 |
+| ReleaseSafe | 416 | 530 | 0 | 0 | 8 | 946 |
+| Debug | 416 | 3434 | 244 | 0 | 8 | 4100 |
 
 
 ## [examples/debug_sdi_print](examples/debug_sdi_print)
@@ -180,27 +180,27 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 1018 | 26 | 0 | 4 | 1200 |
-| ReleaseFast | 156 | 1440 | 26 | 0 | 4 | 1622 |
-| ReleaseSafe | 156 | 9544 | 700 | 0 | 4 | 10400 |
+| ReleaseSmall | 156 | 1044 | 26 | 0 | 4 | 1226 |
+| ReleaseFast | 156 | 1466 | 26 | 0 | 4 | 1648 |
+| ReleaseSafe | 156 | 9570 | 700 | 0 | 4 | 10428 |
 
 ### debug_sdi_print_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 680 | 26 | 0 | 4 | 1098 |
-| ReleaseFast | 392 | 1048 | 26 | 0 | 4 | 1466 |
-| ReleaseSafe | 392 | 7650 | 700 | 0 | 4 | 8744 |
-| Debug | 392 | 19024 | 1184 | 0 | 12 | 20600 |
+| ReleaseSmall | 392 | 686 | 26 | 0 | 4 | 1104 |
+| ReleaseFast | 392 | 1054 | 26 | 0 | 4 | 1472 |
+| ReleaseSafe | 392 | 7656 | 700 | 0 | 4 | 8748 |
+| Debug | 392 | 19382 | 1184 | 0 | 12 | 20960 |
 
 ### debug_sdi_print_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 702 | 26 | 0 | 4 | 1144 |
-| ReleaseFast | 416 | 1070 | 26 | 0 | 4 | 1512 |
-| ReleaseSafe | 416 | 7672 | 700 | 0 | 4 | 8788 |
-| Debug | 416 | 19102 | 1184 | 0 | 12 | 20704 |
+| ReleaseSmall | 416 | 706 | 26 | 0 | 4 | 1148 |
+| ReleaseFast | 416 | 1074 | 26 | 0 | 4 | 1516 |
+| ReleaseSafe | 416 | 7676 | 700 | 0 | 4 | 8792 |
+| Debug | 416 | 19582 | 1184 | 0 | 12 | 21184 |
 
 
 ## [examples/debug_sdi_print_logger](examples/debug_sdi_print_logger)
@@ -209,27 +209,27 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 3724 | 319 | 0 | 17 | 4199 |
-| ReleaseFast | 156 | 5236 | 519 | 0 | 17 | 5911 |
-| ReleaseSafe | 156 | 10378 | 1132 | 0 | 16 | 11668 |
+| ReleaseSmall | 156 | 3726 | 319 | 0 | 17 | 4207 |
+| ReleaseFast | 156 | 5244 | 519 | 0 | 17 | 5919 |
+| ReleaseSafe | 156 | 10404 | 1132 | 0 | 16 | 11692 |
 
 ### debug_sdi_print_logger_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 3324 | 319 | 0 | 17 | 4039 |
-| ReleaseFast | 392 | 4366 | 519 | 0 | 17 | 5279 |
-| ReleaseSafe | 392 | 8548 | 1132 | 0 | 16 | 10076 |
-| Debug | 392 | 28596 | 1536 | 0 | 24 | 30528 |
+| ReleaseSmall | 392 | 3328 | 319 | 0 | 17 | 4039 |
+| ReleaseFast | 392 | 4374 | 519 | 0 | 17 | 5287 |
+| ReleaseSafe | 392 | 8554 | 1132 | 0 | 16 | 10084 |
+| Debug | 392 | 28954 | 1536 | 0 | 24 | 30888 |
 
 ### debug_sdi_print_logger_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 3386 | 319 | 0 | 17 | 4127 |
-| ReleaseFast | 416 | 4428 | 519 | 0 | 17 | 5367 |
-| ReleaseSafe | 416 | 8610 | 1132 | 0 | 16 | 10164 |
-| Debug | 416 | 28674 | 1536 | 0 | 24 | 30632 |
+| ReleaseSmall | 416 | 3388 | 319 | 0 | 17 | 4127 |
+| ReleaseFast | 416 | 4434 | 519 | 0 | 17 | 5375 |
+| ReleaseSafe | 416 | 8614 | 1132 | 0 | 16 | 10164 |
+| Debug | 416 | 29154 | 1536 | 0 | 24 | 31112 |
 
 
 ## [examples/i2c_blocking](examples/i2c_blocking)
@@ -238,17 +238,17 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 4056 | 856 | 0 | 8 | 5072 |
-| ReleaseFast | 156 | 5886 | 836 | 0 | 8 | 6884 |
-| ReleaseSafe | 156 | 11354 | 1168 | 0 | 8 | 12680 |
+| ReleaseSmall | 156 | 4082 | 832 | 0 | 8 | 5072 |
+| ReleaseFast | 156 | 5914 | 812 | 0 | 8 | 6884 |
+| ReleaseSafe | 156 | 11380 | 1168 | 0 | 8 | 12704 |
 
 ### i2c_blocking_ch32v003_slave.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 4492 | 1008 | 0 | 8 | 5656 |
-| ReleaseFast | 156 | 6190 | 1196 | 0 | 8 | 7548 |
-| ReleaseSafe | 156 | 11736 | 1328 | 0 | 8 | 13224 |
+| ReleaseSmall | 156 | 4518 | 984 | 0 | 8 | 5664 |
+| ReleaseFast | 156 | 6218 | 1172 | 0 | 8 | 7548 |
+| ReleaseSafe | 156 | 11762 | 1328 | 0 | 8 | 13248 |
 
 
 ## [examples/i2c_bmi160](examples/i2c_bmi160)
@@ -257,8 +257,8 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 6954 | 1188 | 0 | 17 | 8300 |
-| ReleaseFast | 156 | 10754 | 1376 | 0 | 17 | 12288 |
+| ReleaseSmall | 156 | 6978 | 1172 | 0 | 17 | 8308 |
+| ReleaseFast | 156 | 10774 | 1360 | 0 | 17 | 12296 |
 
 
 ## [examples/mco](examples/mco)
@@ -267,28 +267,28 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 406 | 2 | 0 | 0 | 564 |
-| ReleaseFast | 156 | 454 | 2 | 0 | 0 | 612 |
-| ReleaseSafe | 156 | 528 | 168 | 0 | 0 | 852 |
-| Debug | 156 | 5304 | 416 | 0 | 0 | 5880 |
+| ReleaseSmall | 156 | 432 | 2 | 0 | 0 | 590 |
+| ReleaseFast | 156 | 480 | 2 | 0 | 0 | 638 |
+| ReleaseSafe | 156 | 554 | 168 | 0 | 0 | 880 |
+| Debug | 156 | 5764 | 416 | 0 | 0 | 6336 |
 
 ### mco_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 444 | 2 | 0 | 0 | 838 |
-| ReleaseFast | 392 | 492 | 2 | 0 | 0 | 886 |
-| ReleaseSafe | 392 | 758 | 300 | 0 | 0 | 1452 |
-| Debug | 392 | 7334 | 614 | 0 | 0 | 8342 |
+| ReleaseSmall | 392 | 450 | 2 | 0 | 0 | 844 |
+| ReleaseFast | 392 | 498 | 2 | 0 | 0 | 892 |
+| ReleaseSafe | 392 | 764 | 300 | 0 | 0 | 1456 |
+| Debug | 392 | 7692 | 614 | 0 | 0 | 8702 |
 
 ### mco_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 460 | 2 | 0 | 0 | 878 |
-| ReleaseFast | 416 | 506 | 2 | 0 | 0 | 924 |
-| ReleaseSafe | 416 | 772 | 300 | 0 | 0 | 1488 |
-| Debug | 416 | 7396 | 614 | 0 | 0 | 8430 |
+| ReleaseSmall | 416 | 464 | 2 | 0 | 0 | 882 |
+| ReleaseFast | 416 | 510 | 2 | 0 | 0 | 928 |
+| ReleaseSafe | 416 | 776 | 300 | 0 | 0 | 1492 |
+| Debug | 416 | 7876 | 614 | 0 | 0 | 8910 |
 
 
 ## [examples/spi](examples/spi)
@@ -297,51 +297,51 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 2128 | 544 | 0 | 8 | 2832 |
-| ReleaseFast | 156 | 2872 | 504 | 0 | 8 | 3536 |
-| ReleaseSafe | 156 | 10038 | 1112 | 0 | 8 | 11312 |
+| ReleaseSmall | 156 | 2156 | 488 | 0 | 8 | 2800 |
+| ReleaseFast | 156 | 2900 | 448 | 0 | 8 | 3504 |
+| ReleaseSafe | 156 | 10064 | 1112 | 0 | 8 | 11336 |
 
 ### spi_ch32v003_slave.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 2112 | 548 | 0 | 8 | 2816 |
-| ReleaseFast | 156 | 2788 | 496 | 0 | 8 | 3440 |
-| ReleaseSafe | 156 | 9922 | 1096 | 0 | 8 | 11176 |
+| ReleaseSmall | 156 | 2140 | 492 | 0 | 8 | 2788 |
+| ReleaseFast | 156 | 2816 | 432 | 0 | 8 | 3408 |
+| ReleaseSafe | 156 | 9948 | 1096 | 0 | 8 | 11200 |
 
 ### spi_ch32v20x_master.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 2042 | 732 | 0 | 8 | 3172 |
-| ReleaseFast | 392 | 2716 | 692 | 0 | 8 | 3804 |
-| ReleaseSafe | 392 | 8594 | 1300 | 0 | 8 | 10292 |
+| ReleaseSmall | 392 | 2050 | 676 | 0 | 8 | 3124 |
+| ReleaseFast | 392 | 2732 | 636 | 0 | 8 | 3764 |
+| ReleaseSafe | 392 | 8600 | 1300 | 0 | 8 | 10292 |
 
 ### spi_ch32v20x_slave.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 2038 | 732 | 0 | 8 | 3164 |
-| ReleaseFast | 392 | 2654 | 676 | 0 | 8 | 3724 |
-| ReleaseSafe | 392 | 8540 | 1284 | 0 | 8 | 10220 |
+| ReleaseSmall | 392 | 2046 | 676 | 0 | 8 | 3116 |
+| ReleaseFast | 392 | 2670 | 620 | 0 | 8 | 3684 |
+| ReleaseSafe | 392 | 8546 | 1284 | 0 | 8 | 10228 |
 
 ### spi_ch32v30x_master.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 2056 | 732 | 0 | 8 | 3204 |
-| ReleaseFast | 416 | 2730 | 692 | 0 | 8 | 3844 |
-| ReleaseSafe | 416 | 8608 | 1300 | 0 | 8 | 10324 |
-| Debug | 416 | 35934 | 2068 | 0 | 8 | 38420 |
+| ReleaseSmall | 416 | 2062 | 676 | 0 | 8 | 3156 |
+| ReleaseFast | 416 | 2744 | 636 | 0 | 8 | 3796 |
+| ReleaseSafe | 416 | 8612 | 1300 | 0 | 8 | 10332 |
+| Debug | 416 | 36414 | 2068 | 0 | 8 | 38900 |
 
 ### spi_ch32v30x_slave.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 2052 | 732 | 0 | 8 | 3200 |
-| ReleaseFast | 416 | 2668 | 676 | 0 | 8 | 3764 |
-| ReleaseSafe | 416 | 8554 | 1284 | 0 | 8 | 10260 |
-| Debug | 416 | 35830 | 2044 | 0 | 8 | 38292 |
+| ReleaseSmall | 416 | 2058 | 676 | 0 | 8 | 3152 |
+| ReleaseFast | 416 | 2682 | 620 | 0 | 8 | 3724 |
+| ReleaseSafe | 416 | 8558 | 1284 | 0 | 8 | 10260 |
+| Debug | 416 | 36310 | 2044 | 0 | 8 | 38772 |
 
 
 ## [examples/uart](examples/uart)
@@ -350,27 +350,27 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 1958 | 416 | 0 | 8 | 2532 |
-| ReleaseFast | 156 | 2432 | 376 | 0 | 8 | 2964 |
-| ReleaseSafe | 156 | 3122 | 240 | 0 | 8 | 3520 |
+| ReleaseSmall | 156 | 1984 | 360 | 0 | 8 | 2500 |
+| ReleaseFast | 156 | 2458 | 316 | 0 | 8 | 2932 |
+| ReleaseSafe | 156 | 3148 | 240 | 0 | 8 | 3544 |
 
 ### uart_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 1798 | 596 | 0 | 8 | 2788 |
-| ReleaseFast | 392 | 2150 | 556 | 0 | 8 | 3100 |
-| ReleaseSafe | 392 | 2594 | 420 | 0 | 8 | 3408 |
-| Debug | 392 | 30012 | 1796 | 0 | 8 | 32204 |
+| ReleaseSmall | 392 | 1804 | 540 | 0 | 8 | 2736 |
+| ReleaseFast | 392 | 2156 | 496 | 0 | 8 | 3044 |
+| ReleaseSafe | 392 | 2600 | 420 | 0 | 8 | 3412 |
+| Debug | 392 | 30370 | 1796 | 0 | 8 | 32564 |
 
 ### uart_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 1812 | 596 | 0 | 8 | 2824 |
-| ReleaseFast | 416 | 2164 | 556 | 0 | 8 | 3136 |
-| ReleaseSafe | 416 | 2608 | 420 | 0 | 8 | 3444 |
-| Debug | 416 | 30074 | 1796 | 0 | 8 | 32292 |
+| ReleaseSmall | 416 | 1816 | 540 | 0 | 8 | 2772 |
+| ReleaseFast | 416 | 2168 | 496 | 0 | 8 | 3080 |
+| ReleaseSafe | 416 | 2612 | 420 | 0 | 8 | 3448 |
+| Debug | 416 | 30554 | 1796 | 0 | 8 | 32772 |
 
 
 ## [examples/uart_dma_tx](examples/uart_dma_tx)
@@ -379,27 +379,27 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 1324 | 212 | 0 | 4 | 1692 |
-| ReleaseFast | 156 | 1802 | 212 | 0 | 4 | 2172 |
-| ReleaseSafe | 156 | 3104 | 228 | 0 | 4 | 3488 |
+| ReleaseSmall | 156 | 1350 | 212 | 0 | 4 | 1720 |
+| ReleaseFast | 156 | 1828 | 212 | 0 | 4 | 2196 |
+| ReleaseSafe | 156 | 3130 | 228 | 0 | 4 | 3516 |
 
 ### uart_dma_tx_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 1204 | 392 | 0 | 4 | 1988 |
-| ReleaseFast | 392 | 1594 | 392 | 0 | 4 | 2380 |
-| ReleaseSafe | 392 | 2484 | 408 | 0 | 4 | 3284 |
-| Debug | 392 | 29054 | 1740 | 0 | 12 | 31188 |
+| ReleaseSmall | 392 | 1210 | 392 | 0 | 4 | 1996 |
+| ReleaseFast | 392 | 1600 | 392 | 0 | 4 | 2384 |
+| ReleaseSafe | 392 | 2490 | 408 | 0 | 4 | 3292 |
+| Debug | 392 | 29412 | 1740 | 0 | 12 | 31548 |
 
 ### uart_dma_tx_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 1218 | 392 | 0 | 4 | 2028 |
-| ReleaseFast | 416 | 1608 | 392 | 0 | 4 | 2416 |
-| ReleaseSafe | 416 | 2498 | 408 | 0 | 4 | 3324 |
-| Debug | 416 | 29116 | 1740 | 0 | 12 | 31276 |
+| ReleaseSmall | 416 | 1222 | 392 | 0 | 4 | 2032 |
+| ReleaseFast | 416 | 1612 | 392 | 0 | 4 | 2420 |
+| ReleaseSafe | 416 | 2502 | 408 | 0 | 4 | 3328 |
+| Debug | 416 | 29596 | 1740 | 0 | 12 | 31756 |
 
 
 ## [examples/uart_dma_tx_irq](examples/uart_dma_tx_irq)
@@ -408,26 +408,26 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 1462 | 220 | 0 | 4 | 1840 |
-| ReleaseFast | 156 | 1954 | 220 | 0 | 4 | 2332 |
-| ReleaseSafe | 156 | 3254 | 236 | 0 | 4 | 3648 |
+| ReleaseSmall | 156 | 1488 | 220 | 0 | 4 | 1864 |
+| ReleaseFast | 156 | 1980 | 220 | 0 | 4 | 2356 |
+| ReleaseSafe | 156 | 3280 | 236 | 0 | 4 | 3672 |
 
 ### uart_dma_tx_irq_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 1302 | 400 | 0 | 4 | 2096 |
-| ReleaseFast | 392 | 1776 | 400 | 0 | 4 | 2568 |
-| ReleaseSafe | 392 | 2666 | 416 | 0 | 4 | 3476 |
+| ReleaseSmall | 392 | 1308 | 400 | 0 | 4 | 2100 |
+| ReleaseFast | 392 | 1782 | 400 | 0 | 4 | 2576 |
+| ReleaseSafe | 392 | 2672 | 416 | 0 | 4 | 3480 |
 
 ### uart_dma_tx_irq_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 1316 | 400 | 0 | 4 | 2132 |
-| ReleaseFast | 416 | 1790 | 400 | 0 | 4 | 2608 |
-| ReleaseSafe | 416 | 2680 | 416 | 0 | 4 | 3512 |
-| Debug | 416 | 32228 | 1772 | 0 | 12 | 34420 |
+| ReleaseSmall | 416 | 1320 | 400 | 0 | 4 | 2136 |
+| ReleaseFast | 416 | 1794 | 400 | 0 | 4 | 2612 |
+| ReleaseSafe | 416 | 2684 | 416 | 0 | 4 | 3516 |
+| Debug | 416 | 32708 | 1772 | 0 | 12 | 34900 |
 
 
 ## [examples/uart_echo](examples/uart_echo)
@@ -436,26 +436,26 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 1752 | 456 | 0 | 8 | 2364 |
-| ReleaseFast | 156 | 1674 | 448 | 0 | 8 | 2280 |
-| ReleaseSafe | 156 | 1574 | 240 | 0 | 8 | 1972 |
+| ReleaseSmall | 156 | 1770 | 400 | 0 | 8 | 2328 |
+| ReleaseFast | 156 | 1700 | 392 | 0 | 8 | 2248 |
+| ReleaseSafe | 156 | 1600 | 240 | 0 | 8 | 1996 |
 
 ### uart_echo_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 1692 | 636 | 0 | 8 | 2720 |
-| ReleaseFast | 392 | 1572 | 628 | 0 | 8 | 2592 |
-| ReleaseSafe | 392 | 1510 | 420 | 0 | 8 | 2324 |
+| ReleaseSmall | 392 | 1690 | 580 | 0 | 8 | 2664 |
+| ReleaseFast | 392 | 1578 | 572 | 0 | 8 | 2544 |
+| ReleaseSafe | 392 | 1516 | 420 | 0 | 8 | 2328 |
 
 ### uart_echo_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 1706 | 636 | 0 | 8 | 2760 |
-| ReleaseFast | 416 | 1586 | 628 | 0 | 8 | 2632 |
-| ReleaseSafe | 416 | 1524 | 420 | 0 | 8 | 2360 |
-| Debug | 416 | 33540 | 1960 | 0 | 8 | 35920 |
+| ReleaseSmall | 416 | 1702 | 580 | 0 | 8 | 2700 |
+| ReleaseFast | 416 | 1590 | 572 | 0 | 8 | 2580 |
+| ReleaseSafe | 416 | 1528 | 420 | 0 | 8 | 2364 |
+| Debug | 416 | 34020 | 1960 | 0 | 8 | 36400 |
 
 
 ## [examples/uart_logger](examples/uart_logger)
@@ -464,26 +464,26 @@ This document contains the size in bytes of the firmware for each optimize mode.
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 156 | 4144 | 520 | 0 | 16 | 4824 |
-| ReleaseFast | 156 | 5610 | 720 | 0 | 16 | 6488 |
-| ReleaseSafe | 156 | 10262 | 1432 | 0 | 16 | 11856 |
+| ReleaseSmall | 156 | 4168 | 520 | 0 | 16 | 4848 |
+| ReleaseFast | 156 | 5634 | 720 | 0 | 16 | 6512 |
+| ReleaseSafe | 156 | 10288 | 1432 | 0 | 16 | 11880 |
 
 ### uart_logger_ch32v20x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 392 | 3908 | 704 | 0 | 16 | 5008 |
-| ReleaseFast | 392 | 4998 | 904 | 0 | 16 | 6296 |
-| ReleaseSafe | 392 | 8930 | 1612 | 0 | 16 | 10940 |
+| ReleaseSmall | 392 | 3912 | 704 | 0 | 16 | 5008 |
+| ReleaseFast | 392 | 5002 | 904 | 0 | 16 | 6304 |
+| ReleaseSafe | 392 | 8936 | 1612 | 0 | 16 | 10940 |
 
 ### uart_logger_ch32v30x.elf 
 
 | Mode | .init | .text | .rodata | .data | .bss | Total |
 |--------|--------|--------|--------|--------|--------|--------|
-| ReleaseSmall | 416 | 3962 | 704 | 0 | 16 | 5088 |
-| ReleaseFast | 416 | 5052 | 904 | 0 | 16 | 6376 |
-| ReleaseSafe | 416 | 8984 | 1612 | 0 | 16 | 11012 |
-| Debug | 416 | 37212 | 2084 | 0 | 20 | 39716 |
+| ReleaseSmall | 416 | 3964 | 704 | 0 | 16 | 5088 |
+| ReleaseFast | 416 | 5054 | 904 | 0 | 16 | 6376 |
+| ReleaseSafe | 416 | 8988 | 1612 | 0 | 16 | 11020 |
+| Debug | 416 | 37692 | 2084 | 0 | 20 | 40196 |
 
 
 
