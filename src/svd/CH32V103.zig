@@ -11575,8 +11575,6 @@ pub const nullable_types = struct {
 };
 
 pub const interrupts = enum(u32) {
-    /// Reset
-    Reset = 1,
     /// Non-maskable interrupt
     NMI = 2,
     /// Exception interrupt
@@ -11670,8 +11668,6 @@ pub const interrupts = enum(u32) {
         const call_conv: @import("std").builtin.CallingConvention = if (@import("builtin").cpu.arch != .riscv32) .c else .{ .riscv32_interrupt = .{ .mode = .machine } };
         const Handler = *const fn () callconv(call_conv) void;
 
-        /// 1: Reset
-        Reset: ?Handler = null,
         /// 2: Non-maskable interrupt
         NMI: ?Handler = null,
         /// 3: Exception interrupt

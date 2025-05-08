@@ -17,7 +17,7 @@ comptime {
             .name = "_start",
         });
 
-        @export(&exported_vector_table, .{
+        @export(&vector_table, .{
             .name = "vector_table",
             .section = ".init",
         });
@@ -62,5 +62,58 @@ const defaultPanic = if (ch32_options.logFn == hal.log.nopFn) hal.panic.initSile
 pub const panic = if (@hasDecl(app, "panic")) app.panic else defaultPanic;
 
 pub const interrupts: hal.interrupts.VectorTable = if (@hasDecl(app, "interrupts")) app.interrupts else .{};
+pub const InterruptHandler = *const fn () callconv(hal.interrupts.call_conv) void;
 
-const exported_vector_table = hal.interrupts.generateExportedVectorTable(interrupts, ch32_options.unhandledInterruptFn);
+// Vector table
+
+const vector_table_offset = 1; // First entry is reserved for the _reset_vector.
+
+fn vectorTableSize() usize {
+    const type_info = @typeInfo(svd.interrupts);
+
+    const interrupts_list = type_info.@"enum".fields;
+    const last_interrupt = interrupts_list[interrupts_list.len - 1];
+    const last_interrupt_idx = last_interrupt.value;
+
+    return last_interrupt_idx + 1 - vector_table_offset;
+}
+
+pub fn generateVectorTable(handlers: hal.interrupts.VectorTable, unhandled: InterruptHandler) [vectorTableSize()]InterruptHandler {
+    @setEvalBranchQuota(100_000);
+
+    const type_info = @typeInfo(svd.interrupts);
+    const interrupts_list = type_info.@"enum".fields;
+
+    var temp: [vectorTableSize()]InterruptHandler = @splat(unhandled);
+    for (&temp, vector_table_offset..) |_, idx| {
+        // Find name of the interrupt by its number.
+        var name: ?[:0]const u8 = null;
+        for (interrupts_list) |decl| {
+            if (decl.value == idx) {
+                name = decl.name;
+                break;
+            }
+        }
+
+        if (name) |n| {
+            if (@field(handlers, n)) |h| {
+                temp[idx - vector_table_offset] = h;
+            }
+        }
+    }
+
+    return temp;
+}
+
+const vector_table = generateVectorTable(interrupts, ch32_options.unhandledInterruptFn);
+
+test generateVectorTable {
+    const v = comptime generateVectorTable(.{
+        .SysTick = testSysTickHandler,
+    }, hal.interrupts.unhandled);
+    try std.testing.expectEqual(hal.interrupts.unhandled, v[@intFromEnum(svd.interrupts.NMI) - vector_table_offset]);
+    try std.testing.expectEqual(hal.interrupts.unhandled, v[@intFromEnum(svd.interrupts.HardFault) - vector_table_offset]);
+    try std.testing.expectEqual(testSysTickHandler, v[@intFromEnum(svd.interrupts.SysTick) - vector_table_offset]);
+}
+
+fn testSysTickHandler() callconv(hal.interrupts.call_conv) void {}

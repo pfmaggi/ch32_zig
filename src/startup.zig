@@ -111,33 +111,109 @@ pub fn start() callconv(.naked) void {
 }
 
 fn systemInit() callconv(.c) void {
+    if (config.chip.series == .ch32v003) {
+        svd.peripherals.FLASH.ACTLR.modify(.{ .LATENCY = 0 });
+    }
+
     const RCC = svd.peripherals.RCC;
+
+    // RCC->CTLR |= (uint32_t)0x00000001;
     RCC.CTLR.modify(.{ .HSION = 1 });
 
-    if (config.chip.class == .d8c) {
-        RCC.CFGR0.raw &= 0xF8FF0000;
+    if (config.chip.series == .ch32v30x and config.chip.class == .d8c) {
+        // RCC->CFGR0 &= (uint32_t)0xF0FF0000;
+        RCC.CFGR0.modify(.{
+            .SW = 0,
+            .SWS = 0,
+            .HPRE = 0,
+            .PPRE1 = 0,
+            .PPRE2 = 0,
+            .ADCPRE = 0,
+            .MCO = 0,
+        });
     } else {
-        RCC.CFGR0.raw &= 0xF0FF0000;
+        // RCC->CFGR0 &= (uint32_t)0xF8FF0000;
+        RCC.CFGR0.modify(.{
+            .SW = 0,
+            .SWS = 0,
+            .HPRE = 0,
+            .ADCPRE = 0,
+            .MCO = 0,
+        });
     }
 
-    RCC.CTLR.modify(.{ .HSEON = 0, .CSSON = 0 });
+    // RCC->CTLR &= (uint32_t)0xFEF6FFFF;
+    RCC.CTLR.modify(.{ .HSEON = 0, .CSSON = 0, .PLLON = 0 });
+    // RCC->CTLR &= (uint32_t)0xFFFBFFFF;
     RCC.CTLR.modify(.{ .HSEBYP = 0 });
 
-    switch (config.chip.series) {
-        .ch32v30x => {
-            RCC.CFGR0.raw &= 0xFF80FFFF;
-        },
-        else => {
-            RCC.CFGR0.raw &= 0xFFFEFFFF;
-        },
+    if (config.chip.series == .ch32v003) {
+        // RCC->CFGR0 &= (uint32_t)0xFFFEFFFF;
+        RCC.CFGR0.modify(.{ .PLLSRC = 0 });
+    } else {
+        // RCC->CFGR0 &= (uint32_t)0xFF00FFFF;
+        RCC.CFGR0.modify(.{ .PLLSRC = 0, .PLLXTPRE = 0, .PLLMUL = 0, .USBPRE = 0 });
     }
 
     if (config.chip.class == .d8c) {
-        RCC.CTLR.raw &= 0xEBFFFFFF;
-        RCC.INTR.raw = 0x00FF0000;
-        // RCC.CFGR2.raw = 0x00000000; // FIXME register not exist for v003
+        // RCC->CTLR &= (uint32_t)0xEBFFFFFF;
+        RCC.CTLR.modify(.{ .PLL2ON = 0 });
+        // RCC->INTR = 0x00FF0000;
+        RCC.INTR.write(.{
+            // Read-only ready flags.
+            .LSIRDYF = 0,
+            .LSERDYF = 0,
+            .HSIRDYF = 0,
+            .HSERDYF = 0,
+            .PLLRDYF = 0,
+            .PLL2RDYF = 0,
+            .PLL3RDYF = 0,
+            .CSSF = 0,
+            // Disable ready interrupts.
+            .LSIRDYIE = 0,
+            .LSERDYIE = 0,
+            .HSIRDYIE = 0,
+            .HSERDYIE = 0,
+            .PLLRDYIE = 0,
+            .PLL2RDYIE = 0,
+            .PLL3RDYIE = 0,
+            // Clear ready flags.
+            .LSIRDYC = 1,
+            .LSERDYC = 1,
+            .HSIRDYC = 1,
+            .HSERDYC = 1,
+            .PLLRDYC = 1,
+            .PLL2RDYC = 1,
+            .PLL3RDYC = 1,
+            .CSSC = 1,
+        });
+        RCC.CFGR2.raw = 0x00000000;
     } else {
-        RCC.INTR.raw = 0x009F0000;
+        // RCC->INTR = 0x009F0000;
+        RCC.INTR.write(.{
+            // Read-only ready flags.
+            .LSIRDYF = 0,
+            .HSIRDYF = 0,
+            .HSERDYF = 0,
+            .PLLRDYF = 0,
+            .CSSF = 0,
+            // Disable ready interrupts.
+            .LSIRDYIE = 0,
+            .HSIRDYIE = 0,
+            .HSERDYIE = 0,
+            .PLLRDYIE = 0,
+            // Clear ready flags.
+            .LSIRDYC = 1,
+            .HSIRDYC = 1,
+            .HSERDYC = 1,
+            .PLLRDYC = 1,
+            .CSSC = 1,
+        });
+    }
+
+    if (config.chip.series == .ch32v003) {
+        // Adjusts the Internal High Speed oscillator (HSI) calibration value.
+        RCC.CTLR.modify(.{ .HSITRIM = 0x10 });
     }
 }
 
