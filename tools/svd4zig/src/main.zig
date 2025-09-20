@@ -149,13 +149,17 @@ pub fn main() anyerror!void {
 
     const svd_file_name = args.next() orelse return error.MandatoryFilenameArgumentNotGiven;
     const file = try std.fs.cwd().openFile(svd_file_name, .{});
-    const stream = &file.reader();
+    const stream = &file.deprecatedReader();
 
-    var out_stream: std.io.AnyWriter = std.io.getStdOut().writer().any();
+    var stdout_buffer: [1024]u8 = undefined;
+    var out_stream = std.fs.File.stdout().writer(&stdout_buffer);
+    // const stdout = &stdout_writer.interface;
+    //     var out_stream: std.io.AnyWriter = std.io.getStdOut().writer().any();
     const out_file_name = args.next();
     if (out_file_name) |file_name| {
+        var out_buffer: [1024]u8 = undefined;
         const out_file = try std.fs.cwd().createFile(file_name, .{});
-        out_stream = out_file.writer().any();
+        out_stream = out_file.writer(&out_buffer);
     }
 
     var state = SvdParseState.Device;
@@ -468,8 +472,8 @@ pub fn main() anyerror!void {
         }
     }
     if (state == .Finished) {
-        try out_stream.print("{s}\n", .{register_def});
-        try out_stream.print("{}\n", .{dev});
+        try out_stream.interface.print("{s}\n", .{register_def});
+        try out_stream.interface.print("{any}\n", .{dev});
     } else {
         return error.InvalidXML;
     }

@@ -1,6 +1,6 @@
 const std = @import("std");
 const builtin = @import("builtin");
-const ArrayList = std.ArrayList;
+// const ArrayList = std.ArrayList;
 const Allocator = std.mem.Allocator;
 const AutoHashMap = std.AutoHashMap;
 const warn = std.debug.warn;
@@ -9,9 +9,9 @@ pub const DeduplMap = std.StringHashMap(u32);
 
 /// Top Level
 pub const Device = struct {
-    name: ArrayList(u8),
-    version: ArrayList(u8),
-    description: ArrayList(u8),
+    name: std.array_list.Managed(u8),
+    version: std.array_list.Managed(u8),
+    description: std.array_list.Managed(u8),
     cpu: ?Cpu,
 
     /// Bus Interface Properties
@@ -33,11 +33,11 @@ pub const Device = struct {
     const Self = @This();
 
     pub fn init(allocator: Allocator) !Self {
-        var name = ArrayList(u8).init(allocator);
+        var name = std.array_list.Managed(u8).init(allocator);
         errdefer name.deinit();
-        var version = ArrayList(u8).init(allocator);
+        var version = std.array_list.Managed(u8).init(allocator);
         errdefer version.deinit();
-        var description = ArrayList(u8).init(allocator);
+        var description = std.array_list.Managed(u8).init(allocator);
         errdefer description.deinit();
         var peripherals = Peripherals.init(allocator);
         errdefer peripherals.deinit();
@@ -158,7 +158,7 @@ pub const Device = struct {
         try out_stream.writeAll("};\n");
 
         // now print interrupt table
-        var interrupts_values = ArrayList(u32).init(self.allocator);
+        var interrupts_values = std.array_list.Managed(u32).init(self.allocator);
         defer interrupts_values.deinit();
         var key_iter = self.interrupts.keyIterator();
         while (key_iter.next()) |key| {
@@ -203,9 +203,9 @@ pub const Device = struct {
 };
 
 pub const Cpu = struct {
-    name: ArrayList(u8),
-    revision: ArrayList(u8),
-    endian: ArrayList(u8),
+    name: std.array_list.Managed(u8),
+    revision: std.array_list.Managed(u8),
+    endian: std.array_list.Managed(u8),
     mpu_present: ?bool,
     fpu_present: ?bool,
     nvic_prio_bits: ?u32,
@@ -214,11 +214,11 @@ pub const Cpu = struct {
     const Self = @This();
 
     pub fn init(allocator: Allocator) !Self {
-        var name = ArrayList(u8).init(allocator);
+        var name = std.array_list.Managed(u8).init(allocator);
         errdefer name.deinit();
-        var revision = ArrayList(u8).init(allocator);
+        var revision = std.array_list.Managed(u8).init(allocator);
         errdefer revision.deinit();
-        var endian = ArrayList(u8).init(allocator);
+        var endian = std.array_list.Managed(u8).init(allocator);
         errdefer endian.deinit();
 
         return Self{
@@ -267,13 +267,13 @@ pub const Cpu = struct {
     }
 };
 
-pub const Peripherals = ArrayList(Peripheral);
+pub const Peripherals = std.array_list.Managed(Peripheral);
 
 pub const Peripheral = struct {
-    name: ArrayList(u8),
-    group_name: ArrayList(u8),
-    description: ArrayList(u8),
-    derived_from: ArrayList(u8),
+    name: std.array_list.Managed(u8),
+    group_name: std.array_list.Managed(u8),
+    description: std.array_list.Managed(u8),
+    derived_from: std.array_list.Managed(u8),
     derived_peripherals: Peripherals,
     base_address: ?u32,
     address_block: ?AddressBlock,
@@ -284,13 +284,13 @@ pub const Peripheral = struct {
     const Self = @This();
 
     pub fn init(allocator: Allocator) !Self {
-        var name = ArrayList(u8).init(allocator);
+        var name = std.array_list.Managed(u8).init(allocator);
         errdefer name.deinit();
-        var group_name = ArrayList(u8).init(allocator);
+        var group_name = std.array_list.Managed(u8).init(allocator);
         errdefer group_name.deinit();
-        var description = ArrayList(u8).init(allocator);
+        var description = std.array_list.Managed(u8).init(allocator);
         errdefer description.deinit();
-        var derived_from = ArrayList(u8).init(allocator);
+        var derived_from = std.array_list.Managed(u8).init(allocator);
         errdefer derived_from.deinit();
         var derived_peripherals = Peripherals.init(allocator);
         errdefer derived_peripherals.deinit();
@@ -354,7 +354,7 @@ pub const Peripheral = struct {
         const name = self.name.items;
         const description = self.description.items;
 
-        var common_name = ArrayList(u8).init(self.allocator);
+        var common_name = std.array_list.Managed(u8).init(self.allocator);
         var has_common_name = false;
 
         // Handle special case for timers
@@ -420,7 +420,7 @@ pub const Peripheral = struct {
         , .{description});
 
         if (self.derived_peripherals.items.len > 0 or has_common_name) {
-            var periph_name = ArrayList(u8).init(self.allocator);
+            var periph_name = std.array_list.Managed(u8).init(self.allocator);
             defer periph_name.deinit();
 
             if (has_common_name) {
@@ -508,7 +508,7 @@ pub const Peripheral = struct {
             \\
         , .{description});
 
-        var periph_name = ArrayList(u8).init(self.allocator);
+        var periph_name = std.array_list.Managed(u8).init(self.allocator);
         defer periph_name.deinit();
         if (has_common_name) {
             try periph_name.replaceRange(0, periph_name.items.len, common_name);
@@ -612,7 +612,7 @@ pub const Peripheral = struct {
             \\
         , .{description});
 
-        var periph_name = ArrayList(u8).init(self.allocator);
+        var periph_name = std.array_list.Managed(u8).init(self.allocator);
         defer periph_name.deinit();
         if (has_common_name) {
             try periph_name.replaceRange(0, periph_name.items.len, common_name);
@@ -672,7 +672,7 @@ pub const Peripheral = struct {
             \\
         , .{description});
 
-        var periph_name = ArrayList(u8).init(self.allocator);
+        var periph_name = std.array_list.Managed(u8).init(self.allocator);
         defer periph_name.deinit();
         if (has_common_name) {
             try periph_name.replaceRange(0, periph_name.items.len, common_name);
@@ -718,12 +718,12 @@ pub const Peripheral = struct {
 pub const AddressBlock = struct {
     offset: ?u32,
     size: ?u32,
-    usage: ArrayList(u8),
+    usage: std.array_list.Managed(u8),
 
     const Self = @This();
 
     pub fn init(allocator: Allocator) !Self {
-        var usage = ArrayList(u8).init(allocator);
+        var usage = std.array_list.Managed(u8).init(allocator);
         errdefer usage.deinit();
 
         return Self{
@@ -741,16 +741,16 @@ pub const AddressBlock = struct {
 pub const Interrupts = AutoHashMap(u32, Interrupt);
 
 pub const Interrupt = struct {
-    name: ArrayList(u8),
-    description: ArrayList(u8),
+    name: std.array_list.Managed(u8),
+    description: std.array_list.Managed(u8),
     value: ?u32,
 
     const Self = @This();
 
     pub fn init(allocator: Allocator) !Self {
-        var name = ArrayList(u8).init(allocator);
+        var name = std.array_list.Managed(u8).init(allocator);
         errdefer name.deinit();
-        var description = ArrayList(u8).init(allocator);
+        var description = std.array_list.Managed(u8).init(allocator);
         errdefer description.deinit();
 
         return Self{
@@ -800,14 +800,14 @@ pub const Interrupt = struct {
     }
 };
 
-const Registers = ArrayList(Register);
+const Registers = std.array_list.Managed(Register);
 
 pub const Register = struct {
-    periph_containing: ArrayList(u8),
-    name: ArrayList(u8),
-    display_name: ArrayList(u8),
-    description: ArrayList(u8),
-    alternate_register: ArrayList(u8),
+    periph_containing: std.array_list.Managed(u8),
+    name: std.array_list.Managed(u8),
+    display_name: std.array_list.Managed(u8),
+    description: std.array_list.Managed(u8),
+    alternate_register: std.array_list.Managed(u8),
     address_offset: ?u32,
     size: u32,
     reset_value: u32,
@@ -820,16 +820,16 @@ pub const Register = struct {
     const Self = @This();
 
     pub fn init(allocator: Allocator, periph: []const u8, reset_value: u32, size: u32) !Self {
-        var prefix = ArrayList(u8).init(allocator);
+        var prefix = std.array_list.Managed(u8).init(allocator);
         errdefer prefix.deinit();
         try prefix.appendSlice(periph);
-        var name = ArrayList(u8).init(allocator);
+        var name = std.array_list.Managed(u8).init(allocator);
         errdefer name.deinit();
-        var display_name = ArrayList(u8).init(allocator);
+        var display_name = std.array_list.Managed(u8).init(allocator);
         errdefer display_name.deinit();
-        var description = ArrayList(u8).init(allocator);
+        var description = std.array_list.Managed(u8).init(allocator);
         errdefer description.deinit();
-        var alternate_register = ArrayList(u8).init(allocator);
+        var alternate_register = std.array_list.Managed(u8).init(allocator);
         errdefer alternate_register.deinit();
         var fields = Fields.init(allocator);
         errdefer fields.deinit();
@@ -927,7 +927,7 @@ pub const Register = struct {
     fn generateCommonName(self: Self, periph_name: []const u8) !struct { []u8, bool, bool } {
         const name = self.name.items;
 
-        var common_name = ArrayList(u8).init(self.allocator);
+        var common_name = std.array_list.Managed(u8).init(self.allocator);
         try common_name.replaceRange(0, common_name.items.len, name);
 
         // Handle special case for DMA.
@@ -1087,14 +1087,14 @@ pub const Access = enum {
     ReadWrite,
 };
 
-pub const Fields = ArrayList(Field);
+pub const Fields = std.array_list.Managed(Field);
 
 pub const Field = struct {
-    periph: ArrayList(u8),
-    register: ArrayList(u8),
+    periph: std.array_list.Managed(u8),
+    register: std.array_list.Managed(u8),
     register_reset_value: u32,
-    name: ArrayList(u8),
-    description: ArrayList(u8),
+    name: std.array_list.Managed(u8),
+    description: std.array_list.Managed(u8),
     bit_offset: ?u32,
     bit_width: ?u32,
 
@@ -1103,15 +1103,15 @@ pub const Field = struct {
     const Self = @This();
 
     pub fn init(allocator: Allocator, periph_containing: []const u8, register_containing: []const u8, register_reset_value: u32) !Self {
-        var periph = ArrayList(u8).init(allocator);
+        var periph = std.array_list.Managed(u8).init(allocator);
         try periph.appendSlice(periph_containing);
         errdefer periph.deinit();
-        var register = ArrayList(u8).init(allocator);
+        var register = std.array_list.Managed(u8).init(allocator);
         try register.appendSlice(register_containing);
         errdefer register.deinit();
-        var name = ArrayList(u8).init(allocator);
+        var name = std.array_list.Managed(u8).init(allocator);
         errdefer name.deinit();
-        var description = ArrayList(u8).init(allocator);
+        var description = std.array_list.Managed(u8).init(allocator);
         errdefer description.deinit();
 
         return Self{
@@ -1237,7 +1237,7 @@ const PaddedWriter = struct {
     }
 
     fn anyWriterFn(context: *const anyopaque, buffer: []const u8) anyerror!usize {
-        const self: *Self = @constCast(@alignCast(@ptrCast(context)));
+        const self: *Self = @ptrCast(@alignCast(@constCast(context)));
         return self.writerFn(buffer);
     }
 
@@ -1287,7 +1287,7 @@ test "Field write" {
         \\RNGEN: u1 = 1,
     ;
 
-    var output_buffer = ArrayList(u8).init(allocator);
+    var output_buffer = std.array_list.Managed(u8).init(allocator);
     defer output_buffer.deinit();
     const buf_stream = output_buffer.writer().any();
 
@@ -1315,7 +1315,7 @@ test "Field write nullable" {
         \\RNGEN: ?u1 = null,
     ;
 
-    var output_buffer = ArrayList(u8).init(allocator);
+    var output_buffer = std.array_list.Managed(u8).init(allocator);
     defer output_buffer.deinit();
     const buf_stream = output_buffer.writer().any();
 
@@ -1342,7 +1342,7 @@ test "Register write register" {
         \\RND: RegisterRW(types.PERIPH.RND, nullable_types.PERIPH.RND),
     ;
 
-    var output_buffer = ArrayList(u8).init(allocator);
+    var output_buffer = std.array_list.Managed(u8).init(allocator);
     defer output_buffer.deinit();
     const buf_stream = output_buffer.writer().any();
 
@@ -1404,7 +1404,7 @@ test "Register write type" {
         \\
     ;
 
-    var output_buffer = ArrayList(u8).init(allocator);
+    var output_buffer = std.array_list.Managed(u8).init(allocator);
     defer output_buffer.deinit();
     const buf_stream = output_buffer.writer().any();
 
@@ -1459,7 +1459,7 @@ test "Register write nullable type" {
         \\
     ;
 
-    var output_buffer = ArrayList(u8).init(allocator);
+    var output_buffer = std.array_list.Managed(u8).init(allocator);
     defer output_buffer.deinit();
     const buf_stream = output_buffer.writer().any();
 
@@ -1506,7 +1506,7 @@ test "Register empty write register" {
         \\EMPTY: RegisterRW(types.PERIPH.EMPTY, nullable_types.PERIPH.EMPTY),
     ;
 
-    var output_buffer = ArrayList(u8).init(allocator);
+    var output_buffer = std.array_list.Managed(u8).init(allocator);
     defer output_buffer.deinit();
     const buf_stream = output_buffer.writer().any();
 
@@ -1536,7 +1536,7 @@ test "Register empty write type" {
         \\
     ;
 
-    var output_buffer = ArrayList(u8).init(allocator);
+    var output_buffer = std.array_list.Managed(u8).init(allocator);
     defer output_buffer.deinit();
     const buf_stream = output_buffer.writer().any();
 
@@ -1563,7 +1563,7 @@ test "Register empty write nullable type" {
         \\
     ;
 
-    var output_buffer = ArrayList(u8).init(allocator);
+    var output_buffer = std.array_list.Managed(u8).init(allocator);
     defer output_buffer.deinit();
     const buf_stream = output_buffer.writer().any();
 
@@ -1603,7 +1603,7 @@ test "Peripheral write register" {
         \\
     ;
 
-    var output_buffer = ArrayList(u8).init(allocator);
+    var output_buffer = std.array_list.Managed(u8).init(allocator);
     defer output_buffer.deinit();
     const buf_stream = output_buffer.writer().any();
 
@@ -1679,7 +1679,7 @@ test "Peripheral write type" {
         \\
     ;
 
-    var output_buffer = ArrayList(u8).init(allocator);
+    var output_buffer = std.array_list.Managed(u8).init(allocator);
     defer output_buffer.deinit();
     const buf_stream = output_buffer.writer().any();
 
@@ -1748,7 +1748,7 @@ test "Peripheral write nullable type" {
         \\
     ;
 
-    var output_buffer = ArrayList(u8).init(allocator);
+    var output_buffer = std.array_list.Managed(u8).init(allocator);
     defer output_buffer.deinit();
     const buf_stream = output_buffer.writer().any();
 
