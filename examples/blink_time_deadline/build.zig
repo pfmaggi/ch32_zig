@@ -27,9 +27,11 @@ pub fn build(b: *std.Build) void {
     for (targets) |target| {
         const fw = ch32.addFirmware(b, ch32_dep, .{
             .name = b.fmt("{s}_{s}", .{ name, target.chip.string() }),
-            .root_source_file = b.path("src/main.zig"),
-            .target = target,
-            .optimize = optimize,
+            .root_module = b.createModule(.{
+                .root_source_file = b.path("src/main.zig"),
+                .target = target,
+                .optimize = optimize,
+            }),
         });
 
         // Emit the bin file for flashing.

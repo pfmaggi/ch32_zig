@@ -2,7 +2,7 @@
     .name = .ch32_zig,
     .version = "0.0.0",
     .fingerprint = 0x77f13231f36dd928,
-    .minimum_zig_version = "0.14.0",
+    .minimum_zig_version = "0.15.1",
     .paths = .{
         "build.zig",
         "build.zig.zon",
@@ -15,8 +15,8 @@
     .dependencies = .{
         // zig fetch --save=minichlink https://github.com/ghostiam/minichlink-ocd/archive/ce6022df56143950f04ed42f8c6c25b06b54fd7f.zip
         .minichlink = .{
-            .url = "https://github.com/ghostiam/minichlink-ocd/archive/ce6022df56143950f04ed42f8c6c25b06b54fd7f.zip",
-            .hash = "minichlink-1.0.0-dev-733af6-Yu_TMN0_AADUtRgCEiJ1q3nNdxThpP5eaD8oTVHZmAa5",
+            .url = "git+https://github.com/pfmaggi/minichlink-ocd#1b8542fbd8d48dffa8039da6764f29fdcbe504fc",
+            .hash = "minichlink-1.0.0-dev-733af6-Yu_TMBxAAACnTUeo_StthAdu9mYq-JnszrKaowGv-8ZO",
         },
         .@"tools/svd4zig" = .{ .path = "tools/svd4zig" },
     },

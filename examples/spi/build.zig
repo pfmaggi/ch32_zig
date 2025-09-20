@@ -37,9 +37,11 @@ pub fn build(b: *std.Build) void {
 
             const fw = ch32.addFirmware(b, ch32_dep, .{
                 .name = b.fmt("{s}_{s}_{s}", .{ name, target.chip.string(), @tagName(spi_mode) }),
-                .root_source_file = b.path("src/main.zig"),
-                .target = target,
-                .optimize = optimize,
+                .root_module = b.createModule(.{
+                    .root_source_file = b.path("src/main.zig"),
+                    .target = target,
+                    .optimize = optimize,
+                }),
                 .config_options = config_options,
             });
 
